@@ -1,0 +1,59 @@
+.main {
+  position: relative;
+  color: var(--font-color);
+  background: var(--background-color);
+}
+
+.index {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  padding: 0 var(--global-padding);
+  box-sizing: border-box;
+  z-index: 50;
+
+  &.active {
+    opacity: 1;
+
+    .projects {
+      pointer-events: auto;
+    }
+
+    .projects::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+.projects {
+  grid-column: span 6;
+  max-height: 100vh;
+  overflow-y: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  padding: 0;
+}
+
+.short {
+  padding-top: var(--global-padding);
+  padding-bottom: var(--global-padding);
+}
+
+.last {
+  margin-bottom: var(--global-padding);
+}
+
+.introWrap {
+  padding: var(--global-padding);
+  box-sizing: border-box;
+}
+
+.intro {
+  max-width: 60ch;
+  white-space: pre-wrap;
+}
