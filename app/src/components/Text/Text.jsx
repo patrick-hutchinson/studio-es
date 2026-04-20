@@ -1,21 +1,42 @@
 import { PortableText } from "@portabletext/react";
-import styles from "./Text.module.css";
 
-const Text = ({ text, typo, className }) => {
+import { isValidElement } from "react";
+
+const Text = ({ text, className, typo }) => {
+  if (isValidElement(text)) {
+    return text;
+  }
+
+  if (!Array.isArray(text)) {
+    return text ? (
+      <p typo={typo} className={className}>
+        {text}
+      </p>
+    ) : null;
+  }
+
   return (
-    <div className={`${className}`} typo={typo}>
+    <div className={className} typo={typo}>
       <PortableText
         value={text}
         components={{
+          block: {
+            normal: ({ children }) => <p>{children}</p>,
+          },
           marks: {
-            strong: ({ children }) => {
-              return <strong typo="bold">{children}</strong>;
-            },
             link: ({ value, children }) => {
-              const href = value?.href || value?.url || value?.link;
-              if (!href) return <span>{children}</span>;
+              const href = value?.href;
+              if (!href) return children;
+
+              // Check if external (optional)
+              const isExternal = href.startsWith("http");
+
               return (
-                <a className={styles.textLink} href={href} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={href}
+                  target={isExternal ? "_blank" : undefined}
+                  rel={isExternal ? "noopener noreferrer" : undefined}
+                >
                   {children}
                 </a>
               );
