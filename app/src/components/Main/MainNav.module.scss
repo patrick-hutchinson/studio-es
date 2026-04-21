@@ -1,12 +1,22 @@
 .nav {
-  position: relative;
-  height: 100vh;
-  padding: var(--global-padding) 0;
+  position: fixed;
+  left: var(--global-padding);
+  right: var(--global-padding);
+  bottom: var(--global-padding);
+  height: auto;
+  padding: 0;
   box-sizing: border-box;
   z-index: 10;
-  grid-column: 9 / span 4;
+  grid-column: 1 / -1;
   display: flex;
   flex-flow: column;
+
+  menu {
+    pointer-events: auto;
+    opacity: 1;
+    justify-content: flex-end;
+    gap: 0.25rem;
+  }
 
   header,
   menu {
@@ -14,7 +24,7 @@
     margin: 0;
     display: flex;
     flex-flow: row;
-    pointer-events: auto;
+    // pointer-events: auto;
 
     button {
       padding: 0 0.25rem;
@@ -25,8 +35,12 @@
     }
   }
 
+  header {
+    display: none;
+  }
+
   a:hover,
-  div[role='button']:hover {
+  div[role="button"]:hover {
     background: var(--background-color);
     color: var(--font-color);
     cursor: pointer;
@@ -54,10 +68,6 @@
     }
   }
 
-  .reveal:hover + aside {
-    opacity: 1;
-  }
-
   a {
     color: inherit;
   }
@@ -71,5 +81,26 @@
   text-decoration: underline;
 }
 
-.reveal {
+@media screen and (min-width: 769px) {
+  .nav {
+    position: relative;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    height: 100vh;
+    padding: var(--global-padding) 0;
+    display: block;
+    grid-column: 9 / span 4;
+
+    header {
+      display: flex;
+    }
+
+    menu {
+      pointer-events: none;
+      opacity: 0.3;
+      justify-content: flex-start;
+      gap: 0;
+    }
+  }
 }

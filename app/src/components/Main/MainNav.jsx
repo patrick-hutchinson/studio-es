@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { PortableText } from '@portabletext/react'
-import { useEffect, useState } from 'react'
-import { groq } from '@/lib/sanity'
-import styles from './MainNav.module.scss'
+import Link from "next/link";
+import { PortableText } from "@portabletext/react";
+import { useEffect, useState } from "react";
+import { groq } from "@/lib/sanity";
+import styles from "./MainNav.module.scss";
 
 const query = groq`
   {
@@ -20,23 +20,23 @@ const query = groq`
       description
     }
   }
-`
+`;
 
 export default function MainNav({ activeCategory, onSetCategory }) {
-  const [data, setData] = useState(null)
+  const [data, setData] = useState(null);
 
   useEffect(() => {
-    const url = `/api/sanity?q=${encodeURIComponent(query)}`
+    const url = `/api/sanity?q=${encodeURIComponent(query)}`;
     fetch(url)
       .then((res) => res.json())
       .then((json) => setData(json))
-      .catch(() => setData({ categories: [] }))
-  }, [])
+      .catch(() => setData({ categories: [] }));
+  }, []);
 
   return (
     <nav className={styles.nav}>
       <header>
-        <h1 className={styles.reveal}>Studio Es, a visual communication practice.</h1>
+        <h1 className={styles.reveal}>We're getting things ready. Patience is key.</h1>
         <aside>{data?.studio?.copy ? <PortableText value={data.studio.copy} /> : null}</aside>
         <Link href="mailto:info@studio-es.at" className={styles.reveal}>
           Contact
@@ -54,19 +54,17 @@ export default function MainNav({ activeCategory, onSetCategory }) {
             tabIndex={i}
             onClick={() => onSetCategory(item._id)}
             onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') onSetCategory(item._id)
+              if (event.key === "Enter" || event.key === " ") onSetCategory(item._id);
             }}
           >
-            <button className={`${styles.reveal} ${activeCategory === item._id ? styles.active : ''}`}>
-              {item.abbr}
-            </button>
+            <button className={`${styles.reveal} ${activeCategory === item._id ? styles.active : ""}`}>{item.abbr}</button>
             <aside>
               <h2>{item.title}</h2>
             </aside>
           </div>
         ))}
-        <button onClick={() => onSetCategory(null)}>(Reset)</button>
+        {/* <button onClick={() => onSetCategory(null)}>(Reset)</button> */}
       </menu>
     </nav>
-  )
+  );
 }

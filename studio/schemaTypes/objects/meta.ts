@@ -1,8 +1,6 @@
-import { defineType, defineField } from 'sanity'
-import { SlugInput } from 'sanity-plugin-prefixed-slug'
+import {defineType, defineField} from 'sanity'
 
-export const meta = defineType(
-  {
+export const meta = defineType({
   name: 'meta',
   type: 'object',
   fieldsets: [
@@ -24,7 +22,7 @@ export const meta = defineType(
       name: 'category',
       title: 'Category',
       type: 'reference',
-      to: [{ type: 'category' }],
+      to: [{type: 'category'}],
       options: {
         filter: '!defined(parent)',
       },
@@ -49,43 +47,37 @@ export const meta = defineType(
       name: 'slug',
       title: 'Slug',
       type: 'slug',
-      components: {
-        input: SlugInput,
-      },
       options: {
         source: async (doc, context) => {
-          const client = context.getClient({ apiVersion: '2023-03-01' }); // Sicherstellen, dass eine aktuelle API-Version verwendet wird
-    
+          const client = context.getClient({apiVersion: '2023-03-01'})
+
           if (!doc.meta?.category?._ref || !doc.meta?.number || !doc.meta?.year) {
-            return ''; // Falls nicht alle Werte existieren, Slug nicht generieren
+            return ''
           }
-    
+
           try {
-            // Fetch Category Document from Sanity Dataset
-            const category = await client.getDocument(doc.meta.category._ref);
+            const category = await client.getDocument(doc.meta.category._ref)
             if (!category?.abbr) {
-              return '';
+              return ''
             }
-    
-            // Slug aus den Feldern generieren
+
             return `${category.abbr}-${doc.meta.number
               .toString()
-              .padStart(3, '0')}-${doc.meta.year.toString().slice(2, 4)}`;
+              .padStart(3, '0')}-${doc.meta.year.toString().slice(2, 4)}`
           } catch (error) {
-            console.error('Error fetching category:', error);
-            return '';
+            console.error('Error fetching category:', error)
+            return ''
           }
         },
-        urlPrefix: 'studio-es.at/projects',
       },
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'tags',
       title: 'Badge',
-      type: 'tags',
+      type: 'array',
+      of: [{type: 'string'}],
       hidden: true,
-      
     }),
     defineField({
       name: 'searchtag',
@@ -96,9 +88,9 @@ export const meta = defineType(
       of: [
         {
           type: 'reference',
-          to: [{ type: 'category' }],
+          to: [{type: 'category'}],
           options: {
-            filter: ({ document }) => {
+            filter: ({document}) => {
               // Always make sure to check for document properties
               // before attempting to use them
               if (!document.meta.category) {
@@ -134,7 +126,7 @@ export const meta = defineType(
       name: 'team',
       title: 'Team',
       type: 'array',
-      of: [{ type: 'person' }],
+      of: [{type: 'person'}],
       fieldset: 'meta-2',
       hidden: true,
     }),
@@ -143,7 +135,7 @@ export const meta = defineType(
       title: 'Awards',
       type: 'array',
       fieldset: 'meta-2',
-      of: [{ type: 'text', rows: 3 }],
+      of: [{type: 'text', rows: 3}],
       hidden: true,
     }),
   ],

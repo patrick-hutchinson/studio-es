@@ -4,6 +4,22 @@
   background: var(--background-color);
 }
 
+.intro {
+  padding: var(--global-padding);
+  padding-left: 0px;
+  grid-column: 1 / 12;
+}
+
+.mobileContact {
+  position: fixed;
+  top: var(--global-padding);
+  right: var(--global-padding);
+  z-index: 60;
+  pointer-events: auto;
+  color: inherit;
+  text-decoration: none;
+}
+
 .index {
   width: 100vw;
   height: 100vh;
@@ -46,4 +62,16 @@
 
 .last {
   margin-bottom: var(--global-padding);
+}
+
+@media screen and (min-width: 769px) {
+  .mobileContact {
+    display: none;
+  }
+
+  .intro {
+    padding: var(--global-padding);
+    padding-left: 0px;
+    grid-column: 1 / 6;
+  }
 }

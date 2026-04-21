@@ -1,11 +1,11 @@
 import {defineConfig} from 'sanity'
 import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
-import { schemaTypes } from './schemaTypes'
-import { colorInput } from '@sanity/color-input'
-import { tags } from 'sanity-plugin-tags'
-import { muxInput } from 'sanity-plugin-mux-input'
-import { structure } from './structure'
+import {schemaTypes} from './schemaTypes'
+import {colorInput} from '@sanity/color-input'
+
+import {muxInput} from 'sanity-plugin-mux-input'
+import {structure} from './structure'
 import {media, mediaAssetSource} from 'sanity-plugin-media'
 
 export default defineConfig({
@@ -19,7 +19,11 @@ export default defineConfig({
     structureTool({
       structure: structure,
     }),
-    visionTool(), colorInput(), tags(), muxInput(), media()],
+    visionTool(),
+    colorInput(),
+    muxInput(),
+    media(),
+  ],
   form: {
     image: {
       assetSources: () => [mediaAssetSource],

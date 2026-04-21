@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import MainNav from "@/components/Main/MainNav";
-import ProjectsListItem from "@/components/Projects/ProjectsListItem";
 import ProjectsSlider from "@/components/Projects/ProjectsSlider";
 import Text from "@/components/Text/Text";
 
@@ -16,6 +16,7 @@ export default function HomeClient({ data }) {
   const [loopIsActive, setLoopIsActive] = useState(false);
   const [isShortList, setIsShortList] = useState(false);
   const [colors, setColors] = useState({ font: "#fff", background: "#000" });
+  const [sliderReady, setSliderReady] = useState(false);
   const listEl = useRef(null);
 
   const filteredItems = useMemo(() => {
@@ -28,6 +29,10 @@ export default function HomeClient({ data }) {
       return mainCategory === activeCategory || additionalCategories.includes(activeCategory);
     });
   }, [activeCategory, data?.projects]);
+
+  const sliderItems = useMemo(() => {
+    return (data?.home?.images ?? []).filter((item) => item?.asset?._ref);
+  }, [data?.home?.images]);
 
   const loopedItems = useMemo(() => {
     if (!loopIsActive) return filteredItems;
@@ -104,27 +109,36 @@ export default function HomeClient({ data }) {
   useEffect(() => {
     if (showIndex && filteredItems.length) {
       evaluateLoopState();
-      randomColors();
     }
   }, [showIndex, filteredItems.length]);
 
   useEffect(() => {
     evaluateLoopState();
-    randomColors();
   }, [activeCategory]);
 
   useEffect(() => {
-    randomColors();
-
     const interval = setInterval(() => {
-      const imageLength = data?.home?.images?.length ?? 0;
-      if (!showIndex && imageLength > 0) {
+      const imageLength = sliderItems.length;
+      if (!showIndex && sliderReady && imageLength > 0) {
         setActiveIndex((value) => (value + 1) % imageLength);
       }
     }, 100);
 
     return () => clearInterval(interval);
-  }, [data?.home?.images, showIndex]);
+  }, [showIndex, sliderItems.length, sliderReady]);
+
+  useEffect(() => {
+    if (!sliderItems.length) {
+      setActiveIndex(0);
+      return;
+    }
+
+    setActiveIndex((value) => value % sliderItems.length);
+  }, [sliderItems.length]);
+
+  useEffect(() => {
+    randomColors();
+  }, [data?.projects]);
 
   const sectionClassName = `${styles.index} ${showIndex ? styles.active : ""}`;
   const mainStyle = {
@@ -132,41 +146,59 @@ export default function HomeClient({ data }) {
     "--font-color": colors.font,
   };
 
+  const handleSliderToggle = () => {
+    setShowIndex((current) => {
+      const next = !current;
+
+      if (!current && next) {
+        randomColors();
+      }
+
+      return next;
+    });
+  };
+
+  const handleMainClick = (event) => {
+    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      return;
+    }
+
+    const target = event.target;
+    if (
+      target instanceof Element &&
+      target.closest("a, button, input, textarea, select, label, [role='button'], [data-no-slider-toggle='true']")
+    ) {
+      return;
+    }
+
+    const selection = window.getSelection?.();
+    if (selection && selection.toString().trim().length > 0) {
+      return;
+    }
+
+    handleSliderToggle();
+  };
+
   if (!data || data.length == 0) return null;
 
-  console.log(data, data.home, "data");
-
   return (
-    <main className={styles.main} style={mainStyle}>
-      {data?.home?.images?.length ? (
+    <main className={styles.main} style={mainStyle} onClick={handleMainClick}>
+      {sliderItems.length ? (
         <ProjectsSlider
-          items={data.home.images}
+          items={sliderItems}
           activeIndex={activeIndex}
-          onToggle={() => setShowIndex((current) => !current)}
           isActive={showIndex}
+          onReadyChange={setSliderReady}
         />
       ) : null}
 
       <section className={sectionClassName}>
-        <ul ref={listEl} className={`${styles.projects} ${isShortList ? styles.short : ""}`} onScroll={handleLoopScroll}>
-          {loopedItems.map((item, i) => {
-            const baseLength = Math.max(filteredItems.length, 1);
-            const isLastClass = !activeCategory && i % baseLength === 0;
+        <Link href="mailto:info@studio-es.at" className={styles.mobileContact}>
+          Contact
+        </Link>
 
-            return (
-              <ProjectsListItem
-                key={`${item.slug ?? item._id}-${i}`}
-                title={item.title}
-                slug={item.slug}
-                category={item.category}
-                font={item.size === "small" ? "#0000ff" : item.font?.hex}
-                background={item.background?.hex}
-                className={isLastClass ? styles.last : ""}
-              />
-            );
-          })}
-        </ul>
-        <Text text={data.about} />
+        <Text className={styles.intro} text={data?.home?.intro} />
+
         <MainNav activeCategory={activeCategory} onSetCategory={toggleCategory} />
       </section>
     </main>
