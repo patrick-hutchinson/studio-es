@@ -13,8 +13,8 @@
 
   menu {
     pointer-events: auto;
-    opacity: 1;
-    justify-content: flex-end;
+    opacity: 0.3;
+    justify-content: flex-start;
     gap: 0.25rem;
   }
 
@@ -36,7 +36,13 @@
   }
 
   header {
-    display: none;
+    display: flex;
+    margin-bottom: 0.25rem;
+
+    a,
+    aside {
+      display: none;
+    }
   }
 
   a:hover,
@@ -94,6 +100,11 @@
 
     header {
       display: flex;
+
+      a,
+      aside {
+        display: initial;
+      }
     }
 
     menu {
