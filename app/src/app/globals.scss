@@ -39,6 +39,15 @@ main {
   min-height: 100vh;
 }
 
+@media screen and (max-width: 768px) {
+  html,
+  body {
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+}
+
 body * {
   font-family: "Union Regular", Times, Arial, Helvetica, sans-serif;
   font-weight: 400;
