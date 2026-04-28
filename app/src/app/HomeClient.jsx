@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import MainNav from "@/components/Main/MainNav";
 import ProjectsSlider from "@/components/Projects/ProjectsSlider";
 import Text from "@/components/Text/Text";
@@ -39,7 +39,7 @@ export default function HomeClient({ data }) {
     return Array(loopCopies).fill(filteredItems).flat();
   }, [filteredItems, loopCopies, loopIsActive]);
 
-  const randomColors = () => {
+  const randomColors = useCallback(() => {
     const items = data?.projects ?? [];
     if (!items.length) return;
 
@@ -48,7 +48,7 @@ export default function HomeClient({ data }) {
       font: appearance.font?.hex || "#000000",
       background: appearance.background?.hex || "#ffffff",
     });
-  };
+  }, [data?.projects]);
 
   const evaluateLoopState = () => {
     requestAnimationFrame(() => {
@@ -146,7 +146,7 @@ export default function HomeClient({ data }) {
     "--font-color": colors.font,
   };
 
-  const handleSliderToggle = () => {
+  const handleSliderToggle = useCallback(() => {
     setShowIndex((current) => {
       const next = !current;
 
@@ -156,33 +156,40 @@ export default function HomeClient({ data }) {
 
       return next;
     });
-  };
+  }, [randomColors]);
 
-  const handleMainClick = (event) => {
-    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-      return;
-    }
+  useEffect(() => {
+    const handlePageClick = (event) => {
+      if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
+      }
 
-    const target = event.target;
-    if (
-      target instanceof Element &&
-      target.closest("a, button, input, textarea, select, label, [role='button'], [data-no-slider-toggle='true']")
-    ) {
-      return;
-    }
+      const target = event.target;
+      if (
+        target instanceof Element &&
+        target.closest(
+          "a, button, input, textarea, select, label, [role='button'], [data-no-slider-toggle='true']",
+        )
+      ) {
+        return;
+      }
 
-    const selection = window.getSelection?.();
-    if (selection && selection.toString().trim().length > 0) {
-      return;
-    }
+      const selection = window.getSelection?.();
+      if (selection && selection.toString().trim().length > 0) {
+        return;
+      }
 
-    handleSliderToggle();
-  };
+      handleSliderToggle();
+    };
+
+    document.addEventListener("click", handlePageClick);
+    return () => document.removeEventListener("click", handlePageClick);
+  }, [handleSliderToggle]);
 
   if (!data || data.length == 0) return null;
 
   return (
-    <main className={styles.main} style={mainStyle} onClick={handleMainClick}>
+    <main className={styles.main} style={mainStyle}>
       {sliderItems.length ? (
         <ProjectsSlider
           items={sliderItems}
@@ -193,7 +200,7 @@ export default function HomeClient({ data }) {
       ) : null}
 
       <section className={sectionClassName}>
-        <Link href="mailto:info@studio-es.at" className={styles.mobileContact}>
+        <Link href="mailto:info@studio-es.at" className={styles.mobileContact} data-no-slider-toggle="true">
           Contact
         </Link>
 

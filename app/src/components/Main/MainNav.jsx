@@ -36,7 +36,7 @@ export default function MainNav({ activeCategory, onSetCategory }) {
   return (
     <nav className={styles.nav}>
       <header>
-        <h1 className={styles.reveal}>We're getting things ready. Patience is key.</h1>
+        <h1 className={styles.reveal}>This page is currently in progress.</h1>
         <aside>{data?.studio?.copy ? <PortableText value={data.studio.copy} /> : null}</aside>
         <Link href="mailto:info@studio-es.at" className={styles.reveal}>
           Contact

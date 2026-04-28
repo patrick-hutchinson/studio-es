@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sanityClient } from '@/lib/sanity'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get('q')
 
@@ -14,5 +16,9 @@ export async function GET(request: NextRequest) {
   })
 
   const result = await sanityClient.fetch(query, params)
-  return NextResponse.json(result)
+  return NextResponse.json(result, {
+    headers: {
+      'Cache-Control': 'no-store',
+    },
+  })
 }

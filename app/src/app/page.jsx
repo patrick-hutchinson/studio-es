@@ -1,6 +1,8 @@
 import HomeClient from './HomeClient'
 import { fetchSanity, groq } from '@/lib/sanity'
 
+export const dynamic = 'force-dynamic'
+
 const query = groq`
   {
     "home": *[_type=="home" && _id=="b7605842-c2ca-4d2e-aac8-96bd835dd082"][0]{
@@ -26,6 +28,14 @@ const query = groq`
 `
 
 export default async function HomePage() {
-  const data = await fetchSanity(query)
+  let data
+
+  try {
+    data = await fetchSanity(query)
+  } catch (error) {
+    console.error('HomePage Sanity fetch failed:', error)
+    data = { home: null, projects: [] }
+  }
+
   return <HomeClient data={data} />
 }

@@ -6,13 +6,14 @@
 
 .intro {
   padding: var(--global-padding);
+  padding-top: calc(var(--global-padding) - 1px);
   padding-left: 0px;
   grid-column: 1 / 12;
 }
 
 .mobileContact {
   position: fixed;
-  top: var(--global-padding);
+  bottom: var(--global-padding);
   right: var(--global-padding);
   z-index: 60;
   pointer-events: auto;
@@ -35,6 +36,7 @@
 
   &.active {
     opacity: 1;
+    pointer-events: auto;
 
     .projects {
       pointer-events: auto;
@@ -71,6 +73,7 @@
 
   .intro {
     padding: var(--global-padding);
+    padding-top: calc(var(--global-padding) - 1px);
     padding-left: 0px;
     grid-column: 1 / 6;
   }

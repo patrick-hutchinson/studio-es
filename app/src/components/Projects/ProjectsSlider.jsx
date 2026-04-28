@@ -24,9 +24,16 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
   }, []);
 
   const imageUrls = useMemo(() => {
+    const isMobile = viewportWidth <= 768;
+
     return items.map((item) => {
       const ref = item.asset?._ref;
       if (!ref) return null;
+
+      if (isMobile) {
+        return urlForRef(ref).width(viewportWidth).fit("max").url();
+      }
+
       return urlForRef(ref).width(viewportWidth).height(viewportHeight).fit("fill").url();
     });
   }, [items, viewportHeight, viewportWidth]);
@@ -62,7 +69,10 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
       const img = new Image();
       const markAfterDecode = () => {
         if (typeof img.decode === "function") {
-          img.decode().catch(() => undefined).finally(() => markSettled(index));
+          img
+            .decode()
+            .catch(() => undefined)
+            .finally(() => markSettled(index));
           return;
         }
 
@@ -89,6 +99,7 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
   }, [totalCount, validImageUrls]);
 
   const formatCount = (value) => String(value).padStart(3, "0");
+  const yearSuffix = String(new Date().getFullYear()).slice(-2);
   const shouldShowCounter = !isActive && loadTimeoutReached && totalCount > 0 && loadedCount < totalCount;
   const allImagesLoaded = totalCount === 0 || loadedCount >= totalCount;
 
@@ -99,11 +110,18 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
   return (
     <motion.section
       className={styles.imgs}
+      aria-hidden={isActive}
       animate={{ opacity: isActive ? 0 : 1 }}
       transition={{ duration: 0.35, ease: "easeInOut" }}
+      style={{
+        pointerEvents: "none",
+        visibility: isActive ? "hidden" : "visible",
+      }}
     >
       {shouldShowCounter ? (
-        <div className={styles.counter}>P-{formatCount(loadedCount)}-{formatCount(totalCount)}</div>
+        <div className={styles.counter}>
+          Id–{formatCount(loadedCount)}–{yearSuffix}
+        </div>
       ) : null}
 
       <div className={styles.imageWrapper}>

@@ -1,5 +1,5 @@
-import { defineType, defineField } from 'sanity'
-import { FcAddImage } from 'react-icons/fc'
+import {defineType, defineField} from 'sanity'
+import {FcAddImage} from 'react-icons/fc'
 
 export const home = defineType({
   name: 'home',
@@ -7,16 +7,9 @@ export const home = defineType({
   type: 'document',
   fields: [
     defineField({
-      name: 'title',
-      title: 'Title',
-      type: 'string',
-      hidden: true,
-    }),
-    defineField({
       name: 'intro',
       title: 'Intro',
-      type: 'text',
-      rows: 3,
+      type: 'portableText',
     }),
     defineField({
       name: 'images',
@@ -46,4 +39,7 @@ export const home = defineType({
       validation: (Rule) => Rule.required().min(1),
     }),
   ],
+  preview: {
+    prepare: () => ({title: 'Homepage'}),
+  },
 })
