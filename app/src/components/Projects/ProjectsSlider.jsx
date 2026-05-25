@@ -6,40 +6,59 @@ import { urlForRef } from "@/lib/sanity";
 import styles from "./ProjectsSlider.module.scss";
 
 export default function ProjectsSlider({ items, activeIndex, isActive, onReadyChange }) {
+  const MOBILE_BREAKPOINT = 768;
   const [viewportWidth, setViewportWidth] = useState(1920);
   const [viewportHeight, setViewportHeight] = useState(1080);
   const [pixelRatio, setPixelRatio] = useState(1);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [loadedCount, setLoadedCount] = useState(0);
   const [loadTimeoutReached, setLoadTimeoutReached] = useState(false);
 
   useEffect(() => {
     const updateViewport = () => {
-      setViewportWidth(window.innerWidth);
-      setViewportHeight(window.innerHeight);
-      setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      const nextWidth = window.innerWidth;
+      const nextHeight = window.innerHeight;
+      const nextIsMobile = nextWidth <= MOBILE_BREAKPOINT;
+      const nextPixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+
+      setIsMobileViewport((previousIsMobile) => {
+        if (previousIsMobile !== nextIsMobile) {
+          setViewportWidth(nextWidth);
+          setViewportHeight(nextHeight);
+          setPixelRatio(nextPixelRatio);
+          return nextIsMobile;
+        }
+
+        return previousIsMobile;
+      });
     };
 
-    updateViewport();
+    const initialWidth = window.innerWidth;
+    const initialHeight = window.innerHeight;
+    setViewportWidth(initialWidth);
+    setViewportHeight(initialHeight);
+    setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    setIsMobileViewport(initialWidth <= MOBILE_BREAKPOINT);
+
     window.addEventListener("resize", updateViewport);
 
     return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
   const imageUrls = useMemo(() => {
-    const isMobile = viewportWidth <= 768;
     const mobileWidth = Math.max(Math.round(viewportWidth * pixelRatio), viewportWidth);
 
     return items.map((item) => {
       const ref = item.asset?._ref;
       if (!ref) return null;
 
-      if (isMobile) {
+      if (isMobileViewport) {
         return urlForRef(ref).width(mobileWidth).fit("max").url();
       }
 
       return urlForRef(ref).width(viewportWidth).height(viewportHeight).fit("fill").url();
     });
-  }, [items, pixelRatio, viewportHeight, viewportWidth]);
+  }, [isMobileViewport, items, pixelRatio, viewportHeight, viewportWidth]);
 
   const validImageUrls = useMemo(() => imageUrls.filter(Boolean), [imageUrls]);
   const totalCount = validImageUrls.length;
