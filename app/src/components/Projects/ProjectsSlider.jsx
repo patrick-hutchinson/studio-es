@@ -8,6 +8,7 @@ import styles from "./ProjectsSlider.module.scss";
 export default function ProjectsSlider({ items, activeIndex, isActive, onReadyChange }) {
   const [viewportWidth, setViewportWidth] = useState(1920);
   const [viewportHeight, setViewportHeight] = useState(1080);
+  const [pixelRatio, setPixelRatio] = useState(1);
   const [loadedCount, setLoadedCount] = useState(0);
   const [loadTimeoutReached, setLoadTimeoutReached] = useState(false);
 
@@ -15,6 +16,7 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
     const updateViewport = () => {
       setViewportWidth(window.innerWidth);
       setViewportHeight(window.innerHeight);
+      setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     };
 
     updateViewport();
@@ -25,18 +27,19 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
 
   const imageUrls = useMemo(() => {
     const isMobile = viewportWidth <= 768;
+    const mobileWidth = Math.max(Math.round(viewportWidth * pixelRatio), viewportWidth);
 
     return items.map((item) => {
       const ref = item.asset?._ref;
       if (!ref) return null;
 
       if (isMobile) {
-        return urlForRef(ref).width(viewportWidth).fit("max").url();
+        return urlForRef(ref).width(mobileWidth).fit("max").url();
       }
 
       return urlForRef(ref).width(viewportWidth).height(viewportHeight).fit("fill").url();
     });
-  }, [items, viewportHeight, viewportWidth]);
+  }, [items, pixelRatio, viewportHeight, viewportWidth]);
 
   const validImageUrls = useMemo(() => imageUrls.filter(Boolean), [imageUrls]);
   const totalCount = validImageUrls.length;
@@ -115,7 +118,6 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
       transition={{ duration: 0.35, ease: "easeInOut" }}
       style={{
         pointerEvents: "none",
-        visibility: isActive ? "hidden" : "visible",
       }}
     >
       {shouldShowCounter ? (
