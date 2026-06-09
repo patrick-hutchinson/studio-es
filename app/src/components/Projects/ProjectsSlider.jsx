@@ -17,10 +17,13 @@ function getImageDimensions(ref) {
 
 export default function ProjectsSlider({ items, activeIndex, isActive, onReadyChange }) {
   const MOBILE_BREAKPOINT = 768;
-  const [viewportWidth, setViewportWidth] = useState(1920);
-  const [viewportHeight, setViewportHeight] = useState(1080);
-  const [pixelRatio, setPixelRatio] = useState(1);
-  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [requestedSize, setRequestedSize] = useState({
+    width: 1920,
+    height: 1080,
+    pixelRatio: 1,
+    isMobileViewport: false,
+  });
+  const [renderedImageUrls, setRenderedImageUrls] = useState([]);
   const [loadedCount, setLoadedCount] = useState(0);
   const [loadTimeoutReached, setLoadTimeoutReached] = useState(false);
 
@@ -31,24 +34,34 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
       const nextIsMobile = nextWidth <= MOBILE_BREAKPOINT;
       const nextPixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
-      setViewportWidth(nextWidth);
-      setViewportHeight(nextHeight);
-      setPixelRatio(nextPixelRatio);
-      setIsMobileViewport((previousIsMobile) => {
-        if (previousIsMobile !== nextIsMobile) {
-          return nextIsMobile;
+      setRequestedSize((previousSize) => {
+        const crossedBreakpoint = previousSize.isMobileViewport !== nextIsMobile;
+        const needsLargerSource =
+          nextWidth > previousSize.width ||
+          nextHeight > previousSize.height ||
+          nextPixelRatio > previousSize.pixelRatio;
+
+        if (!crossedBreakpoint && !needsLargerSource) {
+          return previousSize;
         }
 
-        return previousIsMobile;
+        return {
+          width: crossedBreakpoint ? nextWidth : Math.max(previousSize.width, nextWidth),
+          height: crossedBreakpoint ? nextHeight : Math.max(previousSize.height, nextHeight),
+          pixelRatio: Math.max(previousSize.pixelRatio, nextPixelRatio),
+          isMobileViewport: nextIsMobile,
+        };
       });
     };
 
     const initialWidth = window.innerWidth;
     const initialHeight = window.innerHeight;
-    setViewportWidth(initialWidth);
-    setViewportHeight(initialHeight);
-    setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    setIsMobileViewport(initialWidth <= MOBILE_BREAKPOINT);
+    setRequestedSize({
+      width: initialWidth,
+      height: initialHeight,
+      pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+      isMobileViewport: initialWidth <= MOBILE_BREAKPOINT,
+    });
 
     window.addEventListener("resize", updateViewport);
 
@@ -68,8 +81,11 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
   }, [items]);
 
   const imageUrls = useMemo(() => {
-    const mobileWidth = Math.max(Math.round(viewportWidth * pixelRatio), viewportWidth);
-    const viewportPixelHeight = Math.max(Math.round(viewportHeight * pixelRatio), viewportHeight);
+    const mobileWidth = Math.max(Math.round(requestedSize.width * requestedSize.pixelRatio), requestedSize.width);
+    const viewportPixelHeight = Math.max(
+      Math.round(requestedSize.height * requestedSize.pixelRatio),
+      requestedSize.height,
+    );
 
     return imageMeta.map(({ ref, isPortrait }) => {
       if (!ref) return null;
@@ -78,21 +94,23 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
         return urlForRef(ref).height(viewportPixelHeight).fit("max").url();
       }
 
-      if (isMobileViewport) {
+      if (requestedSize.isMobileViewport) {
         return urlForRef(ref).width(mobileWidth).fit("max").url();
       }
 
-      return urlForRef(ref).width(viewportWidth).height(viewportHeight).fit("fill").url();
+      return urlForRef(ref).width(requestedSize.width).height(requestedSize.height).fit("fill").url();
     });
-  }, [imageMeta, isMobileViewport, pixelRatio, viewportHeight, viewportWidth]);
+  }, [imageMeta, requestedSize]);
 
   const validImageUrls = useMemo(() => imageUrls.filter(Boolean), [imageUrls]);
+  const preloadKey = useMemo(() => validImageUrls.join("\n"), [validImageUrls]);
   const totalCount = validImageUrls.length;
 
   useEffect(() => {
     if (!totalCount) {
       setLoadedCount(0);
       setLoadTimeoutReached(false);
+      setRenderedImageUrls([]);
       return;
     }
 
@@ -111,6 +129,10 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
       if (cancelled || settled.has(index)) return;
       settled.add(index);
       setLoadedCount(settled.size);
+
+      if (settled.size >= totalCount) {
+        setRenderedImageUrls(imageUrls);
+      }
     };
 
     validImageUrls.forEach((url, index) => {
@@ -144,16 +166,17 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
       cancelled = true;
       clearTimeout(timeoutId);
     };
-  }, [totalCount, validImageUrls]);
+  }, [preloadKey, totalCount]);
 
   const formatCount = (value) => String(value).padStart(3, "0");
   const yearSuffix = String(new Date().getFullYear()).slice(-2);
-  const shouldShowCounter = !isActive && loadTimeoutReached && totalCount > 0 && loadedCount < totalCount;
+  const hasRenderedImages = renderedImageUrls.some(Boolean);
+  const shouldShowCounter = !hasRenderedImages && !isActive && loadTimeoutReached && totalCount > 0 && loadedCount < totalCount;
   const allImagesLoaded = totalCount === 0 || loadedCount >= totalCount;
 
   useEffect(() => {
-    onReadyChange?.(allImagesLoaded);
-  }, [allImagesLoaded, onReadyChange]);
+    onReadyChange?.(hasRenderedImages || allImagesLoaded);
+  }, [allImagesLoaded, hasRenderedImages, onReadyChange]);
 
   return (
     <motion.section
@@ -174,6 +197,7 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
       <div className={styles.imageWrapper}>
         {items.map((item, i) => {
           const imageUrl = imageUrls[i];
+          const renderedImageUrl = renderedImageUrls[i] ?? (allImagesLoaded ? imageUrl : null);
           const isPortrait = imageMeta[i]?.isPortrait;
 
           return (
@@ -182,7 +206,7 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
               className={`${styles.slide} ${isPortrait ? styles.slidePortrait : ""} ${
                 i === activeIndex ? styles.slideActive : ""
               }`}
-              style={{ backgroundImage: allImagesLoaded && imageUrl ? `url(${imageUrl})` : "none" }}
+              style={{ backgroundImage: renderedImageUrl ? `url(${renderedImageUrl})` : "none" }}
             />
           );
         })}
