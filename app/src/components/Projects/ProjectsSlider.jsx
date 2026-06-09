@@ -5,6 +5,16 @@ import { motion } from "framer-motion";
 import { urlForRef } from "@/lib/sanity";
 import styles from "./ProjectsSlider.module.scss";
 
+function getImageDimensions(ref) {
+  const match = ref?.match(/-(\d+)x(\d+)-[^-]+$/);
+  if (!match) return null;
+
+  return {
+    width: Number(match[1]),
+    height: Number(match[2]),
+  };
+}
+
 export default function ProjectsSlider({ items, activeIndex, isActive, onReadyChange }) {
   const MOBILE_BREAKPOINT = 768;
   const [viewportWidth, setViewportWidth] = useState(1920);
@@ -21,11 +31,11 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
       const nextIsMobile = nextWidth <= MOBILE_BREAKPOINT;
       const nextPixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
+      setViewportWidth(nextWidth);
+      setViewportHeight(nextHeight);
+      setPixelRatio(nextPixelRatio);
       setIsMobileViewport((previousIsMobile) => {
         if (previousIsMobile !== nextIsMobile) {
-          setViewportWidth(nextWidth);
-          setViewportHeight(nextHeight);
-          setPixelRatio(nextPixelRatio);
           return nextIsMobile;
         }
 
@@ -45,12 +55,28 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
     return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
-  const imageUrls = useMemo(() => {
-    const mobileWidth = Math.max(Math.round(viewportWidth * pixelRatio), viewportWidth);
-
+  const imageMeta = useMemo(() => {
     return items.map((item) => {
       const ref = item.asset?._ref;
+      const dimensions = getImageDimensions(ref);
+
+      return {
+        ref,
+        isPortrait: dimensions ? dimensions.height > dimensions.width : false,
+      };
+    });
+  }, [items]);
+
+  const imageUrls = useMemo(() => {
+    const mobileWidth = Math.max(Math.round(viewportWidth * pixelRatio), viewportWidth);
+    const viewportPixelHeight = Math.max(Math.round(viewportHeight * pixelRatio), viewportHeight);
+
+    return imageMeta.map(({ ref, isPortrait }) => {
       if (!ref) return null;
+
+      if (isPortrait) {
+        return urlForRef(ref).height(viewportPixelHeight).fit("max").url();
+      }
 
       if (isMobileViewport) {
         return urlForRef(ref).width(mobileWidth).fit("max").url();
@@ -58,7 +84,7 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
 
       return urlForRef(ref).width(viewportWidth).height(viewportHeight).fit("fill").url();
     });
-  }, [isMobileViewport, items, pixelRatio, viewportHeight, viewportWidth]);
+  }, [imageMeta, isMobileViewport, pixelRatio, viewportHeight, viewportWidth]);
 
   const validImageUrls = useMemo(() => imageUrls.filter(Boolean), [imageUrls]);
   const totalCount = validImageUrls.length;
@@ -148,11 +174,14 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
       <div className={styles.imageWrapper}>
         {items.map((item, i) => {
           const imageUrl = imageUrls[i];
+          const isPortrait = imageMeta[i]?.isPortrait;
 
           return (
             <div
               key={item._id}
-              className={`${styles.slide} ${i === activeIndex ? styles.slideActive : ""}`}
+              className={`${styles.slide} ${isPortrait ? styles.slidePortrait : ""} ${
+                i === activeIndex ? styles.slideActive : ""
+              }`}
               style={{ backgroundImage: allImagesLoaded && imageUrl ? `url(${imageUrl})` : "none" }}
             />
           );

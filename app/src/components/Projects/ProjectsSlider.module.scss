@@ -44,12 +44,23 @@
   image-rendering: pixelated;
 }
 
+.slidePortrait {
+  background-repeat: repeat;
+  background-position: center center;
+}
+
 @media screen and (max-width: 768px) {
   .slide {
     background-size: 100% auto;
     background-repeat: repeat-y;
     background-position: top center;
     image-rendering: auto;
+  }
+
+  .slidePortrait {
+    background-size: auto 100%;
+    background-repeat: repeat;
+    background-position: center center;
   }
 }
 
