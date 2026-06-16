@@ -63,7 +63,6 @@ export default function MainNav({ activeCategory, onSetCategory }) {
             </aside>
           </div>
         ))}
-        {/* <button onClick={() => onSetCategory(null)}>(Reset)</button> */}
       </menu>
     </nav>
   );

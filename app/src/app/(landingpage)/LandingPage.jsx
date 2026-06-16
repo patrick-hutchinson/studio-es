@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import MainNav from "@/components/Main/MainNav";
-import ProjectsSlider from "@/components/Projects/ProjectsSlider";
+import Slideshow from "@/components/Slideshow/Slideshow";
 import Text from "@/components/Text/Text";
 
-import styles from "./home.module.scss";
+import styles from "./LandingPage.module.scss";
 
-export default function HomeClient({ data }) {
+export default function LandingPage({ data }) {
   const [showIndex, setShowIndex] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeCategory, setActiveCategory] = useState(null);
@@ -17,7 +18,12 @@ export default function HomeClient({ data }) {
   const [isShortList, setIsShortList] = useState(false);
   const [colors, setColors] = useState({ font: "#fff", background: "#000" });
   const [sliderReady, setSliderReady] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [introNeedsScroll, setIntroNeedsScroll] = useState(false);
+  const [introScrolledToEnd, setIntroScrolledToEnd] = useState(false);
   const listEl = useRef(null);
+  const indexEl = useRef(null);
+  const introEl = useRef(null);
 
   const filteredItems = useMemo(() => {
     if (!data?.projects) return [];
@@ -87,21 +93,6 @@ export default function HomeClient({ data }) {
     });
   };
 
-  const handleLoopScroll = () => {
-    if (!loopIsActive) return;
-    const container = listEl.current;
-    if (!container) return;
-
-    const fullHeight = container.scrollHeight;
-    const pixelThird = fullHeight / 3;
-    const scroll = container.scrollTop;
-    const relative = scroll % pixelThird;
-
-    if (scroll < pixelThird / 4 || scroll > pixelThird * 1.75) {
-      container.scrollTop = pixelThird + relative;
-    }
-  };
-
   const toggleCategory = (newCategory) => {
     setActiveCategory((current) => (current === newCategory ? null : newCategory));
   };
@@ -140,6 +131,57 @@ export default function HomeClient({ data }) {
     randomColors();
   }, [data?.projects]);
 
+  const updateIntroScrollState = useCallback(() => {
+    const container = indexEl.current;
+    const intro = introEl.current;
+    if (!container) return;
+
+    const nextNeedsScroll = Boolean(intro && intro.scrollHeight > container.clientHeight);
+    setIntroNeedsScroll(nextNeedsScroll);
+
+    if (!nextNeedsScroll) {
+      setIntroScrolledToEnd(true);
+      return;
+    }
+
+    const scrollRemaining = container.scrollHeight - container.scrollTop - container.clientHeight;
+    setIntroScrolledToEnd(scrollRemaining <= 4);
+  }, []);
+
+  useEffect(() => {
+    const updateViewport = () => {
+      const nextIsMobile = window.innerWidth <= 768;
+      setIsMobileViewport(nextIsMobile);
+
+      requestAnimationFrame(() => {
+        if (nextIsMobile) {
+          updateIntroScrollState();
+          return;
+        }
+
+        setIntroScrolledToEnd(true);
+      });
+    };
+
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+
+    return () => window.removeEventListener("resize", updateViewport);
+  }, [updateIntroScrollState]);
+
+  useEffect(() => {
+    if (!showIndex || !isMobileViewport) {
+      setIntroScrolledToEnd(!isMobileViewport);
+      return;
+    }
+
+    const container = indexEl.current;
+    if (!container) return;
+
+    container.scrollTop = 0;
+    requestAnimationFrame(updateIntroScrollState);
+  }, [isMobileViewport, showIndex, updateIntroScrollState]);
+
   const sectionClassName = `${styles.index} ${showIndex ? styles.active : ""}`;
   const mainStyle = {
     "--background-color": colors.background,
@@ -167,9 +209,7 @@ export default function HomeClient({ data }) {
       const target = event.target;
       if (
         target instanceof Element &&
-        target.closest(
-          "a, button, input, textarea, select, label, [role='button'], [data-no-slider-toggle='true']",
-        )
+        target.closest("a, button, input, textarea, select, label, [role='button'], [data-no-slider-toggle='true']")
       ) {
         return;
       }
@@ -188,25 +228,41 @@ export default function HomeClient({ data }) {
 
   if (!data || data.length == 0) return null;
 
+  const shouldDelayMainNav = isMobileViewport && introNeedsScroll;
+  const shouldShowMainNav = !shouldDelayMainNav || introScrolledToEnd;
+  const introClassName = `${styles.intro} ${shouldDelayMainNav ? styles.introWithScrollTail : ""}`;
+
   return (
     <main className={styles.main} style={mainStyle}>
       {sliderItems.length ? (
-        <ProjectsSlider
-          items={sliderItems}
-          activeIndex={activeIndex}
-          isActive={showIndex}
-          onReadyChange={setSliderReady}
-        />
+        <Slideshow items={sliderItems} activeIndex={activeIndex} isActive={showIndex} onReadyChange={setSliderReady} />
       ) : null}
 
-      <section className={sectionClassName}>
-        <Link href="mailto:info@studio-es.at" className={styles.mobileContact} data-no-slider-toggle="true">
-          Contact
-        </Link>
+      <section ref={indexEl} className={sectionClassName} onScroll={updateIntroScrollState}>
+        <div ref={introEl} className={introClassName}>
+          <Text text={data?.home?.intro} />
+        </div>
 
-        <Text className={styles.intro} text={data?.home?.intro} />
+        <AnimatePresence initial={false}>
+          {shouldShowMainNav ? (
+            <>
+              <motion.div
+                key="main-nav"
+                className={styles.navShell}
+                initial={isMobileViewport ? { opacity: 0 } : false}
+                animate={{ opacity: 1 }}
+                exit={isMobileViewport ? { opacity: 0 } : undefined}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+              >
+                <MainNav activeCategory={activeCategory} onSetCategory={toggleCategory} />
 
-        <MainNav activeCategory={activeCategory} onSetCategory={toggleCategory} />
+                <Link href="mailto:info@studio-es.at" className={styles.mobileContact} data-no-slider-toggle="true">
+                  Contact
+                </Link>
+              </motion.div>
+            </>
+          ) : null}
+        </AnimatePresence>
       </section>
     </main>
   );

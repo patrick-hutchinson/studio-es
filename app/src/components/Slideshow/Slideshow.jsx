@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { urlForRef } from "@/lib/sanity";
-import styles from "./ProjectsSlider.module.scss";
+import styles from "./Slideshow.module.scss";
 
 function getImageDimensions(ref) {
   const match = ref?.match(/-(\d+)x(\d+)-[^-]+$/);
@@ -24,7 +24,7 @@ function shouldFitHeight(dimensions, viewportSize) {
   return imageRatio <= viewportRatio;
 }
 
-export default function ProjectsSlider({ items, activeIndex, isActive, onReadyChange }) {
+export default function Slideshow({ items, activeIndex, isActive, onReadyChange }) {
   const MOBILE_BREAKPOINT = 768;
   const [viewportSize, setViewportSize] = useState({
     width: 1920,
@@ -55,9 +55,7 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
       setRequestedSize((previousSize) => {
         const crossedBreakpoint = previousSize.isMobileViewport !== nextIsMobile;
         const needsLargerSource =
-          nextWidth > previousSize.width ||
-          nextHeight > previousSize.height ||
-          nextPixelRatio > previousSize.pixelRatio;
+          nextWidth > previousSize.width || nextHeight > previousSize.height || nextPixelRatio > previousSize.pixelRatio;
 
         if (!crossedBreakpoint && !needsLargerSource) {
           return previousSize;
@@ -104,10 +102,7 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
 
   const imageUrls = useMemo(() => {
     const viewportPixelWidth = Math.max(Math.round(requestedSize.width * requestedSize.pixelRatio), requestedSize.width);
-    const viewportPixelHeight = Math.max(
-      Math.round(requestedSize.height * requestedSize.pixelRatio),
-      requestedSize.height,
-    );
+    const viewportPixelHeight = Math.max(Math.round(requestedSize.height * requestedSize.pixelRatio), requestedSize.height);
 
     return imageMeta.map(({ ref, dimensions }) => {
       if (!ref) return null;
@@ -189,7 +184,8 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
   const formatCount = (value) => String(value).padStart(3, "0");
   const yearSuffix = String(new Date().getFullYear()).slice(-2);
   const hasRenderedImages = renderedImageUrls.some(Boolean);
-  const shouldShowCounter = !hasRenderedImages && !isActive && loadTimeoutReached && totalCount > 0 && loadedCount < totalCount;
+  const shouldShowCounter =
+    !hasRenderedImages && !isActive && loadTimeoutReached && totalCount > 0 && loadedCount < totalCount;
   const allImagesLoaded = totalCount === 0 || loadedCount >= totalCount;
 
   useEffect(() => {

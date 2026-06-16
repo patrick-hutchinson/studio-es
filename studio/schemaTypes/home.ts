@@ -11,6 +11,7 @@ export const home = defineType({
       title: 'Intro',
       type: 'portableText',
     }),
+
     defineField({
       name: 'images',
       type: 'array',

@@ -11,6 +11,10 @@
   grid-column: 1 / 12;
 }
 
+.navShell {
+  grid-column: 1 / -1;
+}
+
 .mobileContact {
   position: fixed;
   bottom: var(--global-padding);
@@ -33,6 +37,7 @@
   padding: 0 var(--global-padding);
   box-sizing: border-box;
   z-index: 50;
+  overflow-y: hidden;
 
   &.active {
     opacity: 1;
@@ -76,5 +81,20 @@
     padding-top: calc(var(--global-padding) - 1px);
     padding-left: 0px;
     grid-column: 1 / 6;
+  }
+
+  .navShell {
+    grid-column: 9 / span 4;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .index.active {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .introWithScrollTail {
+    margin-bottom: 400px;
   }
 }
