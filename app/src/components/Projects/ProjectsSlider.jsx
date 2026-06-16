@@ -15,8 +15,21 @@ function getImageDimensions(ref) {
   };
 }
 
+function shouldFitHeight(dimensions, viewportSize) {
+  if (!dimensions || !viewportSize.width || !viewportSize.height) return true;
+
+  const imageRatio = dimensions.width / dimensions.height;
+  const viewportRatio = viewportSize.width / viewportSize.height;
+
+  return imageRatio <= viewportRatio;
+}
+
 export default function ProjectsSlider({ items, activeIndex, isActive, onReadyChange }) {
   const MOBILE_BREAKPOINT = 768;
+  const [viewportSize, setViewportSize] = useState({
+    width: 1920,
+    height: 1080,
+  });
   const [requestedSize, setRequestedSize] = useState({
     width: 1920,
     height: 1080,
@@ -33,6 +46,11 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
       const nextHeight = window.innerHeight;
       const nextIsMobile = nextWidth <= MOBILE_BREAKPOINT;
       const nextPixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+
+      setViewportSize({
+        width: nextWidth,
+        height: nextHeight,
+      });
 
       setRequestedSize((previousSize) => {
         const crossedBreakpoint = previousSize.isMobileViewport !== nextIsMobile;
@@ -56,6 +74,10 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
 
     const initialWidth = window.innerWidth;
     const initialHeight = window.innerHeight;
+    setViewportSize({
+      width: initialWidth,
+      height: initialHeight,
+    });
     setRequestedSize({
       width: initialWidth,
       height: initialHeight,
@@ -75,30 +97,26 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
 
       return {
         ref,
-        isPortrait: dimensions ? dimensions.height > dimensions.width : false,
+        dimensions,
       };
     });
   }, [items]);
 
   const imageUrls = useMemo(() => {
-    const mobileWidth = Math.max(Math.round(requestedSize.width * requestedSize.pixelRatio), requestedSize.width);
+    const viewportPixelWidth = Math.max(Math.round(requestedSize.width * requestedSize.pixelRatio), requestedSize.width);
     const viewportPixelHeight = Math.max(
       Math.round(requestedSize.height * requestedSize.pixelRatio),
       requestedSize.height,
     );
 
-    return imageMeta.map(({ ref, isPortrait }) => {
+    return imageMeta.map(({ ref, dimensions }) => {
       if (!ref) return null;
 
-      if (isPortrait) {
+      if (shouldFitHeight(dimensions, requestedSize)) {
         return urlForRef(ref).height(viewportPixelHeight).fit("max").url();
       }
 
-      if (requestedSize.isMobileViewport) {
-        return urlForRef(ref).width(mobileWidth).fit("max").url();
-      }
-
-      return urlForRef(ref).width(requestedSize.width).height(requestedSize.height).fit("fill").url();
+      return urlForRef(ref).width(viewportPixelWidth).fit("max").url();
     });
   }, [imageMeta, requestedSize]);
 
@@ -198,12 +216,12 @@ export default function ProjectsSlider({ items, activeIndex, isActive, onReadyCh
         {items.map((item, i) => {
           const imageUrl = imageUrls[i];
           const renderedImageUrl = renderedImageUrls[i] ?? (allImagesLoaded ? imageUrl : null);
-          const isPortrait = imageMeta[i]?.isPortrait;
+          const fitHeight = shouldFitHeight(imageMeta[i]?.dimensions, viewportSize);
 
           return (
             <div
               key={item._id}
-              className={`${styles.slide} ${isPortrait ? styles.slidePortrait : ""} ${
+              className={`${styles.slide} ${fitHeight ? styles.slideFitHeight : styles.slideFitWidth} ${
                 i === activeIndex ? styles.slideActive : ""
               }`}
               style={{ backgroundImage: renderedImageUrl ? `url(${renderedImageUrl})` : "none" }}
