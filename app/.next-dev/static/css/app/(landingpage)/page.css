@@ -246,4 +246,7 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
+  .LandingPage_introWithScrollTail__dlLzn {
+    margin-bottom: 150px;
+  }
 }
