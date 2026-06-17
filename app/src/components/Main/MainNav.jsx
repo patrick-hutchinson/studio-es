@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { PortableText } from "@portabletext/react";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { groq } from "@/lib/sanity";
 import styles from "./MainNav.module.scss";
 
@@ -48,10 +49,13 @@ export default function MainNav({ activeCategory, onSetCategory }) {
       <menu>
         <h3>Filter</h3>
         {(data?.categories ?? []).map((item, i) => (
-          <div
+          <motion.div
             role="button"
             key={item._id}
             tabIndex={i}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
             onClick={() => onSetCategory(item._id)}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") onSetCategory(item._id);
@@ -61,7 +65,7 @@ export default function MainNav({ activeCategory, onSetCategory }) {
             <aside>
               <h2>{item.title}</h2>
             </aside>
-          </div>
+          </motion.div>
         ))}
       </menu>
     </nav>

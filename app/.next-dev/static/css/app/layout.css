@@ -1,0 +1,100 @@
+/*!********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[11].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[11].use[3]!./node_modules/next/dist/build/webpack/loaders/resolve-url-loader/index.js??ruleSet[1].rules[14].oneOf[11].use[4]!./node_modules/next/dist/compiled/sass-loader/cjs.js??ruleSet[1].rules[14].oneOf[11].use[5]!./src/app/globals.scss ***!
+  \********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+@font-face {
+  font-family: "Union Regular";
+  font-style: normal;
+  font-weight: 400;
+  font-display: auto;
+  src: url("https://d32riwu7ppww35.cloudfront.net/RP-W-9ffc0e38-b7df-4bd3-a7cd-f27cf872fa2b/691e87ca-b939-42c6-9a04-3b5e573f7c48.woff2?signature=4f2dcef9bd55fe523124438da3cb0f83ab5431aa") format("woff2"), url("https://d32riwu7ppww35.cloudfront.net/RP-W-9ffc0e38-b7df-4bd3-a7cd-f27cf872fa2b/691e87ca-b939-42c6-9a04-3b5e573f7c48.woff?signature=4f2dcef9bd55fe523124438da3cb0f83ab5431aa") format("woff"), url("https://d32riwu7ppww35.cloudfront.net/RP-W-9ffc0e38-b7df-4bd3-a7cd-f27cf872fa2b/691e87ca-b939-42c6-9a04-3b5e573f7c48.eot?signature=4f2dcef9bd55fe523124438da3cb0f83ab5431aa") format("embedded-opentype");
+}
+html,
+body,
+ul,
+li,
+div,
+section,
+h1,
+h2,
+h3,
+h4,
+dl,
+dd,
+dt,
+p {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+::selection {
+  background: var(--background-color);
+  color: var(--background-color);
+}
+
+body {
+  --global-padding: 11px;
+}
+
+main {
+  min-height: 100vh;
+}
+
+@media screen and (max-width: 768px) {
+  html,
+  body {
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+}
+body * {
+  font-family: "Union Regular", Times, Arial, Helvetica, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 0.15px;
+  line-height: 15.5px;
+}
+
+.line-through {
+  text-decoration: line-through;
+}
+
+p {
+  margin-bottom: 11px;
+}
+
+a {
+  opacity: 0.4;
+  transition: opacity 0.5s;
+  color: var(--font-color);
+}
+
+a:hover {
+  opacity: 1;
+}
+
+button {
+  background-color: transparent;
+  padding: 0;
+  font-size: 1em;
+  color: inherit;
+  border: none;
+  display: block;
+}
+
+.flip-move {
+  transition: transform 0.4s ease, opacity 0.3s ease;
+}
+
+.flip-enter-active,
+.flip-leave-active {
+  transition: all 0.4s ease;
+}
+
+.flip-enter-from,
+.flip-leave-to {
+  opacity: 0;
+}
