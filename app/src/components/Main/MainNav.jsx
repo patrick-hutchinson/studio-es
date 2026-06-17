@@ -2,38 +2,9 @@
 
 import Link from "next/link";
 import { PortableText } from "@portabletext/react";
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { groq } from "@/lib/sanity";
 import styles from "./MainNav.module.scss";
 
-const query = groq`
-  {
-    "studio": *[_type == "studio"][0]{
-      gmaps,
-      copy
-    },
-    "categories": *[_type == "category"] | order(_createdAt asc){
-      _id,
-      title,
-      _type,
-      abbr,
-      description
-    }
-  }
-`;
-
-export default function MainNav({ activeCategory, onSetCategory }) {
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    const url = `/api/sanity?q=${encodeURIComponent(query)}`;
-    fetch(url)
-      .then((res) => res.json())
-      .then((json) => setData(json))
-      .catch(() => setData({ categories: [] }));
-  }, []);
-
+export default function MainNav({ data }) {
   return (
     <nav className={styles.nav}>
       <header>
@@ -49,23 +20,12 @@ export default function MainNav({ activeCategory, onSetCategory }) {
       <menu>
         <h3>Filter</h3>
         {(data?.categories ?? []).map((item, i) => (
-          <motion.div
-            role="button"
-            key={item._id}
-            tabIndex={i}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            onClick={() => onSetCategory(item._id)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === " ") onSetCategory(item._id);
-            }}
-          >
-            <button className={`${styles.reveal} ${activeCategory === item._id ? styles.active : ""}`}>{item.abbr}</button>
+          <div role="button" key={item._id} tabIndex={i}>
+            <button className={styles.reveal}>{item.abbr}</button>
             <aside>
               <h2>{item.title}</h2>
             </aside>
-          </motion.div>
+          </div>
         ))}
       </menu>
     </nav>

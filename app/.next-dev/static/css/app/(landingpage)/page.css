@@ -227,24 +227,6 @@
   display: none;
 }
 
-.LandingPage_projects__OdRr9 {
-  grid-column: span 6;
-  max-height: 100vh;
-  overflow-y: scroll;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  padding: 0;
-}
-
-.LandingPage_short__6w_kM {
-  padding-top: var(--global-padding);
-  padding-bottom: var(--global-padding);
-}
-
-.LandingPage_last__HXdZg {
-  margin-bottom: var(--global-padding);
-}
-
 @media screen and (min-width: 769px) {
   .LandingPage_mobileContact___jwnm {
     display: none;
@@ -263,8 +245,5 @@
   .LandingPage_index__idIm5.LandingPage_active__UTpw0 {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-  }
-  .LandingPage_introWithScrollTail__dlLzn {
-    margin-bottom: 150px;
   }
 }

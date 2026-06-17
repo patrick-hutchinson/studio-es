@@ -53,24 +53,6 @@
   }
 }
 
-.projects {
-  grid-column: span 6;
-  max-height: 100vh;
-  overflow-y: scroll;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  padding: 0;
-}
-
-.short {
-  padding-top: var(--global-padding);
-  padding-bottom: var(--global-padding);
-}
-
-.last {
-  margin-bottom: var(--global-padding);
-}
-
 @media screen and (min-width: 769px) {
   .mobileContact {
     display: none;
@@ -92,9 +74,5 @@
   .index.active {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-  }
-
-  .introWithScrollTail {
-    margin-bottom: 150px;
   }
 }

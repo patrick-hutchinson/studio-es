@@ -1,4 +1,3 @@
 {
-  "/api/sanity/route": "app/api/sanity/route.js",
   "/(landingpage)/page": "app/(landingpage)/page.js"
 }

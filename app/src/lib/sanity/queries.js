@@ -67,6 +67,10 @@ export const landingPageQuery = `
           description
         }
       ),
+      "studio": *[_type == "studio"][0]{
+        gmaps,
+        copy
+      },
       "categories": coalesce(category[]->{
         _id,
         _type,
@@ -94,6 +98,17 @@ export const landingPageQuery = `
       "font": appearance.font,
       "background": appearance.background,
       "size": header.size
-    } | order(date desc)
+    } | order(date desc),
+    "studio": *[_type == "studio"][0]{
+      gmaps,
+      copy
+    },
+    "categories": *[_type == "category"] | order(_createdAt asc){
+      _id,
+      title,
+      _type,
+      abbr,
+      description
+    }
   }
 `;
