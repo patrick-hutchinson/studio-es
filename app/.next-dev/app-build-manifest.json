@@ -11,11 +11,6 @@
       "static/chunks/main-app.js",
       "static/css/app/(landingpage)/page.css",
       "static/chunks/app/(landingpage)/page.js"
-    ],
-    "/api/sanity/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/sanity/route.js"
     ]
   }
 }
