@@ -1,0 +1,35 @@
+.scaleRegion {
+  width: 100%;
+  min-width: 0;
+}
+
+.scaleStage {
+  height: auto;
+  width: 100%;
+}
+
+.scaleContainer {
+  position: relative;
+  height: auto;
+  width: 100%;
+  overflow: hidden;
+}
+
+.scaleContainer[data-pinned] {
+  position: fixed;
+  top: var(--margin);
+  z-index: 1;
+}
+
+.scaleContent {
+  width: 100%;
+  color: inherit;
+}
+
+.scaleContentTransform {
+  --scale-progress: 1;
+
+  transform: scale(var(--scale-progress));
+  transform-origin: top left;
+  will-change: transform;
+}

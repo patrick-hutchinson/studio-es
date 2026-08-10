@@ -1,7 +1,19 @@
 .description {
-  background: var(--random-background);
-  color: var(--random-foreground);
+  display: block;
   width: 100%;
+}
+
+/* .metaScale.first {
+  margin-top: 100px;
+}
+.metaScale.last {
+  margin-bottom: 100px;
+} */
+
+.metaLine {
+  display: block;
+  width: 100%;
+  height: var(--lineHeight-3);
 }
 
 .text {

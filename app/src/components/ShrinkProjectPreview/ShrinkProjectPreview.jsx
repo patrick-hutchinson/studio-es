@@ -80,9 +80,9 @@ const ShrinkProjectPreview = ({ backgroundImage, className = "", medium, index, 
           "--preview-background-image": backgroundImage ? `url("${backgroundImage}")` : "none",
         }}
       >
-        {medium ? (
+        {/* {medium ? (
           <Media className={styles.projectMedia} eager={index === 0} medium={medium} objectFit="contain" />
-        ) : null}
+        ) : null} */}
       </article>
     </RegionElement>
   );

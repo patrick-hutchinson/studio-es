@@ -178,10 +178,7 @@ const ShuffleGallery = ({ className = "", images = [] }) => {
       width: getImageWidth(image, layout.itemSize),
     };
   });
-  const activeCenter = canRenderStrip
-    ? items.slice(0, layout.sideCount).reduce((sum, item) => sum + item.width, 0) +
-      (items[layout.sideCount]?.width ?? 0) / 2
-    : 0;
+  const activeLeft = canRenderStrip ? items.slice(0, layout.sideCount).reduce((sum, item) => sum + item.width, 0) : 0;
 
   return (
     <section ref={regionRef} className={[styles.region, className].filter(Boolean).join(" ")}>
@@ -191,7 +188,7 @@ const ShuffleGallery = ({ className = "", images = [] }) => {
         data-paused={isPaused ? "" : undefined}
         onClick={togglePaused}
         style={{
-          "--shuffle-active-center": `${activeCenter}px`,
+          "--shuffle-active-left": `${activeLeft}px`,
           "--shuffle-item-size": `${layout.itemSize}px`,
         }}
       >

@@ -9,13 +9,13 @@ const DEFAULT_FONT_URLS = [
   "https://d32riwu7ppww35.cloudfront.net/RP-W-9ffc0e38-b7df-4bd3-a7cd-f27cf872fa2b/691e87ca-b939-42c6-9a04-3b5e573f7c48.eot?signature=4f2dcef9bd55fe523124438da3cb0f83ab5431aa",
 ];
 const FONT_FAMILY = "Union Regular";
-const SVG_FONT_SIZE = 1000;
+const DEFAULT_SVG_FONT_SIZE = 1000;
 const fontCache = new Map();
 const fallbackBox = {
   x: 0,
-  y: -SVG_FONT_SIZE,
-  width: SVG_FONT_SIZE * 2,
-  height: SVG_FONT_SIZE,
+  y: -DEFAULT_SVG_FONT_SIZE,
+  width: DEFAULT_SVG_FONT_SIZE * 2,
+  height: DEFAULT_SVG_FONT_SIZE,
 };
 
 const getPaddedBox = (box, padding = 0) => ({
@@ -59,17 +59,35 @@ const loadFont = async (fontUrls) => {
   throw new AggregateError(errors, "RenderSVG could not load a parseable font.");
 };
 
-const getPathWithLetterSpacing = (font, text, letterSpacing) => {
+const resolveFontSize = (fontSize) => {
+  if (typeof fontSize === "number") return fontSize;
+  if (!fontSize || typeof window === "undefined") return DEFAULT_SVG_FONT_SIZE;
+
+  const probe = document.createElement("span");
+
+  probe.style.position = "absolute";
+  probe.style.visibility = "hidden";
+  probe.style.fontSize = fontSize;
+  document.body.appendChild(probe);
+
+  const resolvedFontSize = Number.parseFloat(window.getComputedStyle(probe).fontSize);
+
+  document.body.removeChild(probe);
+
+  return Number.isFinite(resolvedFontSize) ? resolvedFontSize : DEFAULT_SVG_FONT_SIZE;
+};
+
+const getPathWithLetterSpacing = (font, text, letterSpacing, fontSize) => {
   if (!letterSpacing) {
-    return font.getPath(text, 0, 0, SVG_FONT_SIZE);
+    return font.getPath(text, 0, 0, fontSize);
   }
 
   const path = new opentype.Path();
   let x = 0;
 
   for (const character of text) {
-    const glyphPath = font.getPath(character, x, 0, SVG_FONT_SIZE);
-    const advanceWidth = font.getAdvanceWidth(character, SVG_FONT_SIZE);
+    const glyphPath = font.getPath(character, x, 0, fontSize);
+    const advanceWidth = font.getAdvanceWidth(character, fontSize);
 
     path.extend(glyphPath);
     x += advanceWidth + letterSpacing;
@@ -78,7 +96,7 @@ const getPathWithLetterSpacing = (font, text, letterSpacing) => {
   return path;
 };
 
-const RenderSVG = ({ text, className = "", fontUrl, fontUrls = DEFAULT_FONT_URLS, letterSpacing = 0, padding = 0 }) => {
+const RenderSVG = ({ text, className = "", fontSize = DEFAULT_SVG_FONT_SIZE, fontUrl, fontUrls = DEFAULT_FONT_URLS, letterSpacing = 0, padding = 0 }) => {
   const [outline, setOutline] = useState(null);
   const resolvedFontUrls = useMemo(() => (fontUrl ? [fontUrl] : fontUrls), [fontUrl, fontUrls]);
 
@@ -89,7 +107,8 @@ const RenderSVG = ({ text, className = "", fontUrl, fontUrls = DEFAULT_FONT_URLS
       .then((font) => {
         if (!isMounted || !text) return;
 
-        const path = getPathWithLetterSpacing(font, text, letterSpacing);
+        const resolvedFontSize = resolveFontSize(fontSize);
+        const path = getPathWithLetterSpacing(font, text, letterSpacing, resolvedFontSize);
         const box = path.getBoundingBox();
         const nextBox = getPaddedBox(box, padding);
 
@@ -111,7 +130,7 @@ const RenderSVG = ({ text, className = "", fontUrl, fontUrls = DEFAULT_FONT_URLS
     return () => {
       isMounted = false;
     };
-  }, [letterSpacing, padding, resolvedFontUrls, text]);
+  }, [fontSize, letterSpacing, padding, resolvedFontUrls, text]);
 
   const viewBox = outline?.viewBox || `${fallbackBox.x} ${fallbackBox.y} ${fallbackBox.width} ${fallbackBox.height}`;
   const pathData = outline?.pathData;
@@ -129,7 +148,7 @@ const RenderSVG = ({ text, className = "", fontUrl, fontUrls = DEFAULT_FONT_URLS
       {pathData ? (
         <path className={styles.path} d={pathData} />
       ) : (
-        <text className={styles.path} x="0" y="0" fontFamily={FONT_FAMILY} fontSize={SVG_FONT_SIZE}>
+        <text className={styles.path} x="0" y="0" fontFamily={FONT_FAMILY} fontSize={DEFAULT_SVG_FONT_SIZE}>
           {label}
         </text>
       )}

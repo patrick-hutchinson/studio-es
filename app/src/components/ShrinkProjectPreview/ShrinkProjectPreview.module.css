@@ -18,7 +18,7 @@
   width: 100%;
   overflow: hidden;
   background-image: var(--preview-background-image);
-  background-position: center center;
+  background-position: top left;
   background-repeat: repeat-x;
   background-size: auto 100%;
   color: inherit;

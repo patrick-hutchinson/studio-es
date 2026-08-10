@@ -21,10 +21,11 @@
 .track {
   position: absolute;
   top: 0;
-  left: 50%;
+  left: 0;
   display: flex;
   height: 100%;
-  transform: translateX(calc(-1 * var(--shuffle-active-center)));
+  transform: translateX(calc(-1 * var(--shuffle-active-left)));
+  transform-origin: top left;
 }
 
 .item {
