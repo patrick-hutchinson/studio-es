@@ -1,0 +1,49 @@
+.scaleText {
+  grid-column: 1 / 9;
+}
+
+.rowOne {
+  grid-row: 1;
+}
+
+.rowTwo {
+  grid-row: 2;
+}
+
+.rowThree {
+  grid-row: 3;
+}
+
+.aboutText {
+  grid-row: 1 / 4;
+  grid-column: 9 / 12;
+  align-self: stretch;
+}
+
+.aboutTextInner {
+  position: sticky;
+  top: calc(var(--margin) + 10px);
+}
+
+.placeholder {
+  grid-column: 1 / 13;
+  height: 100vw;
+
+  width: 100%;
+}
+
+.indexList {
+  --index-list-gap: 100px;
+  grid-column: 12 / 13;
+  align-self: stretch;
+}
+
+.indexListItem {
+  min-height: calc(1em + var(--index-list-gap));
+}
+
+.indexListItemInner {
+  position: sticky;
+  top: var(--margin);
+  background: var(--background);
+}

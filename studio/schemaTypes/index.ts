@@ -1,5 +1,5 @@
 import {about} from './about'
-import {appearance} from './objects/appearance'
+import {appearance, appearanceCombination} from './objects/appearance'
 import {award} from './objects/award'
 import {awardcat} from './objects/award-cat'
 import {button} from './objects/button'
@@ -28,10 +28,13 @@ import {videoSize} from './objects/video-size'
 import {videoCaption} from './objects/video-caption'
 import {portableText} from './types/portableText'
 import {link} from './types/link'
+import {site} from './site'
 
 export const schemaTypes = [
+  site,
   about,
   appearance,
+  appearanceCombination,
   award,
   awardcat,
   button,

@@ -1,0 +1,9 @@
+.description {
+  background: var(--random-background);
+  color: var(--random-foreground);
+  width: 100%;
+}
+
+.text {
+  color: inherit;
+}

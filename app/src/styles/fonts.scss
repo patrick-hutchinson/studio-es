@@ -1,0 +1,75 @@
+@font-face {
+  font-family: "Union Regular";
+  font-style: normal;
+  font-weight: 400;
+  font-display: auto;
+  src:
+    url("https://d32riwu7ppww35.cloudfront.net/RP-W-9ffc0e38-b7df-4bd3-a7cd-f27cf872fa2b/691e87ca-b939-42c6-9a04-3b5e573f7c48.woff2?signature=4f2dcef9bd55fe523124438da3cb0f83ab5431aa")
+      format("woff2"),
+    url("https://d32riwu7ppww35.cloudfront.net/RP-W-9ffc0e38-b7df-4bd3-a7cd-f27cf872fa2b/691e87ca-b939-42c6-9a04-3b5e573f7c48.woff?signature=4f2dcef9bd55fe523124438da3cb0f83ab5431aa")
+      format("woff"),
+    url("https://d32riwu7ppww35.cloudfront.net/RP-W-9ffc0e38-b7df-4bd3-a7cd-f27cf872fa2b/691e87ca-b939-42c6-9a04-3b5e573f7c48.eot?signature=4f2dcef9bd55fe523124438da3cb0f83ab5431aa")
+      format("embedded-opentype");
+}
+
+body * {
+  font-family: "Union Regular", Times, Arial, Helvetica, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  text-decoration: none;
+}
+
+:root {
+  // --fontSize-1: 14rem;
+  // --lineHeight-1: 1;
+  // --letterSpacing-1: -0.75rem;
+  // --paragraphSpacing-1: 0rem;
+
+  --fontSize-2: 4.48rem;
+  --lineHeight-2: 1;
+  --letterSpacing-2: -0.08rem;
+  ----paragraphSpacing-2: 0rem;
+
+  --fontSize-3: 1.3rem;
+  --lineHeight-3: 1.55rem;
+  --letterSpacing-3: -0.015rem;
+  ----paragraphSpacing-3: 0rem;
+}
+
+h2,
+[typo~="h2"] {
+  font-size: var(--fontSize-2);
+  line-height: var(--lineHeight-2);
+  letter-spacing: var(--letterSpacing-2);
+}
+h2 p,
+[typo~="h2"] p {
+  margin-bottom: var(----paragraphSpacing-2);
+}
+
+[typo~="h2"][typo~="compensate"] {
+  --h2-overshoot: 0.18em;
+
+  margin-top: calc(var(--h2-overshoot) * -1);
+}
+
+h3,
+[typo~="h3"] {
+  font-size: var(--fontSize-3);
+  line-height: var(--lineHeight-3);
+  letter-spacing: var(--letterSpacing-3);
+}
+h3 p,
+[typo~="h3"] p {
+  margin-bottom: var(----paragraphSpacing-3);
+}
+
+[typo~="h3"][typo~="compensate"] {
+  --h3-overshoot: 0.18em;
+
+  margin-top: calc(var(--h3-overshoot) * -1);
+}
+
+/* Tablets */
+@media screen and (min-width: 769px) {
+}

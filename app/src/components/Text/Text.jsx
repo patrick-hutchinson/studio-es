@@ -1,46 +1,64 @@
 import { PortableText } from "@portabletext/react";
+import { cloneElement, isValidElement } from "react";
 
-import { isValidElement } from "react";
+import Link from "next/link";
 
-const Text = ({ text, className, typo }) => {
-  if (isValidElement(text)) {
-    return text;
+const isPortableTextBlockEmpty = (value) => {
+  if (!value?.children?.length) return true;
+
+  return value.children.every((child) => child._type === "span" && !child.text);
+};
+
+const renderSoftBreaks = (node) => {
+  if (typeof node === "string") {
+    return node.split("\n").flatMap((part, index) => (index === 0 ? [part] : [<br key={`br-${index}`} />, part]));
   }
 
+  if (Array.isArray(node)) {
+    return node.flatMap((child) => renderSoftBreaks(child));
+  }
+
+  if (isValidElement(node) && node.props?.children) {
+    return cloneElement(node, {
+      children: renderSoftBreaks(node.props.children),
+    });
+  }
+
+  return [node];
+};
+
+const PortableTextParagraph = ({ children, value }) => {
+  if (isPortableTextBlockEmpty(value)) return <p aria-hidden="true">&nbsp;</p>;
+
+  return <p>{renderSoftBreaks(children)}</p>;
+};
+
+const Text = ({ text, typo, className, components, style }) => {
   if (!Array.isArray(text)) {
     return text ? (
-      <p typo={typo} className={className}>
+      <p typo={typo} className={className} style={{ ...style }}>
         {text}
       </p>
     ) : null;
   }
 
   return (
-    <div className={className} typo={typo}>
+    <div className={className} typo={typo} style={{ ...style }}>
       <PortableText
         value={text}
         components={{
+          ...components,
           block: {
-            normal: ({ children }) => <p>{children}</p>,
+            normal: PortableTextParagraph,
+            ...components?.block,
           },
           marks: {
             link: ({ value, children }) => {
-              const href = value?.href;
-              if (!href) return children;
+              if (!value) return children;
 
-              // Check if external (optional)
-              const isExternal = href.startsWith("http");
-
-              return (
-                <a
-                  href={href}
-                  target={isExternal ? "_blank" : undefined}
-                  rel={isExternal ? "noopener noreferrer" : undefined}
-                >
-                  {children}
-                </a>
-              );
+              return <Link link={value}>{children}</Link>;
             },
+            ...components?.marks,
           },
         }}
       />

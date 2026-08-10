@@ -1,0 +1,31 @@
+.scaleRegion {
+  width: 100%;
+  min-width: 0;
+}
+
+.scaleStage {
+  height: var(--content-height);
+  width: 100%;
+}
+
+.scaleContainer {
+  position: relative;
+  height: var(--content-height);
+  width: 100%;
+  overflow: hidden;
+}
+
+.scaleContainer[data-pinned] {
+  position: fixed;
+  top: var(--margin);
+  z-index: 1;
+}
+
+.lead {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  flex: 0 0 auto;
+  overflow: hidden;
+}

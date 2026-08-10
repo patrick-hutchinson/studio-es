@@ -25,3 +25,37 @@ export const appearance = defineType ({
 		columns: 2 // Defines a grid for the fields and how many columns it should have
 	}
 })
+
+export const appearanceCombination = defineType({
+	name: 'appearanceCombination',
+	title: 'Appearance',
+	type: 'document',
+	fields: [
+		defineField({
+			name: 'title',
+			title: 'Title',
+			type: 'string',
+			validation: (Rule) => Rule.required(),
+		}),
+		defineField({
+			name: 'appearance',
+			title: 'Appearance',
+			type: 'appearance',
+		}),
+	],
+	preview: {
+		select: {
+			title: 'title',
+			background: 'appearance.background.hex',
+			font: 'appearance.font.hex',
+		},
+		prepare(selection) {
+			const {title, background, font} = selection
+
+			return {
+				title,
+				subtitle: [font, background].filter(Boolean).join(' / '),
+			}
+		},
+	},
+})

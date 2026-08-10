@@ -1,0 +1,9 @@
+.scaleText {
+  grid-column: 1 / -1;
+}
+
+.projects {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: var(--margin);
+}

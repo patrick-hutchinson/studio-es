@@ -13,6 +13,14 @@ export const structure = (S: StructureBuilder) =>
   S.list()
     .title('Content')
     .items([
+      S.listItem().title('Site').child(S.editor().schemaType('site')),
+      S.listItem()
+        .title('Appearance')
+        .child(
+          S.documentTypeList('appearanceCombination')
+            .title('Appearance')
+            .defaultOrdering([{field: 'title', direction: 'asc'}]),
+        ),
       S.listItem()
         .title('Homepage')
         .child(S.editor().schemaType('home').documentId('b7605842-c2ca-4d2e-aac8-96bd835dd082')),

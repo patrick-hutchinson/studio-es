@@ -9,6 +9,9 @@ export const mediaAssetFragment = `{
     ),
 
     "url": select(_type == "imageAsset" => file.asset->url, true => null),
+    "extension": select(_type == "imageAsset" => file.asset->extension, true => null),
+    "mimeType": select(_type == "imageAsset" => file.asset->mimeType, true => null),
+    
     "lqip": select(_type == "imageAsset" => file.asset->metadata.lqip, true => null),
     "width": select(_type == "imageAsset" => file.asset->metadata.dimensions.width, true => null),
     "height": select(_type == "imageAsset" => file.asset->metadata.dimensions.height, true => null),
@@ -25,6 +28,18 @@ export const mediaAssetFragment = `{
     "copyright": select(
       _type == "imageAsset" => copyright,
       _type == "videoAsset" => copyright,
+      true => null
+    ),
+
+    "caption": select(
+      _type == "imageAsset" => caption,
+      _type == "videoAsset" => caption,
+      true => null
+    ),
+
+    "subcaption": select(
+      _type == "imageAsset" => subcaption,
+      _type == "videoAsset" => subcaption,
       true => null
     ),
   }

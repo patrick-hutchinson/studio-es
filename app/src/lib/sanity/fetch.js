@@ -1,23 +1,65 @@
-import { production, preview } from "./client";
-import { landingPageQuery, siteQuery } from "./queries";
+import { getPreviewClient, getProductionClient } from "./client";
+import { appearancesQuery, projectBySlugQuery, projectsQuery, siteQuery } from "./queries";
 
-const isProduction = process.env.VERCEL_ENV === "production";
-const isPreview = process.env.VERCEL_ENV === "preview";
-const isLocal = !process.env.VERCEL_ENV;
+export function getSanityClient() {
+  const isProduction = process.env.VERCEL_ENV === "production";
+  const isPreview = process.env.VERCEL_ENV === "preview";
+  const isLocal = !process.env.VERCEL_ENV;
+  const hasReadToken = Boolean(process.env.SANITY_READ_TOKEN);
 
-export const getSanityClient = () => {
-  if (isProduction) return production;
-  if (isPreview || isLocal) return preview;
+  if ((isPreview || isLocal) && hasReadToken) {
+    return getPreviewClient();
+  }
 
-  return preview;
-};
+  if (isProduction || !hasReadToken) {
+    return getProductionClient();
+  }
 
-const client = getSanityClient();
-
-export async function getSite() {
-  return client.fetch(siteQuery);
+  return getProductionClient();
 }
 
-export async function getLandingPage() {
-  return client.fetch(landingPageQuery);
+function normalizeSite(site) {
+  return {
+    ...site,
+    faviconUrl: site?.favicon?.asset?.url,
+  };
+}
+
+function normalizeProject(project) {
+  if (!project) return null;
+
+  return {
+    ...project,
+    slug: project?.meta?.slug ?? null,
+  };
+}
+
+function normalizeProjects(projects) {
+  return Array.isArray(projects) ? projects.map(normalizeProject).filter(Boolean) : [];
+}
+
+export async function getSite() {
+  const site = await getSanityClient().fetch(siteQuery);
+
+  return normalizeSite(site);
+}
+
+export async function getProjects() {
+  const projects = await getSanityClient().fetch(projectsQuery);
+
+  return normalizeProjects(projects);
+}
+
+export async function getAppearances() {
+  const appearances = await getSanityClient().fetch(appearancesQuery);
+
+  return Array.isArray(appearances) ? appearances : [];
+}
+
+export async function getProject(slug) {
+  if (!slug) return null;
+
+  const project = await getSanityClient().fetch(projectBySlugQuery, { slug });
+
+  return normalizeProject(project);
 }

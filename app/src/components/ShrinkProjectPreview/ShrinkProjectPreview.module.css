@@ -1,0 +1,32 @@
+.region {
+  display: block;
+  height: var(--content-height);
+  min-width: 0;
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.region:hover {
+  opacity: 1;
+}
+
+.preview {
+  display: block;
+  position: relative;
+  height: var(--content-height);
+  width: 100%;
+  overflow: hidden;
+  background-image: var(--preview-background-image);
+  background-position: center center;
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.preview[data-pinned] {
+  position: fixed;
+  top: var(--margin);
+  z-index: 1;
+}
