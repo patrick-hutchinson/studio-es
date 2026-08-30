@@ -3,6 +3,8 @@ import RenderSVG from "@/components/RenderSVG/RenderSVG";
 import ScaleBlock from "@/components/ScaleBlock/ScaleBlock";
 import { useRandomColorPair } from "@/lib/getRandomColorPair";
 
+import Spacing from "@/components/Spacing/Spacing";
+
 import styles from "./Description.module.css";
 
 const getDescriptionText = (text) => {
@@ -29,6 +31,7 @@ const Description = ({ appearance, appearances = [], className = "", colorPair, 
 
   return (
     <section className={[styles.description, className].filter(Boolean).join(" ")} style={colorStyle}>
+      <Spacing spacing={6} />
       <ScaleBlock className={`${styles.first}`} scaleContent>
         <p typo="h3">Client: Fotografie im Diskurs</p>
       </ScaleBlock>
@@ -41,9 +44,13 @@ const Description = ({ appearance, appearances = [], className = "", colorPair, 
         <p typo="h3">Year: 2026</p>
       </ScaleBlock>
 
+      <Spacing spacing={2} />
+
       <ScaleBlock className={styles.textScale} scaleContent>
         <Text className={styles.text} text={descriptionText} typo="h2" />
       </ScaleBlock>
+
+      <Spacing spacing={2} />
     </section>
   );
 };

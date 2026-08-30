@@ -1,0 +1,26 @@
+.mediaContainer {
+  width: 100%;
+  /* min-height: var(--content-height); */
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.mediaFrame {
+  position: relative;
+  /* width: min(var(--content-width), calc(var(--content-height) * var(--media-ratio, 1)));
+  height: min(var(--content-height), calc(var(--content-width) / var(--media-ratio, 1)));
+  max-width: var(--content-width);
+  max-height: var(--content-height); */
+  width: min(100vw, calc(var(--content-height) * var(--media-ratio, 1)));
+  height: min(100vh, calc(var(--content-width) / var(--media-ratio, 1)));
+  max-width: 100vw;
+  max-height: 100vh;
+}
+
+.placeholder {
+  z-index: -1 !important;
+  object-fit: contain;
+}

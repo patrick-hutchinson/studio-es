@@ -1,6 +1,6 @@
 import NextImage from "next/image";
 
-const Placeholder = ({ medium, isLoaded }) => {
+const Placeholder = ({ medium, className, isLoaded }) => {
   let src;
 
   medium.type === "image"
@@ -9,6 +9,7 @@ const Placeholder = ({ medium, isLoaded }) => {
 
   return (
     <NextImage
+      className={className}
       src={src}
       fill
       loading="eager"

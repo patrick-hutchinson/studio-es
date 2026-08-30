@@ -6,6 +6,10 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { useRouter } from "next/router";
 
 const LenisContext = createContext(null);
+const SCROLL_VELOCITY_VARIABLE = "--lenis-scroll-velocity";
+const SCROLL_VELOCITY_NORMALIZER = 5;
+const SCROLL_VELOCITY_IDLE_DELAY = 120;
+const PROGRAMMATIC_SCROLL_LOCK_EVENT = "neverathome:programmatic-scroll-lock";
 
 export const useLenisContext = () => useContext(LenisContext);
 
@@ -13,6 +17,7 @@ function LenisContextProvider({ children }) {
   const lenis = useLenis();
   const router = useRouter();
   const resetTimers = useRef([]);
+  const isProgrammaticScrollLockedRef = useRef(false);
 
   const clearResetTimers = useCallback(() => {
     resetTimers.current.forEach(({ id, type }) => {
@@ -50,9 +55,38 @@ function LenisContextProvider({ children }) {
 
     queueFrame(() => {
       scrollToTop();
-      lenis?.start?.();
+      if (!isProgrammaticScrollLockedRef.current) {
+        lenis?.start?.();
+      }
     });
   }, [clearResetTimers, lenis, scrollToTop]);
+
+  useEffect(() => {
+    const handleProgrammaticScrollLock = (event) => {
+      const isLocked = Boolean(event.detail?.isLocked);
+      isProgrammaticScrollLockedRef.current = isLocked;
+
+      if (isLocked) {
+        const targetScrollTop = Number(event.detail?.targetScrollTop);
+
+        if (Number.isFinite(targetScrollTop)) {
+          lenis?.start?.();
+          lenis?.scrollTo?.(targetScrollTop, {
+            force: true,
+          });
+        } else {
+          lenis?.stop?.();
+        }
+        return;
+      }
+
+      lenis?.start?.();
+    };
+
+    window.addEventListener(PROGRAMMATIC_SCROLL_LOCK_EVENT, handleProgrammaticScrollLock);
+
+    return () => window.removeEventListener(PROGRAMMATIC_SCROLL_LOCK_EVENT, handleProgrammaticScrollLock);
+  }, [lenis]);
 
   useEffect(() => {
     if ("scrollRestoration" in window.history) {
@@ -82,6 +116,51 @@ function LenisContextProvider({ children }) {
   useEffect(() => {
     queueScrollToTop();
   }, [queueScrollToTop, router.asPath]);
+
+  useEffect(() => {
+    if (!lenis) return undefined;
+
+    const root = document.documentElement;
+    let animationFrame = null;
+    let idleTimer = null;
+    let latestVelocity = 0;
+
+    const commitVelocity = () => {
+      root.style.setProperty(SCROLL_VELOCITY_VARIABLE, latestVelocity.toFixed(3));
+      animationFrame = null;
+    };
+
+    const scheduleCommit = () => {
+      if (animationFrame) return;
+      animationFrame = requestAnimationFrame(commitVelocity);
+    };
+
+    const handleScroll = (event = {}) => {
+      const velocity = Math.abs(Number(event.velocity ?? lenis.velocity ?? 0));
+      latestVelocity = Math.min(velocity / SCROLL_VELOCITY_NORMALIZER, 1);
+      scheduleCommit();
+
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        latestVelocity = 0;
+        scheduleCommit();
+      }, SCROLL_VELOCITY_IDLE_DELAY);
+    };
+
+    const unsubscribe = lenis.on?.("scroll", handleScroll);
+
+    return () => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      } else {
+        lenis.off?.("scroll", handleScroll);
+      }
+
+      if (animationFrame) cancelAnimationFrame(animationFrame);
+      if (idleTimer) clearTimeout(idleTimer);
+      root.style.removeProperty(SCROLL_VELOCITY_VARIABLE);
+    };
+  }, [lenis]);
 
   return <LenisContext.Provider value={lenis}>{children}</LenisContext.Provider>;
 }

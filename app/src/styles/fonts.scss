@@ -20,10 +20,10 @@ body * {
 }
 
 :root {
-  // --fontSize-1: 14rem;
-  // --lineHeight-1: 1;
-  // --letterSpacing-1: -0.75rem;
-  // --paragraphSpacing-1: 0rem;
+  --fontSize-1: clamp(20rem, calc(22.3547vw + 2.808rem), 35rem);
+  --lineHeight-1: 1;
+  --letterSpacing-1: clamp(-2rem, calc(-1.2774vw - 0.1605rem), -1.1429rem);
+  --paragraphSpacing-1: 0rem;
 
   --fontSize-2: 4.48rem;
   --lineHeight-2: 1;
@@ -34,6 +34,17 @@ body * {
   --lineHeight-3: 1.55rem;
   --letterSpacing-3: -0.015rem;
   ----paragraphSpacing-3: 0rem;
+}
+
+h1,
+[typo~="h1"] {
+  font-size: var(--fontSize-1);
+  line-height: var(--lineHeight-1);
+  letter-spacing: var(--letterSpacing-1);
+}
+h1 p,
+[typo~="h1"] p {
+  margin-bottom: var(----paragraphSpacing-1);
 }
 
 h2,

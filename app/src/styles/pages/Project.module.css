@@ -21,12 +21,77 @@
   width: 100%;
 }
 
+.mediaSpotlight {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.block {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
 .description {
   grid-column: 1 / -1;
+}
+
+.scaleMarquee {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 350px;
+  /* background: blue; */
+}
+
+.repeatMediaGrid {
+  grid-column: 1 / -1;
+  width: 100%;
 }
 
 .placeholder {
   width: 100%;
   height: 100vh;
   background: red;
+}
+
+.optionMenu {
+  position: fixed;
+  left: 50%;
+  bottom: var(--margin);
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--spacing-7);
+  z-index: 20;
+}
+
+.optionMenu button {
+  min-width: 110px;
+}
+
+.optionButtonActive {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+.optionTwoShowcase {
+  grid-column: 1 / -1;
+  min-height: var(--content-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--foreground);
+}
+
+.optionTwoSpacer {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: var(--content-height);
+}
+
+.optionTwoEntry {
+  grid-column: 1 / -1;
+}
+
+.optionTwoForeground {
+  position: relative;
+  z-index: 1;
 }
