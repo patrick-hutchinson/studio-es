@@ -13,6 +13,35 @@ const MARQUEE_SCROLL_SPEED_DAMPING = 0.075;
 const MARQUEE_SCROLL_VELOCITY_VARIABLE = "--lenis-scroll-velocity";
 const MARQUEE_DEFAULT_SPEED_TRANSITION_MS = 600;
 
+const getPixelValue = (value) => {
+  const number = Number.parseFloat(value);
+
+  return Number.isFinite(number) ? number : 0;
+};
+
+const getDocumentTop = (element) => element.getBoundingClientRect().top + window.scrollY;
+
+const getVerticalFollowingElement = (region) => {
+  const regionTop = getDocumentTop(region);
+  let element = region;
+
+  while (element) {
+    let sibling = element.nextElementSibling;
+
+    while (sibling) {
+      if (getDocumentTop(sibling) > regionTop) {
+        return sibling;
+      }
+
+      sibling = sibling.nextElementSibling;
+    }
+
+    element = element.parentElement;
+  }
+
+  return null;
+};
+
 const getMarqueeDuration = (itemWidth, targetSpeed) => {
   if (!itemWidth || targetSpeed <= 0) return MARQUEE_BASE_DURATION;
 
@@ -34,7 +63,12 @@ const ScaleMarquee = ({
   speedTransitionMs = MARQUEE_DEFAULT_SPEED_TRANSITION_MS,
   targetSpeed = MARQUEE_TARGET_SPEED,
   typo,
+  style,
 }) => {
+  const regionRef = useRef(null);
+  const stageRef = useRef(null);
+  const scaleContainerRef = useRef(null);
+  const contentRef = useRef(null);
   const outerRef = useRef(null);
   const innerRef = useRef(null);
   const measureRef = useRef(null);
@@ -42,6 +76,13 @@ const ScaleMarquee = ({
   const visibleSpeedMultiplierRef = useRef(speedMultiplier);
   const speedTransitionMsRef = useRef(speedTransitionMs);
   const scaleProgressRef = useRef(1);
+  const layoutFrameRef = useRef(null);
+  const measurementLoopRef = useRef(null);
+  const timeoutRefs = useRef([]);
+  const lastHeightRef = useRef("");
+  const lastPinnedRef = useRef(false);
+  const lastScaleRef = useRef("");
+  const lastStageHeightRef = useRef("");
   const [itemWidth, setItemWidth] = useState(0);
   const [repeatCount, setRepeatCount] = useState(MARQUEE_MIN_REPEAT_COUNT);
   const [isInView, setIsInView] = useState(true);
@@ -79,14 +120,15 @@ const ScaleMarquee = ({
   }, []);
 
   useEffect(() => {
+    const region = regionRef.current;
     const outer = outerRef.current;
-    if (!outer) return undefined;
+    if (!region || !outer) return undefined;
 
     const intersectionObserver = new IntersectionObserver(([entry]) => {
       setIsInView(entry.isIntersecting);
     });
 
-    intersectionObserver.observe(outer);
+    intersectionObserver.observe(region);
 
     return () => {
       intersectionObserver.disconnect();
@@ -94,16 +136,125 @@ const ScaleMarquee = ({
   }, []);
 
   useEffect(() => {
+    const updateScaleHeight = () => {
+      layoutFrameRef.current = null;
+
+      const region = regionRef.current;
+      const stage = stageRef.current;
+      const scaleContainer = scaleContainerRef.current;
+      const content = contentRef.current;
+      const outer = outerRef.current;
+      const followingElement = region ? getVerticalFollowingElement(region) : null;
+
+      if (!region || !stage || !scaleContainer || !content || !outer) return;
+
+      const rootStyles = window.getComputedStyle(document.documentElement);
+      const margin = getPixelValue(rootStyles.getPropertyValue("--margin"));
+      const stageBox = stage.getBoundingClientRect();
+      const followingBox = followingElement?.getBoundingClientRect();
+      const baseHeight = Math.max(outer.scrollHeight || outer.getBoundingClientRect().height || 0, 0);
+      const baseHeightValue = `${baseHeight}px`;
+      const pinnedBottom = margin + baseHeight;
+      const shrink = followingBox ? Math.max(pinnedBottom - followingBox.top, 0) : 0;
+      const nextHeightValue = Math.min(Math.max(baseHeight - shrink, 0), baseHeight);
+      const nextHeight = `${nextHeightValue}px`;
+      const nextScale = baseHeight ? Math.max(nextHeightValue / baseHeight, 0) : 0;
+      const isPinned = stageBox.top <= margin && nextHeightValue > 0;
+
+      scaleProgressRef.current = nextScale || 0;
+
+      if (baseHeightValue !== lastStageHeightRef.current) {
+        stage.style.height = baseHeightValue;
+        lastStageHeightRef.current = baseHeightValue;
+      }
+
+      if (nextHeight !== lastHeightRef.current) {
+        scaleContainer.style.height = nextHeight;
+        lastHeightRef.current = nextHeight;
+      }
+
+      const scaleValue = `${nextScale}`;
+
+      if (scaleValue !== lastScaleRef.current) {
+        content.style.setProperty("--scale-progress", scaleValue);
+        lastScaleRef.current = scaleValue;
+      }
+
+      if (isPinned !== lastPinnedRef.current) {
+        scaleContainer.toggleAttribute("data-pinned", isPinned);
+        lastPinnedRef.current = isPinned;
+      }
+
+      if (isPinned) {
+        scaleContainer.style.left = `${stageBox.left}px`;
+        scaleContainer.style.width = `${stageBox.width}px`;
+      } else {
+        scaleContainer.style.left = "";
+        scaleContainer.style.width = "";
+      }
+    };
+
+    const scheduleUpdate = () => {
+      if (layoutFrameRef.current) return;
+
+      layoutFrameRef.current = window.requestAnimationFrame(updateScaleHeight);
+    };
+
+    const scheduleSettledUpdates = () => {
+      scheduleUpdate();
+
+      for (let index = 0; index < 3; index += 1) {
+        window.requestAnimationFrame(scheduleUpdate);
+      }
+
+      timeoutRefs.current = [100, 300, 600].map((delay) => window.setTimeout(scheduleUpdate, delay));
+    };
+
+    const resizeObserver = new ResizeObserver(scheduleUpdate);
+    [regionRef.current, stageRef.current, scaleContainerRef.current, contentRef.current, outerRef.current]
+      .filter(Boolean)
+      .forEach((element) => resizeObserver.observe(element));
+
+    const runMeasurementLoop = () => {
+      updateScaleHeight();
+      measurementLoopRef.current = window.requestAnimationFrame(runMeasurementLoop);
+    };
+
+    scheduleSettledUpdates();
+    measurementLoopRef.current = window.requestAnimationFrame(runMeasurementLoop);
+
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+
+    return () => {
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      resizeObserver.disconnect();
+      timeoutRefs.current.forEach((timeout) => window.clearTimeout(timeout));
+      timeoutRefs.current = [];
+
+      if (layoutFrameRef.current) {
+        window.cancelAnimationFrame(layoutFrameRef.current);
+      }
+
+      if (measurementLoopRef.current) {
+        window.cancelAnimationFrame(measurementLoopRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     const outer = outerRef.current;
     const measure = measureRef.current;
-    if (!outer || !measure) return undefined;
+    const content = contentRef.current;
+    if (!outer || !measure || !content) return undefined;
 
     let frame = null;
 
     const updateMetrics = () => {
       const containerWidth = outer.clientWidth || window.innerWidth || 1;
       const nextItemWidth = measure.scrollWidth || 1;
-      const scaleProgress = getScaleProgress(outer);
+      const scaleProgress = getScaleProgress(content);
       scaleProgressRef.current = scaleProgress;
       const scaledItemWidth = nextItemWidth * scaleProgress;
       const minimumScrollableWidth = containerWidth * MARQUEE_SCROLLABLE_WIDTH_MULTIPLIER;
@@ -198,33 +349,41 @@ const ScaleMarquee = ({
   }, [isAnimating, marqueeScrollSpeedMultiplier]);
 
   return (
-    <div
-      className={`${styles.carousel_outer} ${className} ${typo === "h1" ? styles.h1 : ""}`}
-      ref={outerRef}
-      style={{
-        "--marquee-distance": `${itemWidth}px`,
-        "--marquee-duration": `${duration}s`,
-        "--marquee-direction": animationDirection,
-      }}
-    >
-      <div
-        ref={innerRef}
-        className={[styles.carousel_inner, isAnimating ? styles.isAnimating : ""].filter(Boolean).join(" ")}
-        typo={`${typo} compensate`}
-      >
-        {slides.map((_, index) => (
-          <span className={styles.slide} key={index}>
-            <Text text={text} />
-          </span>
-        ))}
-      </div>
-      <div
-        ref={measureRef}
-        className={`${styles.slide} ${styles.measure_slide}`}
-        typo={`${typo} compensate`}
-        aria-hidden="true"
-      >
-        <Text text={text} />
+    <div ref={regionRef} className={[styles.scaleRegion, className].filter(Boolean).join(" ")}>
+      <div ref={stageRef} className={styles.scaleStage}>
+        <div ref={scaleContainerRef} className={styles.scaleContainer} style={style}>
+          <div ref={contentRef} className={styles.scaleContent}>
+            <div
+              className={`${styles.carousel_outer} ${typo === "h1" ? styles.h1 : ""}`}
+              ref={outerRef}
+              style={{
+                "--marquee-distance": `${itemWidth}px`,
+                "--marquee-duration": `${duration}s`,
+                "--marquee-direction": animationDirection,
+              }}
+            >
+              <div
+                ref={innerRef}
+                className={[styles.carousel_inner, isAnimating ? styles.isAnimating : ""].filter(Boolean).join(" ")}
+                typo={`${typo} compensate`}
+              >
+                {slides.map((_, index) => (
+                  <span className={styles.slide} key={index}>
+                    <Text text={text} />
+                  </span>
+                ))}
+              </div>
+              <div
+                ref={measureRef}
+                className={`${styles.slide} ${styles.measure_slide}`}
+                typo={`${typo} compensate`}
+                aria-hidden="true"
+              >
+                <Text text={text} />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

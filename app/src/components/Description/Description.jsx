@@ -1,7 +1,6 @@
 import Text from "@/components/Text/Text";
 import RenderSVG from "@/components/RenderSVG/RenderSVG";
 import ScaleBlock from "@/components/ScaleBlock/ScaleBlock";
-import { useRandomColorPair } from "@/lib/getRandomColorPair";
 
 import Spacing from "@/components/Spacing/Spacing";
 
@@ -18,13 +17,14 @@ const getColorPair = ({ appearance, colorPair }) => ({
   foreground: colorPair?.foreground || colorPair?.["random-foreground"] || appearance?.font?.hex,
 });
 
-const Description = ({ appearance, appearances = [], className = "", colorPair, text }) => {
+const Description = ({ appearance, className = "", colorPair, text }) => {
   const descriptionText = getDescriptionText(text);
-  const randomColorPair = useRandomColorPair(appearances);
-  const colors = getColorPair({ appearance, colorPair: colorPair ?? randomColorPair });
+  const colors = getColorPair({ appearance, colorPair });
   const colorStyle = {
     "--random-background": colors.background,
     "--random-foreground": colors.foreground,
+    background: colors.background,
+    color: colors.foreground,
   };
 
   if (!descriptionText) return null;
@@ -50,7 +50,7 @@ const Description = ({ appearance, appearances = [], className = "", colorPair, 
         <Text className={styles.text} text={descriptionText} typo="h2" />
       </ScaleBlock>
 
-      <Spacing spacing={2} />
+      {/* <Spacing spacing={2} /> */}
     </section>
   );
 };

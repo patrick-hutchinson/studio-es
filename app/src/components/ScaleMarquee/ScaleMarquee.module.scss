@@ -1,3 +1,36 @@
+.scaleRegion {
+  width: 100%;
+  min-width: 0;
+}
+
+.scaleStage {
+  height: auto;
+  width: 100%;
+}
+
+.scaleContainer {
+  position: relative;
+  height: auto;
+  width: 100%;
+  overflow: hidden;
+}
+
+.scaleContainer[data-pinned] {
+  position: fixed;
+  top: var(--margin);
+  z-index: 1;
+}
+
+.scaleContent {
+  --scale-progress: 1;
+
+  width: 100%;
+  color: inherit;
+  transform: scale(var(--scale-progress));
+  transform-origin: top left;
+  will-change: transform;
+}
+
 .title {
   /* text-transform: uppercase; */
   font-size: var(--font-size-4);

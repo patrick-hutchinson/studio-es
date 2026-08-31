@@ -35,8 +35,27 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
     if (activeCellIndex === null) return undefined;
 
     const handleKeyDown = (event) => {
-      if (event.key !== "Escape") return;
-      setActiveCellIndex(null);
+      if (event.key === "Escape") {
+        setActiveCellIndex(null);
+        return;
+      }
+
+      if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        event.preventDefault();
+        setActiveCellIndex((currentIndex) => {
+          if (currentIndex === null) return currentIndex;
+          return (currentIndex - 1 + repeatedImages.length) % repeatedImages.length;
+        });
+        return;
+      }
+
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        event.preventDefault();
+        setActiveCellIndex((currentIndex) => {
+          if (currentIndex === null) return currentIndex;
+          return (currentIndex + 1) % repeatedImages.length;
+        });
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -44,7 +63,7 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [activeCellIndex]);
+  }, [activeCellIndex, repeatedImages.length]);
 
   if (!repeatedImages.length) return null;
 
@@ -76,7 +95,7 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
               layout
               key={image._repeatKey}
               className={styles.cell}
-              onClick={() => setActiveCellIndex(index)}
+              onClick={() => setActiveCellIndex((currentIndex) => (currentIndex === index ? null : index))}
               transition={{
                 layout: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
               }}

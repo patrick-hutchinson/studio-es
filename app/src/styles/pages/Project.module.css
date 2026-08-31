@@ -5,6 +5,10 @@
   overflow: visible;
 }
 
+.optionThreePage {
+  padding: 0;
+}
+
 .projectTitle > div,
 .projectTitle > div > div {
   overflow: visible;
@@ -38,8 +42,7 @@
 .scaleMarquee {
   grid-column: 1 / -1;
   width: 100%;
-  height: 350px;
-  /* background: blue; */
+  height: auto;
 }
 
 .repeatMediaGrid {
@@ -55,16 +58,20 @@
 
 .optionMenu {
   position: fixed;
-  left: 50%;
+
   bottom: var(--margin);
-  transform: translateX(-50%);
   display: flex;
   gap: var(--spacing-7);
   z-index: 20;
 }
 
 .optionMenu button {
-  min-width: 110px;
+  min-width: 50px;
+  height: 30px;
+  border-radius: 30px;
+  border: none;
+  /* background: #fff; */
+  backdrop-filter: blur(10px);
 }
 
 .optionButtonActive {
@@ -94,4 +101,12 @@
 .optionTwoForeground {
   position: relative;
   z-index: 1;
+}
+
+.divider {
+  all: unset;
+  width: var(--content-width);
+  border-bottom: 1px solid black;
+  position: relative;
+  height: 1px;
 }

@@ -22,7 +22,7 @@
 
 .aboutTextInner {
   position: sticky;
-  top: calc(var(--margin) + 10px);
+  top: calc(var(--margin) + 20px);
 }
 
 .placeholder {

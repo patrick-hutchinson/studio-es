@@ -31,7 +31,15 @@ const getVerticalFollowingElement = (region) => {
   return null;
 };
 
-const ScaleBlock = ({ children, className = "", contentClassName = "", scaleContent = false, style }) => {
+const ScaleBlock = ({
+  children,
+  className = "",
+  containerClassName = "",
+  containerStyle,
+  contentClassName = "",
+  scaleContent = false,
+  style,
+}) => {
   const regionRef = useRef(null);
   const stageRef = useRef(null);
   const scaleContainerRef = useRef(null);
@@ -151,8 +159,12 @@ const ScaleBlock = ({ children, className = "", contentClassName = "", scaleCont
 
   return (
     <div ref={regionRef} className={[styles.scaleRegion, className].filter(Boolean).join(" ")} style={style}>
-      <div ref={stageRef} className={styles.scaleStage}>
-        <div ref={scaleContainerRef} className={styles.scaleContainer}>
+        <div ref={stageRef} className={styles.scaleStage}>
+        <div
+          ref={scaleContainerRef}
+          className={[styles.scaleContainer, containerClassName].filter(Boolean).join(" ")}
+          style={containerStyle}
+        >
           <div
             ref={contentRef}
             className={[styles.scaleContent, scaleContent ? styles.scaleContentTransform : "", contentClassName].filter(Boolean).join(" ")}
