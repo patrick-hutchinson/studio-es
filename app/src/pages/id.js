@@ -6,7 +6,7 @@ const pItems = Array.from({ length: 33 }, () => "P–001–2026");
 const dItems = Array.from({ length: 31 }, () => "D–001–2026");
 
 const IndexList = ({ className = "", items }) => (
-  <div className={[styles.indexList, className].filter(Boolean).join(" ")}>
+  <div className={[styles.indexList, className].filter(Boolean).join(" ")} typo="h3">
     {items.map((item, index) => (
       <div className={styles.indexListItem} key={`${item}-${index}`}>
         <div className={styles.indexListItemInner}>{item}</div>
@@ -23,7 +23,7 @@ export default function Index() {
           <ScaleText text="Id" className={`${styles.scaleText} ${styles.rowOne}`} />
           <ScaleText text="P" className={`${styles.scaleText} ${styles.rowTwo}`} />
           <ScaleText text="D" className={`${styles.scaleText} ${styles.rowThree}`} />
-          <div className={styles.aboutText}>
+          <div className={styles.aboutText} typo="h3">
             <div className={styles.aboutTextInner}>
               The Studio Studio Es is an independent design practice based in Vienna, creating visual identities,
               publications, and digital experiences for institutions across culture, architecture, film, science, art, and

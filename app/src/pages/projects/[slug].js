@@ -79,7 +79,7 @@ export default function Project({ appearances = [], project }) {
         ) : null}
         <ScaleText className={styles.projectTitle} text={project.title.toUpperCase()} letterSpacing={-60} />
         <Description appearances={appearances} className={styles.description} text={project.description} />
-        <hr className={styles.divider} />
+        {/* <hr className={styles.divider} /> */}
 
         <Spacing spacing={1} />
 
@@ -109,7 +109,7 @@ export default function Project({ appearances = [], project }) {
           className={`${styles.description} ${styles.optionTwoForeground}`}
           text={project.description}
         />
-        <hr className={styles.divider} />
+        {/* <hr className={styles.divider} /> */}
 
         <Spacing spacing={1} />
 

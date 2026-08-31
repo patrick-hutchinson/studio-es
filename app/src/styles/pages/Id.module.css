@@ -36,6 +36,7 @@
   --index-list-gap: 100px;
   grid-column: 12 / 13;
   align-self: stretch;
+  text-align: right;
 }
 
 .indexListItem {
@@ -46,4 +47,6 @@
   position: sticky;
   top: var(--margin);
   background: var(--background);
+  display: block;
+  width: 100%;
 }
