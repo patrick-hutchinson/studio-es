@@ -48,7 +48,7 @@ export default function Index() {
               Employment and Internships We do not currently have any vacancies. Studio Space A 70 m² apartment studio is
               available for designers seeking part-time use. Instagram No updates Upcoming APERN – What Emerges: Visual
               Identity, 2027 The Kurious Magazine No. 2, 2026 P.IN.E.A 002, Fall/Winter, 2026 Talk at Schloss Hollenegg, June
-              25–26, 2026 Commissions and General Enquiries info@studio-es.ata
+              25–26, 2026 Commissions and General Enquiries info@studio-es.at.
             </div>
           </div>
           <IndexList className={styles.rowOne} items={idItems} />

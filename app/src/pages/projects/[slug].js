@@ -161,7 +161,7 @@ export default function Project({ appearances = [], project }) {
           style={titleStyle}
         />
         <Description className={styles.description} colorPair={optionThreeDescriptionColors} text={project.description} />
-        <hr className={styles.divider} />
+        {/* <hr className={styles.divider} /> */}
 
         {/* <Spacing spacing={1} /> */}
 
