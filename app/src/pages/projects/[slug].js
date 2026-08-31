@@ -86,6 +86,7 @@ export default function Project({ appearances = [], project }) {
         <MediaSpotlight className={styles.mediaSpotlight} medium={coverMedium} usePlaceholder={true} />
         <Spacing spacing={1} />
         <ScaleMarquee text="https://www.studio-es.at" typo="h1" direction="backward" className={styles.scaleMarquee} />
+        <Spacing spacing={2} />
         {galleryImages.length > 1 ? <RepeatMediaGrid className={styles.repeatMediaGrid} gallery={galleryImages} /> : null}
         <div className={styles.placeholder} />
       </>
