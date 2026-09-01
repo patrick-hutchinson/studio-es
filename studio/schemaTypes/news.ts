@@ -2,7 +2,9 @@ import {defineType, defineField} from 'sanity'
 
 import {FcAddImage, FcVideoCall} from 'react-icons/fc'
 
-export const news = defineType({
+// Keep the former field set independent so archived documents remain editable
+// after the active news schema is rebuilt.
+export const legacyNews = defineType({
   name: 'news',
   title: 'News',
   type: 'document',
@@ -42,3 +44,6 @@ export const news = defineType({
     }),
   ],
 })
+
+// This continues to power active news until the replacement schema is ready.
+export const news = legacyNews

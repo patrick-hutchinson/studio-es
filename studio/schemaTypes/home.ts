@@ -3,7 +3,7 @@ import {FcAddImage} from 'react-icons/fc'
 
 export const home = defineType({
   name: 'home',
-  title: 'Home',
+  title: 'Landing Page',
   type: 'document',
   fields: [
     defineField({
@@ -41,6 +41,6 @@ export const home = defineType({
     }),
   ],
   preview: {
-    prepare: () => ({title: 'Homepage'}),
+    prepare: () => ({title: 'Landing Page'}),
   },
 })

@@ -1,5 +1,5 @@
 .region {
-  height: var(--content-height);
+  height: 100vh;
   min-width: 0;
   width: 100%;
 }
@@ -7,14 +7,14 @@
 .gallery {
   cursor: pointer;
   position: relative;
-  height: var(--content-height);
+  height: 100vh;
   width: 100%;
   overflow: hidden;
 }
 
 .gallery[data-pinned] {
   position: fixed;
-  top: var(--margin);
+  top: 0;
   z-index: 1;
 }
 

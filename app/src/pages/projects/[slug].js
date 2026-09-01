@@ -15,15 +15,7 @@ import ScaleMarquee from "@/components/ScaleMarquee/ScaleMarquee";
 import Spacing from "@/components/Spacing/Spacing";
 
 const getGalleryImages = (project) =>
-  (project.header?.images ?? [])
-    .filter((item) => item._type === "image" && item.asset?.url)
-    .map((item) => ({
-      _id: item.asset._id || item._key,
-      alt: item.alt,
-      url: item.asset.url,
-      width: item.asset.metadata?.dimensions?.width,
-      height: item.asset.metadata?.dimensions?.height,
-    }));
+  (project.gallery ?? []).map((item) => item?.medium).filter((medium) => medium?.type === "image" && medium.url);
 
 const getAppearanceItem = (item) => item?.appearance ?? item;
 
@@ -60,8 +52,8 @@ const getDistinctColorPairs = (appearances = [], count = 3) => {
 
 export default function Project({ appearances = [], project }) {
   const [activeOption, setActiveOption] = useState("option-1");
-  const coverMedium = project.previewMedia?.medium;
   const galleryImages = getGalleryImages(project);
+  const coverMedium = galleryImages[0] ?? project.homePageCover?.image?.medium ?? project.homePageCover?.video?.medium;
   const isOptionOne = activeOption === "option-1";
   const isOptionThree = activeOption === "option-3";
   const [optionThreeTitleColors, optionThreeDescriptionColors, optionThreeMarqueeColors] = useMemo(

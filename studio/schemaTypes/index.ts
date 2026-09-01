@@ -1,11 +1,14 @@
 import {about} from './about'
+import {archivedProject} from './archivedProject'
+import {archivedNews} from './archivedNews'
+import {archivedPost} from './archivedPost'
 import {appearance, appearanceCombination} from './objects/appearance'
 import {award} from './objects/award'
 import {awardcat} from './objects/award-cat'
 import {button} from './objects/button'
 import {category} from './category'
 import {exhibition} from './objects/exhibition'
-import {gallery} from './objects/gallery'
+// import {gallery} from './objects/gallery'
 import {grid} from './objects/grid'
 import {gridBook} from './objects/grid-book'
 import {gridItem} from './objects/grid-item'
@@ -14,9 +17,7 @@ import {intro} from './objects/intro'
 import {meta} from './objects/meta'
 import {news} from './news'
 import {post} from './post'
-import {postLinks} from './objects/post-links'
-import {postNews} from './objects/post-news'
-import {postProject} from './objects/post-project'
+
 import {legal} from './legal'
 import {person} from './objects/person'
 import {project} from './project'
@@ -29,10 +30,17 @@ import {videoCaption} from './objects/video-caption'
 import {portableText} from './types/portableText'
 import {link} from './types/link'
 import {site} from './site'
+import {imageAsset} from './types/media/imageAsset'
+import {mediaAsset} from './types/media/mediaAsset'
+import {videoAsset} from './types/media/videoAsset'
+import {gallery} from './types/media/gallery'
 
 export const schemaTypes = [
   site,
   about,
+  archivedNews,
+  archivedPost,
+  archivedProject,
   appearance,
   appearanceCombination,
   award,
@@ -40,7 +48,7 @@ export const schemaTypes = [
   button,
   category,
   exhibition,
-  gallery,
+  // gallery,
   grid,
   gridBook,
   gridItem,
@@ -51,9 +59,6 @@ export const schemaTypes = [
   news,
   person,
   post,
-  postLinks,
-  postNews,
-  postProject,
   project,
   services,
   slider,
@@ -63,4 +68,9 @@ export const schemaTypes = [
   videoCaption,
   portableText,
   link,
+
+  imageAsset,
+  mediaAsset,
+  videoAsset,
+  gallery,
 ]

@@ -1,7 +1,9 @@
 import { defineType, defineField } from 'sanity'
 import { FcNews } from 'react-icons/fc'
 
-export const post = defineType({
+// Keep the former field set independent so archived documents remain editable
+// after the active post schema is rebuilt.
+export const legacyPost = defineType({
 	name: 'post',
 	title: 'News Post',
 	type: 'document',
@@ -92,3 +94,6 @@ export const post = defineType({
   }
 }
 })
+
+// This continues to power active posts until the replacement schema is ready.
+export const post = legacyPost

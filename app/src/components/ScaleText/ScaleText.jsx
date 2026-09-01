@@ -46,6 +46,7 @@ const ScaleText = ({ text, className = "", style, letterSpacing = 0 }) => {
   const timeoutRefs = useRef([]);
   const lastHeightRef = useRef("");
   const lastPinnedRef = useRef(false);
+  const lastStageHeightRef = useRef("");
 
   useEffect(() => {
     const updateScaleHeight = () => {
@@ -59,8 +60,11 @@ const ScaleText = ({ text, className = "", style, letterSpacing = 0 }) => {
       if (!region || !scaleContainer || !stage) return;
 
       const rootStyles = window.getComputedStyle(document.documentElement);
+      const regionStyles = window.getComputedStyle(region);
       const margin = getPixelValue(rootStyles.getPropertyValue("--margin"));
-      const maxHeight = Math.max(window.innerHeight - margin * 2, 0);
+      const verticalPadding = getPixelValue(regionStyles.paddingTop) + getPixelValue(regionStyles.paddingBottom);
+      // Keep the padded region within the content area instead of adding its block padding on top.
+      const maxHeight = Math.max(window.innerHeight - margin * 2 - verticalPadding, 0);
       const contentBottom = window.innerHeight - margin;
       const stageBox = stage.getBoundingClientRect();
       const followingBox = followingElement?.getBoundingClientRect();
@@ -71,7 +75,13 @@ const ScaleText = ({ text, className = "", style, letterSpacing = 0 }) => {
       const shrink = followingBox ? Math.max(contentBottom - followingBox.top, 0) : 0;
       const nextHeightValue = Math.min(Math.max(maxHeight - shrink, minHeight), maxHeight);
       const nextHeight = `${nextHeightValue}px`;
+      const stageHeight = `${maxHeight}px`;
       const isPinned = stageBox.top <= margin && nextHeightValue > 0;
+
+      if (stageHeight !== lastStageHeightRef.current) {
+        stage.style.height = stageHeight;
+        lastStageHeightRef.current = stageHeight;
+      }
 
       if (nextHeight !== lastHeightRef.current) {
         scaleContainer.style.height = nextHeight;

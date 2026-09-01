@@ -1,3 +1,5 @@
+import { mediaAssetFragment } from "../fragments";
+
 export const siteQuery = `*[_type=="site"][0]{
   title,
   favicon{
@@ -38,29 +40,11 @@ const projectListFields = `{
     abbr,
     description
   },
-  "previewMedia": header.images[(_type=="image" && defined(asset)) || (_type=="video" && defined(video.asset))][0]{
-    _key,
-    alt,
-    "medium": select(
-      _type=="image" => {
-      "type": "image",
-      "_id": asset->_id,
-      "url": asset->url,
-      "extension": asset->extension,
-      "mimeType": asset->mimeType,
-      "lqip": asset->metadata.lqip,
-      "width": asset->metadata.dimensions.width,
-      "height": asset->metadata.dimensions.height
-      },
-      _type=="video" => {
-        "type": "video",
-        "_id": video.asset->_id,
-        "assetId": video.asset->assetId,
-        "playbackId": video.asset->playbackId,
-        "status": video.asset->status,
-        "aspect_ratio": video.asset->data.aspect_ratio
-      }
-    )
+  homePageCover{
+    type,
+    image[0] ${mediaAssetFragment},
+    video[0] ${mediaAssetFragment},
+    gallery[] ${mediaAssetFragment}
   }
 }`;
 
@@ -68,8 +52,6 @@ const projectFields = `{
   _id,
   _type,
   title,
-  longTitle,
-  isActive,
   description,
   appearance,
   meta{
@@ -91,61 +73,12 @@ const projectFields = `{
     abbr,
     description
   },
-  "previewMedia": header.images[(_type=="image" && defined(asset)) || (_type=="video" && defined(video.asset))][0]{
-    _key,
-    alt,
-    "medium": select(
-      _type=="image" => {
-      "type": "image",
-      "_id": asset->_id,
-      "url": asset->url,
-      "extension": asset->extension,
-      "mimeType": asset->mimeType,
-      "lqip": asset->metadata.lqip,
-      "width": asset->metadata.dimensions.width,
-      "height": asset->metadata.dimensions.height
-      },
-      _type=="video" => {
-        "type": "video",
-        "_id": video.asset->_id,
-        "assetId": video.asset->assetId,
-        "playbackId": video.asset->playbackId,
-        "status": video.asset->status,
-        "aspect_ratio": video.asset->data.aspect_ratio
-      }
-    )
-  },
-  header{
-    images[]{
-      _key,
-      _type,
-      alt,
-      size,
-      asset->{
-        _id,
-        url,
-        extension,
-        mimeType,
-        metadata{
-          lqip,
-          dimensions{
-            width,
-            height,
-            aspectRatio
-          }
-        }
-      },
-      video{
-        asset->{
-          assetId,
-          playbackId,
-          status,
-          data{
-            aspect_ratio
-          }
-        }
-      }
-    }
+  gallery[] ${mediaAssetFragment},
+  homePageCover{
+    type,
+    image[0] ${mediaAssetFragment},
+    video[0] ${mediaAssetFragment},
+    gallery[] ${mediaAssetFragment}
   }
 }`;
 

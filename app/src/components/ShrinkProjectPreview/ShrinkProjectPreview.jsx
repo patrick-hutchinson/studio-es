@@ -4,13 +4,15 @@ import styles from "./ShrinkProjectPreview.module.css";
 import Media from "@/components/Media/Media";
 import Link from "next/link";
 
-const getPixelValue = (value) => {
-  const number = Number.parseFloat(value);
+const getAspectRatio = (value) => {
+  if (typeof value !== "string") return "16 / 9";
 
-  return Number.isFinite(number) ? number : 0;
+  const [width, height] = value.split(":").map(Number);
+
+  return Number.isFinite(width) && Number.isFinite(height) && height > 0 ? `${width} / ${height}` : "16 / 9";
 };
 
-const ShrinkProjectPreview = ({ backgroundImage, className = "", medium, index, href }) => {
+const ShrinkProjectPreview = ({ backgroundImage, className = "", foregroundMedium, index, href }) => {
   const regionRef = useRef(null);
   const previewRef = useRef(null);
   const loopFrameRef = useRef(null);
@@ -22,15 +24,13 @@ const ShrinkProjectPreview = ({ backgroundImage, className = "", medium, index, 
 
       if (!region || !preview) return;
 
-      const rootStyles = window.getComputedStyle(document.documentElement);
-      const margin = getPixelValue(rootStyles.getPropertyValue("--margin"));
-      const maxHeight = Math.max(window.innerHeight - margin * 2, 0);
+      const maxHeight = Math.max(window.innerHeight, 0);
       const regionBox = region.getBoundingClientRect();
       const followingBox = region.nextElementSibling?.getBoundingClientRect();
       const followingTop = followingBox?.top ?? window.innerHeight;
-      const height = Math.min(Math.max(followingTop - margin, 0), maxHeight);
+      const height = Math.min(Math.max(followingTop, 0), maxHeight);
       const nextHeight = `${height}px`;
-      const isPinned = regionBox.top <= margin && regionBox.bottom > margin && height > 0;
+      const isPinned = regionBox.top <= 0 && regionBox.bottom > 0 && height > 0;
 
       if (preview.style.height !== nextHeight) {
         preview.style.height = nextHeight;
@@ -78,11 +78,20 @@ const ShrinkProjectPreview = ({ backgroundImage, className = "", medium, index, 
         className={styles.preview}
         style={{
           "--preview-background-image": backgroundImage ? `url("${backgroundImage}")` : "none",
+          "--preview-media-aspect-ratio": getAspectRatio(foregroundMedium?.aspect_ratio),
         }}
       >
-        {/* {medium ? (
-          <Media className={styles.projectMedia} eager={index === 0} medium={medium} objectFit="contain" />
-        ) : null} */}
+        {foregroundMedium ? (
+          <div className={styles.projectMedia}>
+            <Media
+              className={styles.projectMediaContent}
+              eager={index === 0}
+              medium={foregroundMedium}
+              objectFit="cover"
+              showPlaceholder={false}
+            />
+          </div>
+        ) : null}
       </article>
     </RegionElement>
   );

@@ -3,6 +3,8 @@ import Media from "../Media/Media";
 import styles from "./MediaSpotlight.module.css";
 
 const MediaSpotlight = ({ className, medium, usePlaceholder }) => {
+  if (!medium) return null;
+
   const aspectRatio = medium?.width && medium?.height ? medium.width / medium.height : undefined;
 
   return (

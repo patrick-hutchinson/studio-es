@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
-import { getVideoPlaybackUrl } from "@/lib/media/getVideoRenditionUrl";
+import { getVideoRenditionUrl } from "@/lib/media/getVideoRenditionUrl";
 
 const Video = ({ medium, objectFit = "cover", playerState, playerControls }) => {
-  const src = getVideoPlaybackUrl(medium);
+  const src = getVideoRenditionUrl(medium);
 
   useEffect(() => {
     const player = playerControls.playerRef.current;

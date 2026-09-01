@@ -17,7 +17,7 @@
 
 .scaleContainer[data-pinned] {
   position: fixed;
-  top: var(--margin);
+  top: 0;
   z-index: 1;
 }
 

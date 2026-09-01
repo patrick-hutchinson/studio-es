@@ -13,22 +13,54 @@ export const structure = (S: StructureBuilder) =>
   S.list()
     .title('Content')
     .items([
-      S.listItem().title('Site').child(S.editor().schemaType('site')),
+      S.listItem().title('Website Settings').child(S.editor().schemaType('site').documentId('site')),
       S.listItem()
-        .title('Appearance')
+        .title('Design Settings')
         .child(
-          S.documentTypeList('appearanceCombination')
-            .title('Appearance')
-            .defaultOrdering([{field: 'title', direction: 'asc'}]),
+          S.list()
+            .title('Design Settings')
+            .items([
+              S.listItem()
+                .title('Appearance')
+                .child(
+                  S.documentTypeList('appearanceCombination')
+                    .title('Appearance')
+                    .defaultOrdering([{field: 'title', direction: 'asc'}]),
+                ),
+              S.listItem()
+                .title('Categories')
+                .child(
+                  S.documentList()
+                    .title('Categories')
+                    .filter('_type == "category"')
+                    .menuItems([
+                      S.orderingMenuItem({
+                        title: 'Title',
+                        name: 'titleAsc',
+                        by: [{field: 'title', direction: 'asc'}],
+                      }),
+                      S.orderingMenuItem({
+                        title: 'Parent',
+                        name: 'parentAbbr',
+                        by: [
+                          {field: 'abbr', direction: 'asc'},
+                          {field: 'parent.abbr', direction: 'asc'},
+                        ],
+                      }),
+                    ])
+                    .defaultOrdering([{field: 'abbr', direction: 'asc'}]),
+                ),
+            ]),
         ),
+      S.divider(),
       S.listItem()
-        .title('Homepage')
+        .title('Landing Page')
         .child(S.editor().schemaType('home').documentId('b7605842-c2ca-4d2e-aac8-96bd835dd082')),
       S.listItem()
-        .title('News & Projects')
+        .title('Projects')
         .child(async () => {
           const results = await client.fetch(
-            `*[_type in ["post", "project"] && defined(meta.year)]{
+            `*[_type == "project" && defined(meta.year)]{
 								"year": meta.year
 							}`,
           )
@@ -38,14 +70,13 @@ export const structure = (S: StructureBuilder) =>
             .sort((a, b) => b.localeCompare(a))
 
           return S.list()
-            .title('News & Projects')
+            .title('Projects')
             .items([
               S.listItem()
-                .title('All News & Projects')
+                .title('All Projects')
                 .child(
-                  S.documentList()
-                    .title('All News & Projects')
-                    .filter('_type in ["post", "project"]')
+                  S.documentTypeList('project')
+                    .title('All Projects')
                     .defaultOrdering([{field: 'meta.year', direction: 'desc'}]),
                 ),
               ...years.map((year) =>
@@ -55,8 +86,9 @@ export const structure = (S: StructureBuilder) =>
                     S.documentList()
                       .title(`Content from ${year}`)
                       .filter(
-                        '_type in ["post", "project"] && meta.year >= $startOfYear && meta.year < $startOfNextYear',
+                        '_type == "project" && meta.year >= $startOfYear && meta.year < $startOfNextYear',
                       )
+                      .schemaType('project')
                       .params({
                         startOfYear: `${year}-01-01`,
                         startOfNextYear: `${parseInt(year, 10) + 1}-01-01`,
@@ -66,51 +98,59 @@ export const structure = (S: StructureBuilder) =>
               ),
             ])
         }),
+      S.divider(),
       S.listItem()
-        .title('Categories')
-        .child(
-          S.documentList()
-            .title('Categories')
-            .filter('_type == "category"')
-            .menuItems([
-              S.orderingMenuItem({
-                title: 'Title',
-                name: 'titleAsc',
-                by: [{field: 'title', direction: 'asc'}],
-              }),
-              S.orderingMenuItem({
-                title: 'Parent',
-                name: 'parentAbbr',
-                by: [
-                  {field: 'abbr', direction: 'asc'},
-                  {field: 'parent.abbr', direction: 'asc'},
-                ],
-              }),
-            ])
-            .defaultOrdering([{field: 'abbr', direction: 'asc'}]),
-        ),
-      S.listItem()
-        .title('Studio')
+        .title('Archive')
         .child(
           S.list()
-            .title('Settings')
+            .title('Archive')
             .items([
               S.listItem()
-                .title('About')
+                .title('Archived Posts')
                 .child(
-                  S.editor().schemaType('about').documentId('6e0df564-a4d8-4f51-84f7-081b4b858942'),
+                  S.documentTypeList('archivedPost')
+                    .title('Archived Posts')
+                    .defaultOrdering([{field: 'meta.year', direction: 'desc'}]),
                 ),
               S.listItem()
-                .title('Misc')
+                .title('Archived Projects')
                 .child(
-                  S.editor()
-                    .schemaType('studio')
-                    .documentId('fa7797e1-921f-4713-8fb9-9838fab83b8e'),
+                  S.documentTypeList('archivedProject')
+                    .title('Archived Projects')
+                    .defaultOrdering([{field: 'meta.year', direction: 'desc'}]),
                 ),
               S.listItem()
-                .title('Legal')
+                .title('Archived News')
+                .child(S.documentTypeList('archivedNews').title('Archived News')),
+              S.divider(),
+              S.listItem()
+                .title('Studio')
                 .child(
-                  S.editor().schemaType('legal').documentId('34d7887a-c6de-417f-9968-7dc4b5ae4e8f'),
+                  S.list()
+                    .title('Studio')
+                    .items([
+                      S.listItem()
+                        .title('About')
+                        .child(
+                          S.editor()
+                            .schemaType('about')
+                            .documentId('6e0df564-a4d8-4f51-84f7-081b4b858942'),
+                        ),
+                      S.listItem()
+                        .title('Misc')
+                        .child(
+                          S.editor()
+                            .schemaType('studio')
+                            .documentId('fa7797e1-921f-4713-8fb9-9838fab83b8e'),
+                        ),
+                      S.listItem()
+                        .title('Legal')
+                        .child(
+                          S.editor()
+                            .schemaType('legal')
+                            .documentId('34d7887a-c6de-417f-9968-7dc4b5ae4e8f'),
+                        ),
+                    ]),
                 ),
             ]),
         ),

@@ -16,7 +16,8 @@ export const exhibition = defineType({
 			title: 'Link to Project',
 			type: 'reference',
 			to: [
-				{ type: 'project' }
+				{ type: 'project' },
+				{ type: 'archivedProject' }
 			],
 
 		}),

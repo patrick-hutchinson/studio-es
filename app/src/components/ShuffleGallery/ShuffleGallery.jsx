@@ -1,16 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 
 import styles from "./ShuffleGallery.module.css";
 
 const INTERVAL = 200;
 const MIN_SIDE_COUNT = 2;
 const MIN_LAYOUT_HEIGHT = 2;
-
-const getPixelValue = (value) => {
-  const number = Number.parseFloat(value);
-
-  return Number.isFinite(number) ? number : 0;
-};
 
 const getImageAtOffset = (images, index, offset) => {
   const length = images.length;
@@ -27,7 +22,7 @@ const getImageWidth = (image, height) => {
   return Math.max(height * aspectRatio, MIN_LAYOUT_HEIGHT);
 };
 
-const ShuffleGallery = ({ className = "", images = [] }) => {
+const ShuffleGallery = ({ className = "", eager = false, href, images = [], interactive = true, shuffle = true }) => {
   const regionRef = useRef(null);
   const galleryRef = useRef(null);
   const loopFrameRef = useRef(null);
@@ -36,7 +31,7 @@ const ShuffleGallery = ({ className = "", images = [] }) => {
   const [layout, setLayout] = useState({ itemSize: 0, sideCount: MIN_SIDE_COUNT });
 
   const visibleImages = useMemo(() => images.filter((image) => image?.url), [images]);
-  const canShuffle = visibleImages.length > 1 && layout.itemSize >= MIN_LAYOUT_HEIGHT && !isPaused;
+  const canShuffle = shuffle && visibleImages.length > 1 && layout.itemSize >= MIN_LAYOUT_HEIGHT && !isPaused;
 
   useEffect(() => {
     if (!canShuffle) return undefined;
@@ -51,6 +46,8 @@ const ShuffleGallery = ({ className = "", images = [] }) => {
   }, [canShuffle, visibleImages.length]);
 
   const togglePaused = () => {
+    if (!interactive) return;
+
     setIsPaused((paused) => !paused);
   };
 
@@ -76,7 +73,7 @@ const ShuffleGallery = ({ className = "", images = [] }) => {
     };
   }, [isPaused, visibleImages.length]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const gallery = galleryRef.current;
     if (!gallery) return undefined;
 
@@ -122,15 +119,13 @@ const ShuffleGallery = ({ className = "", images = [] }) => {
 
       if (!region || !gallery) return;
 
-      const rootStyles = window.getComputedStyle(document.documentElement);
-      const margin = getPixelValue(rootStyles.getPropertyValue("--margin"));
-      const maxHeight = Math.max(window.innerHeight - margin * 2, 0);
+      const maxHeight = Math.max(window.innerHeight, 0);
       const regionBox = region.getBoundingClientRect();
       const followingBox = region.nextElementSibling?.getBoundingClientRect();
       const followingTop = followingBox?.top ?? window.innerHeight;
-      const height = Math.min(Math.max(followingTop - margin, 0), maxHeight);
+      const height = Math.min(Math.max(followingTop, 0), maxHeight);
       const nextHeight = `${height}px`;
-      const isPinned = regionBox.top <= margin && regionBox.bottom > margin && height > 0;
+      const isPinned = regionBox.top <= 0 && regionBox.bottom > 0 && height > 0;
 
       if (gallery.style.height !== nextHeight) {
         gallery.style.height = nextHeight;
@@ -180,13 +175,21 @@ const ShuffleGallery = ({ className = "", images = [] }) => {
   });
   const activeLeft = canRenderStrip ? items.slice(0, layout.sideCount).reduce((sum, item) => sum + item.width, 0) : 0;
 
+  const RegionElement = href ? Link : "section";
+  const regionProps = href ? { href, prefetch: false } : {};
+
   return (
-    <section ref={regionRef} className={[styles.region, className].filter(Boolean).join(" ")}>
+    <RegionElement
+      ref={regionRef}
+      {...regionProps}
+      aria-label={href ? "Open project" : undefined}
+      className={[styles.region, className].filter(Boolean).join(" ")}
+    >
       <div
         ref={galleryRef}
         className={styles.gallery}
         data-paused={isPaused ? "" : undefined}
-        onClick={togglePaused}
+        onClick={interactive ? togglePaused : undefined}
         style={{
           "--shuffle-active-left": `${activeLeft}px`,
           "--shuffle-item-size": `${layout.itemSize}px`,
@@ -201,13 +204,20 @@ const ShuffleGallery = ({ className = "", images = [] }) => {
                 key={`${offset}-${image._id}`}
                 style={{ "--shuffle-item-width": `${width}px` }}
               >
-                <img alt={image.alt || ""} className={styles.image} draggable={false} src={image.url} />
+                <img
+                  alt={image.alt || ""}
+                  className={styles.image}
+                  draggable={false}
+                  fetchPriority={eager ? "high" : "auto"}
+                  loading={eager ? "eager" : "lazy"}
+                  src={image.url}
+                />
               </div>
             );
           })}
         </div>
       </div>
-    </section>
+    </RegionElement>
   );
 };
 

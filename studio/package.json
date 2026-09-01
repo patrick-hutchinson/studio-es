@@ -10,7 +10,10 @@
     "build": "sanity build",
     "deploy": "sanity deploy",
     "deploy-graphql": "sanity graphql deploy",
-    "migrate:homepage-news-to-home": "node sanity-migrate/migrate-homepage-news-to-home.js"
+    "migrate:homepage-news-to-home": "node sanity-migrate/migrate-homepage-news-to-home.js",
+    "migrate:projects-to-archive": "node --env-file=.env sanity-migrate/migrate-projects-to-archive.mjs",
+    "migrate:news-to-archive": "node --env-file=.env sanity-migrate/migrate-news-to-archive.mjs",
+    "migrate:posts-to-archive": "node --env-file=.env sanity-migrate/migrate-posts-to-archive.mjs"
   },
   "keywords": [
     "sanity"
