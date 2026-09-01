@@ -38,7 +38,7 @@ export default function Studio({ appearances = [], projects = [] }) {
     >
       <main className="main">
         <div className="content grid">
-          <ScaleText text="Es" className={styles.scaleText} />
+          <ScaleText text="Es" className={styles.scaleText} fullViewport />
           <div className={styles.projects} data-project-count={projects.length}>
             {visibleProjects.map((project, index) => {
               const cover = project.homePageCover;

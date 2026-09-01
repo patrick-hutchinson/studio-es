@@ -37,7 +37,7 @@ const getSvgAspectRatio = (svg) => {
   return width > 0 && height > 0 ? width / height : 0;
 };
 
-const ScaleText = ({ text, className = "", style, letterSpacing = 0 }) => {
+const ScaleText = ({ text, className = "", fullViewport = false, style, letterSpacing = 0 }) => {
   const regionRef = useRef(null);
   const stageRef = useRef(null);
   const scaleContainerRef = useRef(null);
@@ -62,10 +62,13 @@ const ScaleText = ({ text, className = "", style, letterSpacing = 0 }) => {
       const rootStyles = window.getComputedStyle(document.documentElement);
       const regionStyles = window.getComputedStyle(region);
       const margin = getPixelValue(rootStyles.getPropertyValue("--margin"));
-      const verticalPadding = getPixelValue(regionStyles.paddingTop) + getPixelValue(regionStyles.paddingBottom);
-      // Keep the padded region within the content area instead of adding its block padding on top.
-      const maxHeight = Math.max(window.innerHeight - margin * 2 - verticalPadding, 0);
-      const contentBottom = window.innerHeight - margin;
+      const paddingTop = getPixelValue(regionStyles.paddingTop);
+      const verticalPadding = paddingTop + getPixelValue(regionStyles.paddingBottom);
+      const pinTop = paddingTop || margin;
+      const availableHeight = fullViewport ? window.innerHeight : window.innerHeight - margin * 2;
+      // Keep the padded region within the available height instead of adding its block padding on top.
+      const maxHeight = Math.max(availableHeight - verticalPadding, 0);
+      const contentBottom = fullViewport ? window.innerHeight : window.innerHeight - margin;
       const stageBox = stage.getBoundingClientRect();
       const followingBox = followingElement?.getBoundingClientRect();
       const svg = scaleContainer.querySelector("svg");
@@ -76,7 +79,9 @@ const ScaleText = ({ text, className = "", style, letterSpacing = 0 }) => {
       const nextHeightValue = Math.min(Math.max(maxHeight - shrink, minHeight), maxHeight);
       const nextHeight = `${nextHeightValue}px`;
       const stageHeight = `${maxHeight}px`;
-      const isPinned = stageBox.top <= margin && nextHeightValue > 0;
+      const isPinned = stageBox.top <= pinTop && nextHeightValue > 0;
+
+      scaleContainer.style.setProperty("--scale-container-top", `${pinTop}px`);
 
       if (stageHeight !== lastStageHeightRef.current) {
         stage.style.height = stageHeight;
@@ -147,7 +152,7 @@ const ScaleText = ({ text, className = "", style, letterSpacing = 0 }) => {
         window.cancelAnimationFrame(loopFrameRef.current);
       }
     };
-  }, []);
+  }, [fullViewport]);
 
   return (
     <div ref={regionRef} className={[styles.scaleRegion, className].filter(Boolean).join(" ")} style={style}>
