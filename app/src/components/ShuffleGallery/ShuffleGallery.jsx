@@ -20,21 +20,15 @@ const isPortrait = (image) => image.width && image.height && image.height > imag
 const getGalleryMaxHeight = (images, allowPortraitOverflow) => {
   if (!allowPortraitOverflow) return window.innerHeight;
 
-  const portraitHeight = images.reduce((maxHeight, image) => {
-    if (!isPortrait(image)) return maxHeight;
+  const firstImage = images[0];
 
-    return Math.max(maxHeight, (window.innerWidth * 0.5 * image.height) / image.width);
-  }, 0);
+  if (!isPortrait(firstImage)) return window.innerHeight;
 
-  return Math.max(window.innerHeight, portraitHeight);
+  return (window.innerWidth * 0.5 * firstImage.height) / firstImage.width;
 };
 
-const getImageWidth = (image, height, portraitWidth, allowPortraitOverflow) => {
+const getImageWidth = (image, height) => {
   if (height < MIN_LAYOUT_HEIGHT) return 0;
-
-  if (allowPortraitOverflow && isPortrait(image)) {
-    return Math.max(portraitWidth, MIN_LAYOUT_HEIGHT);
-  }
 
   const aspectRatio = image.width && image.height ? image.width / image.height : 1;
 
@@ -55,7 +49,7 @@ const ShuffleGallery = ({
   const loopFrameRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [layout, setLayout] = useState({ itemSize: 0, portraitWidth: 0, sideCount: MIN_SIDE_COUNT });
+  const [layout, setLayout] = useState({ itemSize: 0, sideCount: MIN_SIDE_COUNT });
 
   const visibleImages = useMemo(() => images.filter((image) => image?.url), [images]);
   const canShuffle = shuffle && visibleImages.length > 1 && layout.itemSize >= MIN_LAYOUT_HEIGHT && !isPaused;
@@ -110,18 +104,15 @@ const ShuffleGallery = ({
 
       if (!itemSize) {
         setLayout((current) => {
-          if (current.itemSize === 0 && current.portraitWidth === 0 && current.sideCount === MIN_SIDE_COUNT) return current;
+          if (current.itemSize === 0 && current.sideCount === MIN_SIDE_COUNT) return current;
 
-          return { itemSize: 0, portraitWidth: 0, sideCount: MIN_SIDE_COUNT };
+          return { itemSize: 0, sideCount: MIN_SIDE_COUNT };
         });
         return;
       }
 
-      const portraitWidth =
-        (window.innerWidth * 0.5 * itemSize) / Math.max(getGalleryMaxHeight(visibleImages, allowPortraitOverflow), 1);
-
       const minItemWidth = visibleImages.reduce(
-        (minWidth, image) => Math.min(minWidth, getImageWidth(image, itemSize, portraitWidth, allowPortraitOverflow)),
+        (minWidth, image) => Math.min(minWidth, getImageWidth(image, itemSize)),
         itemSize,
       );
       // The active image begins at the viewport's left edge, so the following
@@ -130,14 +121,12 @@ const ShuffleGallery = ({
 
       setLayout((current) => {
         if (
-          current.itemSize === itemSize &&
-          current.portraitWidth === portraitWidth &&
-          current.sideCount === sideCount
+          current.itemSize === itemSize && current.sideCount === sideCount
         ) {
           return current;
         }
 
-        return { itemSize, portraitWidth, sideCount };
+        return { itemSize, sideCount };
       });
     };
 
@@ -209,8 +198,7 @@ const ShuffleGallery = ({
     return {
       image,
       offset,
-      width: getImageWidth(image, layout.itemSize, layout.portraitWidth, allowPortraitOverflow),
-      isPortrait: allowPortraitOverflow && isPortrait(image),
+      width: getImageWidth(image, layout.itemSize),
     };
   });
   const activeLeft = canRenderStrip ? items.slice(0, layout.sideCount).reduce((sum, item) => sum + item.width, 0) : 0;
@@ -236,12 +224,11 @@ const ShuffleGallery = ({
         }}
       >
         <div className={styles.track}>
-          {items.map(({ image, isPortrait: itemIsPortrait, offset, width }) => {
+          {items.map(({ image, offset, width }) => {
             return (
               <div
                 className={styles.item}
                 data-active={offset === 0 ? "" : undefined}
-                data-portrait={itemIsPortrait ? "" : undefined}
                 key={`${offset}-${image._id}`}
                 style={{ "--shuffle-item-width": `${width}px` }}
               >
