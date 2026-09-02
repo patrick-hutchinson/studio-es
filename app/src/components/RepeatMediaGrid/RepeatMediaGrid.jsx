@@ -1,7 +1,8 @@
 import { LayoutGroup, motion } from "framer-motion";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { DeviceContext } from "@/context/DeviceContext";
+import Placeholder from "@/components/Media/components/Placeholder";
 import styles from "./RepeatMediaGrid.module.css";
 
 const DESKTOP_CELL_COUNT = 12;
@@ -11,8 +12,17 @@ const DESKTOP_ROWS = 3;
 const MOBILE_COLUMNS = 2;
 const MOBILE_ROWS = 4;
 
+const getCoverScale = (image, cellAspectRatio) => {
+  const imageAspectRatio = image.width && image.height ? image.width / image.height : 1;
+
+  return Math.max(cellAspectRatio / imageAspectRatio, imageAspectRatio / cellAspectRatio, 1);
+};
+
 const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
+  const gridRef = useRef(null);
   const [activeCellIndex, setActiveCellIndex] = useState(null);
+  const [pendingCellIndex, setPendingCellIndex] = useState(null);
+  const [cellAspectRatio, setCellAspectRatio] = useState(1);
   const { isMobile } = useContext(DeviceContext);
   const images = useMemo(() => gallery.filter((item) => item?.url), [gallery]);
 
@@ -30,6 +40,29 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
       };
     });
   }, [images, isMobile]);
+
+  const columnCount = isMobile ? MOBILE_COLUMNS : DESKTOP_COLUMNS;
+  const rowCount = isMobile ? MOBILE_ROWS : DESKTOP_ROWS;
+
+  useLayoutEffect(() => {
+    if (activeCellIndex !== null) return undefined;
+
+    const grid = gridRef.current;
+    if (!grid) return undefined;
+
+    const updateCellAspectRatio = () => {
+      const { height, width } = grid.getBoundingClientRect();
+      const nextCellAspectRatio = height > 0 ? (width / columnCount) / (height / rowCount) : 1;
+
+      setCellAspectRatio((current) => (current === nextCellAspectRatio ? current : nextCellAspectRatio));
+    };
+
+    const resizeObserver = new ResizeObserver(updateCellAspectRatio);
+    resizeObserver.observe(grid);
+    updateCellAspectRatio();
+
+    return () => resizeObserver.disconnect();
+  }, [activeCellIndex, columnCount, rowCount]);
 
   useEffect(() => {
     if (activeCellIndex === null) return undefined;
@@ -67,8 +100,24 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
 
   if (!repeatedImages.length) return null;
 
-  const columnCount = isMobile ? MOBILE_COLUMNS : DESKTOP_COLUMNS;
-  const rowCount = isMobile ? MOBILE_ROWS : DESKTOP_ROWS;
+  const pendingImage = pendingCellIndex === null ? null : repeatedImages[pendingCellIndex];
+
+  const openCell = (index) => {
+    if (activeCellIndex === index) {
+      setActiveCellIndex(null);
+      return;
+    }
+
+    if (pendingCellIndex !== null) return;
+
+    setPendingCellIndex(index);
+  };
+
+  const revealPendingCell = (index) => {
+    setActiveCellIndex(index);
+    setPendingCellIndex(null);
+  };
+
   const activeColumn = activeCellIndex === null ? null : activeCellIndex % columnCount;
   const activeRow = activeCellIndex === null ? null : Math.floor(activeCellIndex / columnCount);
   const columnTemplate = Array.from({ length: columnCount }, (_, index) =>
@@ -81,32 +130,50 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
   return (
     <LayoutGroup>
       <motion.section
+        ref={gridRef}
         className={[styles.grid, className].filter(Boolean).join(" ")}
+        data-expanded={activeCellIndex === null ? undefined : ""}
         animate={{
           gridTemplateColumns: columnTemplate,
           gridTemplateRows: rowTemplate,
         }}
         transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
       >
+        {pendingImage ? (
+          <div className={styles.placeholderPreload} aria-hidden="true">
+            <Placeholder
+              key={pendingImage._repeatKey}
+              medium={pendingImage}
+              persistent
+              onError={() => revealPendingCell(pendingCellIndex)}
+              onLoad={() => revealPendingCell(pendingCellIndex)}
+            />
+          </div>
+        ) : null}
         {repeatedImages.map((image, index) => {
           return (
-            <motion.button
-              type="button"
-              layout
-              key={image._repeatKey}
-              className={styles.cell}
-              onClick={() => setActiveCellIndex((currentIndex) => (currentIndex === index ? null : index))}
+              <motion.button
+                type="button"
+                layout
+                key={image._repeatKey}
+                className={styles.cell}
+                data-active={activeCellIndex === index ? "" : undefined}
+                onClick={() => openCell(index)}
               transition={{
                 layout: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
               }}
-            >
-              <motion.img
-                layoutId={`repeat-media-${image._repeatKey}`}
+              >
+                {activeCellIndex === index ? <Placeholder className={styles.placeholder} medium={image} persistent /> : null}
+                <motion.img
+                  layoutId={`repeat-media-${image._repeatKey}`}
                 alt={image.alt || ""}
-                className={styles.image}
-                draggable={false}
-                src={image.url}
-              />
+                  className={styles.image}
+                  draggable={false}
+                  src={image.url}
+                  animate={{ scale: activeCellIndex === index ? 1 : getCoverScale(image, cellAspectRatio) }}
+                  initial={false}
+                  transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                />
             </motion.button>
           );
         })}

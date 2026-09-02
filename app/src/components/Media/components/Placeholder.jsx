@@ -1,6 +1,6 @@
 import NextImage from "next/image";
 
-const Placeholder = ({ medium, className, isLoaded }) => {
+const Placeholder = ({ medium, className, isLoaded, onError, onLoad, persistent = false }) => {
   let src;
 
   medium.type === "image"
@@ -13,6 +13,8 @@ const Placeholder = ({ medium, className, isLoaded }) => {
       src={src}
       fill
       loading="eager"
+      onError={onError}
+      onLoad={onLoad}
       alt="placeholder image"
       style={{
         position: "absolute",
@@ -23,9 +25,9 @@ const Placeholder = ({ medium, className, isLoaded }) => {
         left: 0,
         filter: "blur(20px) brightness(1.3)",
         transform: "scale(1.5)",
-        opacity: isLoaded ? 0 : 1,
+        opacity: persistent || !isLoaded ? 1 : 0,
         transition: "opacity 0.5s ease 0.5s",
-        zIndex: 3,
+        zIndex: persistent ? 0 : 3,
       }}
     />
   );
