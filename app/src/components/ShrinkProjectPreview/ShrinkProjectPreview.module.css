@@ -29,6 +29,10 @@
   background-image: none;
 }
 
+.preview.portrait {
+  background-size: var(--preview-portrait-width, 50vw) auto;
+}
+
 .preview[data-pinned] {
   position: fixed;
   top: 0;

@@ -13,10 +13,19 @@ const getAspectRatio = (value) => {
   return Number.isFinite(width) && Number.isFinite(height) && height > 0 ? `${width} / ${height}` : "16 / 9";
 };
 
-const ShrinkProjectPreview = ({ backgroundImage, className = "", foregroundMedium, index, href }) => {
+const ShrinkProjectPreview = ({ backgroundImage, backgroundMedium, className = "", foregroundMedium, index, href }) => {
   const regionRef = useRef(null);
   const previewRef = useRef(null);
   const loopFrameRef = useRef(null);
+  const isPortrait = backgroundMedium?.width && backgroundMedium?.height && backgroundMedium.height > backgroundMedium.width;
+
+  const getPreviewMaxHeight = () => {
+    if (!isPortrait) return window.innerHeight;
+
+    const portraitHeight = (window.innerWidth * 0.5 * backgroundMedium.height) / backgroundMedium.width;
+
+    return Math.max(window.innerHeight, portraitHeight);
+  };
 
   useEffect(() => {
     const updatePreview = () => {
@@ -25,16 +34,22 @@ const ShrinkProjectPreview = ({ backgroundImage, className = "", foregroundMediu
 
       if (!region || !preview) return;
 
-      const maxHeight = Math.max(window.innerHeight, 0);
+      const maxHeight = Math.max(getPreviewMaxHeight(), 0);
+      region.style.height = `${maxHeight}px`;
       const regionBox = region.getBoundingClientRect();
       const followingBox = region.nextElementSibling?.getBoundingClientRect();
       const followingTop = followingBox?.top ?? window.innerHeight;
       const height = Math.min(Math.max(followingTop, 0), maxHeight);
       const nextHeight = `${height}px`;
       const isPinned = regionBox.top <= 0 && regionBox.bottom > 0 && height > 0;
+      const portraitWidth = (window.innerWidth * 0.5 * height) / Math.max(maxHeight, 1);
 
       if (preview.style.height !== nextHeight) {
         preview.style.height = nextHeight;
+      }
+
+      if (isPortrait) {
+        preview.style.setProperty("--preview-portrait-width", `${portraitWidth}px`);
       }
 
       if (preview.hasAttribute("data-pinned") !== isPinned) {
@@ -62,7 +77,7 @@ const ShrinkProjectPreview = ({ backgroundImage, className = "", foregroundMediu
         window.cancelAnimationFrame(loopFrameRef.current);
       }
     };
-  }, []);
+  }, [isPortrait]);
 
   const RegionElement = href ? Link : "section";
   const regionProps = href ? { href, prefetch: false } : {};
@@ -76,7 +91,7 @@ const ShrinkProjectPreview = ({ backgroundImage, className = "", foregroundMediu
     >
       <article
         ref={previewRef}
-        className={styles.preview}
+        className={[styles.preview, isPortrait ? styles.portrait : ""].filter(Boolean).join(" ")}
         style={{
           "--preview-background-image": backgroundImage ? `url("${backgroundImage}")` : "none",
           "--preview-media-aspect-ratio": getAspectRatio(foregroundMedium?.aspect_ratio),

@@ -23,6 +23,7 @@
   top: 0;
   left: 0;
   display: flex;
+  align-items: flex-start;
   height: 100%;
   transform: translateX(calc(-1 * var(--shuffle-active-left)));
   transform-origin: top left;
@@ -41,4 +42,12 @@
   object-fit: cover;
   object-position: center;
   user-select: none;
+}
+
+.item[data-portrait] {
+  height: auto;
+}
+
+.item[data-portrait] .image {
+  height: auto;
 }

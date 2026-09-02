@@ -15,21 +15,47 @@ const getImageAtOffset = (images, index, offset) => {
   return images[nextIndex];
 };
 
-const getImageWidth = (image, height) => {
+const isPortrait = (image) => image.width && image.height && image.height > image.width;
+
+const getGalleryMaxHeight = (images, allowPortraitOverflow) => {
+  if (!allowPortraitOverflow) return window.innerHeight;
+
+  const portraitHeight = images.reduce((maxHeight, image) => {
+    if (!isPortrait(image)) return maxHeight;
+
+    return Math.max(maxHeight, (window.innerWidth * 0.5 * image.height) / image.width);
+  }, 0);
+
+  return Math.max(window.innerHeight, portraitHeight);
+};
+
+const getImageWidth = (image, height, portraitWidth, allowPortraitOverflow) => {
   if (height < MIN_LAYOUT_HEIGHT) return 0;
+
+  if (allowPortraitOverflow && isPortrait(image)) {
+    return Math.max(portraitWidth, MIN_LAYOUT_HEIGHT);
+  }
 
   const aspectRatio = image.width && image.height ? image.width / image.height : 1;
 
   return Math.max(height * aspectRatio, MIN_LAYOUT_HEIGHT);
 };
 
-const ShuffleGallery = ({ className = "", eager = false, href, images = [], interactive = true, shuffle = true }) => {
+const ShuffleGallery = ({
+  allowPortraitOverflow = false,
+  className = "",
+  eager = false,
+  href,
+  images = [],
+  interactive = true,
+  shuffle = true,
+}) => {
   const regionRef = useRef(null);
   const galleryRef = useRef(null);
   const loopFrameRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [layout, setLayout] = useState({ itemSize: 0, sideCount: MIN_SIDE_COUNT });
+  const [layout, setLayout] = useState({ itemSize: 0, portraitWidth: 0, sideCount: MIN_SIDE_COUNT });
 
   const visibleImages = useMemo(() => images.filter((image) => image?.url), [images]);
   const canShuffle = shuffle && visibleImages.length > 1 && layout.itemSize >= MIN_LAYOUT_HEIGHT && !isPaused;
@@ -84,15 +110,18 @@ const ShuffleGallery = ({ className = "", eager = false, href, images = [], inte
 
       if (!itemSize) {
         setLayout((current) => {
-          if (current.itemSize === 0 && current.sideCount === MIN_SIDE_COUNT) return current;
+          if (current.itemSize === 0 && current.portraitWidth === 0 && current.sideCount === MIN_SIDE_COUNT) return current;
 
-          return { itemSize: 0, sideCount: MIN_SIDE_COUNT };
+          return { itemSize: 0, portraitWidth: 0, sideCount: MIN_SIDE_COUNT };
         });
         return;
       }
 
+      const portraitWidth =
+        (window.innerWidth * 0.5 * itemSize) / Math.max(getGalleryMaxHeight(visibleImages, allowPortraitOverflow), 1);
+
       const minItemWidth = visibleImages.reduce(
-        (minWidth, image) => Math.min(minWidth, getImageWidth(image, itemSize)),
+        (minWidth, image) => Math.min(minWidth, getImageWidth(image, itemSize, portraitWidth, allowPortraitOverflow)),
         itemSize,
       );
       // The active image begins at the viewport's left edge, so the following
@@ -100,9 +129,15 @@ const ShuffleGallery = ({ className = "", eager = false, href, images = [], inte
       const sideCount = Math.max(Math.ceil(width / minItemWidth) + COVERAGE_BUFFER, MIN_SIDE_COUNT);
 
       setLayout((current) => {
-        if (current.itemSize === itemSize && current.sideCount === sideCount) return current;
+        if (
+          current.itemSize === itemSize &&
+          current.portraitWidth === portraitWidth &&
+          current.sideCount === sideCount
+        ) {
+          return current;
+        }
 
-        return { itemSize, sideCount };
+        return { itemSize, portraitWidth, sideCount };
       });
     };
 
@@ -113,7 +148,7 @@ const ShuffleGallery = ({ className = "", eager = false, href, images = [], inte
     return () => {
       resizeObserver.disconnect();
     };
-  }, [visibleImages]);
+  }, [allowPortraitOverflow, visibleImages]);
 
   useEffect(() => {
     const updateGallery = () => {
@@ -122,7 +157,8 @@ const ShuffleGallery = ({ className = "", eager = false, href, images = [], inte
 
       if (!region || !gallery) return;
 
-      const maxHeight = Math.max(window.innerHeight, 0);
+      const maxHeight = Math.max(getGalleryMaxHeight(visibleImages, allowPortraitOverflow), 0);
+      region.style.height = `${maxHeight}px`;
       const regionBox = region.getBoundingClientRect();
       const followingBox = region.nextElementSibling?.getBoundingClientRect();
       const followingTop = followingBox?.top ?? window.innerHeight;
@@ -159,7 +195,7 @@ const ShuffleGallery = ({ className = "", eager = false, href, images = [], inte
         window.cancelAnimationFrame(loopFrameRef.current);
       }
     };
-  }, []);
+  }, [allowPortraitOverflow, visibleImages]);
 
   if (!visibleImages.length) return null;
 
@@ -173,7 +209,8 @@ const ShuffleGallery = ({ className = "", eager = false, href, images = [], inte
     return {
       image,
       offset,
-      width: getImageWidth(image, layout.itemSize),
+      width: getImageWidth(image, layout.itemSize, layout.portraitWidth, allowPortraitOverflow),
+      isPortrait: allowPortraitOverflow && isPortrait(image),
     };
   });
   const activeLeft = canRenderStrip ? items.slice(0, layout.sideCount).reduce((sum, item) => sum + item.width, 0) : 0;
@@ -199,11 +236,12 @@ const ShuffleGallery = ({ className = "", eager = false, href, images = [], inte
         }}
       >
         <div className={styles.track}>
-          {items.map(({ image, offset, width }) => {
+          {items.map(({ image, isPortrait: itemIsPortrait, offset, width }) => {
             return (
               <div
                 className={styles.item}
                 data-active={offset === 0 ? "" : undefined}
+                data-portrait={itemIsPortrait ? "" : undefined}
                 key={`${offset}-${image._id}`}
                 style={{ "--shuffle-item-width": `${width}px` }}
               >

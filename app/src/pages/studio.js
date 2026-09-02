@@ -56,6 +56,7 @@ export default function Studio({ appearances = [], projects = [] }) {
               return (
                 <ShrinkProjectPreview
                   backgroundImage={backgroundImage}
+                  backgroundMedium={cover?.type === "image" ? image : undefined}
                   key={project._id}
                   foregroundMedium={cover?.type === "video" ? video : undefined}
                   index={index}

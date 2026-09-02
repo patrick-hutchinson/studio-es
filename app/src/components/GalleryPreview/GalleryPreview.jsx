@@ -11,6 +11,7 @@ const GalleryPreview = ({ className = "", gallery = [], href }) => {
       href={href}
       images={images}
       interactive={false}
+      allowPortraitOverflow
       shuffle={false}
     />
   );
