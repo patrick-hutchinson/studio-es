@@ -17,7 +17,7 @@ const IndexList = ({ className = "", items }) => (
 
 export default function Index() {
   return (
-    <div className="page">
+    <div className={`page ${styles.page}`}>
       <main className="main">
         <div className="content grid">
           <ScaleText text="Id" className={`${styles.scaleText} ${styles.rowOne}`} />
