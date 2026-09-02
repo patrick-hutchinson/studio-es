@@ -1,6 +1,7 @@
 // import { createHeading } from "./helpers";
 
 import {defineType, defineField} from 'sanity'
+import {Divider} from '../components/Divider'
 
 export const project = defineType({
   name: 'project',
@@ -16,10 +17,6 @@ export const project = defineType({
       validation: (Rule) => Rule.required(),
     }),
 
-    defineField({
-      name: 'description',
-      type: 'portableText',
-    }),
     defineField({
       name: 'homePageCover',
       title: 'Homepage Cover',
@@ -62,6 +59,20 @@ export const project = defineType({
           hidden: ({parent}) => parent?.type !== 'gallery',
         }),
       ],
+    }),
+    defineField({
+      name: 'divider',
+      type: 'string',
+      components: {field: Divider},
+    }),
+    defineField({
+      name: 'coverImage',
+      title: 'Cover Bild (Unterseite)',
+      type: 'mediaAsset',
+    }),
+    defineField({
+      name: 'description',
+      type: 'portableText',
     }),
     defineField({
       name: 'gallery',

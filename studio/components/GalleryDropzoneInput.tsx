@@ -64,7 +64,7 @@ export default function GalleryDropzoneInput(props: ArrayOfObjectsInputProps) {
 
       const nextValue = [...(props.value || []), ...uploadedImageAssets]
       props.onChange(set(nextValue))
-      setStatusMessage(`Caricate ${uploadedImageAssets.length} immagini.`)
+      setStatusMessage(`${uploadedImageAssets.length} Bilder hochgeladen.`)
     } catch (error) {
       console.error(error)
       setStatusMessage('Caricamento non riuscito. Riprova.')
@@ -119,7 +119,7 @@ export default function GalleryDropzoneInput(props: ArrayOfObjectsInputProps) {
             />
             {isUploading ? (
               <Text size={1}>
-                {uploadProgress.uploaded} / {uploadProgress.total} caricate
+                {uploadProgress.uploaded} / {uploadProgress.total} geladen...
               </Text>
             ) : null}
             {statusMessage ? <Text size={1}>{statusMessage}</Text> : null}

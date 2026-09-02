@@ -6,7 +6,6 @@ import Media from "@/components/Media/Media";
 import MediaSpotlight from "@/components/MediaSpotlight/MediaSpotlight";
 import RepeatMediaGrid from "@/components/RepeatMediaGrid/RepeatMediaGrid";
 import ScaleText from "@/components/ScaleText/ScaleText";
-import ShuffleGallery from "@/components/ShuffleGallery/ShuffleGallery";
 import { DEFAULT_COLOR_PAIR } from "@/lib/getRandomColorPair";
 import { getAppearances, getProject, getProjects } from "@/lib/sanity";
 import styles from "@/styles/pages/Project.module.css";
@@ -53,7 +52,7 @@ const getDistinctColorPairs = (appearances = [], count = 3) => {
 export default function Project({ appearances = [], project }) {
   const [activeOption, setActiveOption] = useState("option-1");
   const galleryImages = getGalleryImages(project);
-  const coverMedium = galleryImages[0] ?? project.homePageCover?.image?.medium ?? project.homePageCover?.video?.medium;
+  const coverMedium = project.coverMedia?.medium;
   const isOptionOne = activeOption === "option-1";
   const isOptionThree = activeOption === "option-3";
   const [optionThreeTitleColors, optionThreeDescriptionColors, optionThreeMarqueeColors] = useMemo(
@@ -64,11 +63,7 @@ export default function Project({ appearances = [], project }) {
   const OptionOne = () => {
     return (
       <>
-        {galleryImages.length > 1 ? (
-          <ShuffleGallery className={styles.coverMedia} images={galleryImages} />
-        ) : coverMedium ? (
-          <Media className={styles.coverMedia} eager medium={coverMedium} objectFit="contain" />
-        ) : null}
+        {coverMedium ? <Media className={styles.coverMedia} eager medium={coverMedium} objectFit="contain" /> : null}
         <ScaleText className={styles.projectTitle} text={project.title.toUpperCase()} letterSpacing={-60} />
         <Description appearances={appearances} className={styles.description} text={project.description} />
         {/* <hr className={styles.divider} /> */}
@@ -77,10 +72,9 @@ export default function Project({ appearances = [], project }) {
 
         <MediaSpotlight className={styles.mediaSpotlight} medium={coverMedium} usePlaceholder={true} />
         <Spacing spacing={1} />
-        <ScaleMarquee text="https://www.studio-es.at" typo="h1" direction="backward" className={styles.scaleMarquee} />
+        {/* <ScaleMarquee text="https://www.studio-es.at" typo="h1" direction="backward" className={styles.scaleMarquee} /> */}
         <Spacing spacing={2} />
         {galleryImages.length > 1 ? <RepeatMediaGrid className={styles.repeatMediaGrid} gallery={galleryImages} /> : null}
-        <div className={styles.placeholder} />
       </>
     );
   };
@@ -90,11 +84,7 @@ export default function Project({ appearances = [], project }) {
       <>
         <BlurCoverMedia medium={coverMedium} />
         <div className={styles.optionTwoSpacer} aria-hidden="true" />
-        {galleryImages.length > 1 ? (
-          <ShuffleGallery className={styles.coverMedia} images={galleryImages} />
-        ) : coverMedium ? (
-          <Media className={styles.coverMedia} eager medium={coverMedium} objectFit="contain" />
-        ) : null}
+        {coverMedium ? <Media className={styles.coverMedia} eager medium={coverMedium} objectFit="contain" /> : null}
         <ScaleText className={styles.projectTitle} text={project.title.toUpperCase()} letterSpacing={-60} />
         <Description
           appearances={appearances}
@@ -113,16 +103,14 @@ export default function Project({ appearances = [], project }) {
 
         <Spacing spacing={1} />
 
-        <ScaleMarquee
+        {/* <ScaleMarquee
           text="https://www.studio-es.at"
           typo="h1"
           direction="backward"
           className={`${styles.scaleMarquee} ${styles.optionTwoForeground}`}
-        />
+        /> */}
 
         {galleryImages.length > 1 ? <RepeatMediaGrid className={styles.repeatMediaGrid} gallery={galleryImages} /> : null}
-
-        <div className={`${styles.placeholder} ${styles.optionTwoForeground}`} />
       </>
     );
   };
@@ -141,11 +129,7 @@ export default function Project({ appearances = [], project }) {
 
     return (
       <>
-        {galleryImages.length > 1 ? (
-          <ShuffleGallery className={styles.coverMedia} images={galleryImages} />
-        ) : coverMedium ? (
-          <Media className={styles.coverMedia} eager medium={coverMedium} objectFit="contain" />
-        ) : null}
+        {coverMedium ? <Media className={styles.coverMedia} eager medium={coverMedium} objectFit="contain" /> : null}
         <ScaleText
           className={styles.projectTitle}
           text={project.title.toUpperCase()}
@@ -159,15 +143,14 @@ export default function Project({ appearances = [], project }) {
 
         <MediaSpotlight className={styles.mediaSpotlight} medium={coverMedium} usePlaceholder={true} />
         {/* <Spacing spacing={1} /> */}
-        <ScaleMarquee
+        {/* <ScaleMarquee
           text="https://www.studio-es.at"
           typo="h1"
           direction="backward"
           className={styles.scaleMarquee}
           style={marqueeStyle}
-        />
+        /> */}
         {galleryImages.length > 1 ? <RepeatMediaGrid className={styles.repeatMediaGrid} gallery={galleryImages} /> : null}
-        <div className={styles.placeholder} />
       </>
     );
   };

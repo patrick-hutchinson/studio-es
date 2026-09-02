@@ -74,6 +74,7 @@ const projectFields = `{
     description
   },
   gallery[] ${mediaAssetFragment},
+  "coverMedia": coverImage[0] ${mediaAssetFragment},
   homePageCover{
     type,
     image[0] ${mediaAssetFragment},
