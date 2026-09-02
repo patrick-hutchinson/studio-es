@@ -1,0 +1,15 @@
+.strip {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+.frame {
+  display: block;
+  flex: 0 0 auto;
+  width: auto;
+  height: 100%;
+  aspect-ratio: var(--video-frame-aspect-ratio);
+  object-fit: cover;
+}

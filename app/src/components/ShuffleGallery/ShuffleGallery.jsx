@@ -6,6 +6,7 @@ import styles from "./ShuffleGallery.module.css";
 const INTERVAL = 200;
 const MIN_SIDE_COUNT = 2;
 const MIN_LAYOUT_HEIGHT = 2;
+const COVERAGE_BUFFER = 2;
 
 const getImageAtOffset = (images, index, offset) => {
   const length = images.length;
@@ -94,7 +95,9 @@ const ShuffleGallery = ({ className = "", eager = false, href, images = [], inte
         (minWidth, image) => Math.min(minWidth, getImageWidth(image, itemSize)),
         itemSize,
       );
-      const sideCount = Math.max(Math.ceil(width / minItemWidth / 2) + 1, MIN_SIDE_COUNT);
+      // The active image begins at the viewport's left edge, so the following
+      // sequence must cover the entire available width, not only half of it.
+      const sideCount = Math.max(Math.ceil(width / minItemWidth) + COVERAGE_BUFFER, MIN_SIDE_COUNT);
 
       setLayout((current) => {
         if (current.itemSize === itemSize && current.sideCount === sideCount) return current;

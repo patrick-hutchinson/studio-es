@@ -25,6 +25,10 @@
   text-decoration: none;
 }
 
+.preview:has(.projectMedia) {
+  background-image: none;
+}
+
 .preview[data-pinned] {
   position: fixed;
   top: 0;

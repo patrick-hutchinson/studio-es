@@ -8,6 +8,8 @@ export const videoAsset = defineType({
     defineField({
       name: 'file',
       title: 'File',
+      description:
+        "Für Videos kürzer als 30 Sekunden unten bei 'Static Renditions' 'Highest Resolution (up to 4K)' anclicken :)",
       type: 'mux.video',
       options: {
         collapsible: false,

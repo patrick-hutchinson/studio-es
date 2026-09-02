@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 
 import styles from "./ShrinkProjectPreview.module.css";
 import Media from "@/components/Media/Media";
+import VideoFrameStrip from "@/components/VideoFrameStrip/VideoFrameStrip";
 import Link from "next/link";
 
 const getAspectRatio = (value) => {
@@ -81,6 +82,7 @@ const ShrinkProjectPreview = ({ backgroundImage, className = "", foregroundMediu
           "--preview-media-aspect-ratio": getAspectRatio(foregroundMedium?.aspect_ratio),
         }}
       >
+        {foregroundMedium?.type === "video" ? <VideoFrameStrip medium={foregroundMedium} /> : null}
         {foregroundMedium ? (
           <div className={styles.projectMedia}>
             <Media
