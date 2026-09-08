@@ -1,9 +1,17 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { getVideoRenditionUrl } from "@/lib/media/getVideoRenditionUrl";
+import { getVideoPlaybackUrl, getVideoStaticRenditionUrl } from "@/lib/media/getVideoRenditionUrl";
 
 const Video = ({ medium, objectFit = "cover", playerState, playerControls }) => {
-  const src = getVideoRenditionUrl(medium);
+  const staticRenditionUrl = getVideoStaticRenditionUrl(medium);
+  const playbackUrl = getVideoPlaybackUrl(medium);
+  const [usePlaybackFallback, setUsePlaybackFallback] = useState(false);
+  const src = usePlaybackFallback || !staticRenditionUrl ? playbackUrl : staticRenditionUrl;
+  const isHlsStream = src?.endsWith(".m3u8");
+
+  useEffect(() => {
+    setUsePlaybackFallback(false);
+  }, [medium.playbackId]);
 
   useEffect(() => {
     const player = playerControls.playerRef.current;
@@ -12,8 +20,9 @@ const Video = ({ medium, objectFit = "cover", playerState, playerControls }) => 
     let hls;
     let cancelled = false;
 
-    if (player.canPlayType("application/vnd.apple.mpegurl")) {
+    if (!isHlsStream) {
       player.src = src;
+      player.load();
       return;
     }
 
@@ -22,6 +31,7 @@ const Video = ({ medium, objectFit = "cover", playerState, playerControls }) => 
 
       if (!Hls.isSupported()) {
         player.src = src;
+        player.load();
         return;
       }
 
@@ -32,6 +42,15 @@ const Video = ({ medium, objectFit = "cover", playerState, playerControls }) => 
         const playPromise = player.play();
         if (playPromise?.catch) playPromise.catch(() => {});
       });
+      hls.on(Hls.Events.ERROR, (_, data) => {
+        if (!data.fatal) return;
+
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+          hls.startLoad();
+        } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+          hls.recoverMediaError();
+        }
+      });
       hls.loadSource(src);
       hls.attachMedia(player);
     });
@@ -40,7 +59,7 @@ const Video = ({ medium, objectFit = "cover", playerState, playerControls }) => 
       cancelled = true;
       hls?.destroy();
     };
-  }, [playerControls.playerRef, playerState.isInView, src]);
+  }, [isHlsStream, playerControls.playerRef, playerState.isInView, src]);
 
   useEffect(() => {
     const player = playerControls.playerRef.current;
@@ -81,6 +100,9 @@ const Video = ({ medium, objectFit = "cover", playerState, playerControls }) => 
       onPlaying={() => playerState.setIsLoaded(true)}
       onTimeUpdate={playerControls.onTimeUpdate}
       onLoadedMetadata={playerControls.onLoadedMetadata}
+      onError={() => {
+        if (staticRenditionUrl && !usePlaybackFallback) setUsePlaybackFallback(true);
+      }}
     />
   );
 };

@@ -1,8 +1,7 @@
 .projectTitle {
-  background: var(--random-background);
-  color: var(--random-foreground);
   grid-column: 1 / -1;
   overflow: visible;
+  padding: var(--margin);
 }
 
 .projectTitle > div,
@@ -22,6 +21,7 @@
 }
 
 .projectInfo {
+  padding: var(--margin);
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--content-grid-gap);
