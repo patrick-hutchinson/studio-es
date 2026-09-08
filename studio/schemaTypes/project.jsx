@@ -1,15 +1,18 @@
 // import { createHeading } from "./helpers";
 
 import {defineType, defineField} from 'sanity'
+import {orderRankField, orderRankOrdering} from '@sanity/orderable-document-list'
 import {Divider} from '../components/Divider'
 
 export const project = defineType({
   name: 'project',
   title: 'Project',
   type: 'document',
+  orderings: [orderRankOrdering],
   // icon: FcGallery,
 
   fields: [
+    orderRankField({type: 'project'}),
     defineField({
       name: 'title',
       title: 'Title',
@@ -55,7 +58,7 @@ export const project = defineType({
         defineField({
           name: 'gallery',
           title: 'Bilder Gallerie',
-          type: 'gallery',
+          type: 'mediaGallery',
           hidden: ({parent}) => parent?.type !== 'gallery',
         }),
       ],
@@ -77,7 +80,7 @@ export const project = defineType({
     defineField({
       name: 'gallery',
       title: 'Raster Gallerie',
-      type: 'gallery',
+      type: 'mediaGallery',
     }),
 
     defineField({

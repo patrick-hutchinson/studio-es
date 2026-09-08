@@ -8,7 +8,7 @@ import {awardcat} from './objects/award-cat'
 import {button} from './objects/button'
 import {category} from './category'
 import {exhibition} from './objects/exhibition'
-// import {gallery} from './objects/gallery'
+import {gallery} from './objects/gallery'
 import {grid} from './objects/grid'
 import {gridBook} from './objects/grid-book'
 import {gridItem} from './objects/grid-item'
@@ -33,7 +33,7 @@ import {site} from './site'
 import {imageAsset} from './types/media/imageAsset'
 import {mediaAsset} from './types/media/mediaAsset'
 import {videoAsset} from './types/media/videoAsset'
-import {gallery} from './types/media/gallery'
+import {mediaGallery} from './types/media/gallery'
 
 export const schemaTypes = [
   site,
@@ -48,7 +48,7 @@ export const schemaTypes = [
   button,
   category,
   exhibition,
-  // gallery,
+  gallery,
   grid,
   gridBook,
   gridItem,
@@ -72,5 +72,5 @@ export const schemaTypes = [
   imageAsset,
   mediaAsset,
   videoAsset,
-  gallery,
+  mediaGallery,
 ]

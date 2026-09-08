@@ -1,15 +1,8 @@
+import type {ConfigContext} from 'sanity'
 import {StructureBuilder} from 'sanity/structure'
+import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
 
-import {createClient} from '@sanity/client'
-
-const client = createClient({
-  projectId: 'kzivqb7t',
-  dataset: 'production',
-  apiVersion: '2025-01-01',
-  useCdn: false,
-})
-
-export const structure = (S: StructureBuilder) =>
+export const structure = (S: StructureBuilder, context: ConfigContext) =>
   S.list()
     .title('Content')
     .items([
@@ -56,48 +49,12 @@ export const structure = (S: StructureBuilder) =>
       S.listItem()
         .title('Landing Page')
         .child(S.editor().schemaType('home').documentId('b7605842-c2ca-4d2e-aac8-96bd835dd082')),
-      S.listItem()
-        .title('Projects')
-        .child(async () => {
-          const results = await client.fetch(
-            `*[_type == "project" && defined(meta.year)]{
-								"year": meta.year
-							}`,
-          )
-
-          const years = Array.from(new Set(results.map((item) => item.year?.slice(0, 4))))
-            .filter(Boolean)
-            .sort((a, b) => b.localeCompare(a))
-
-          return S.list()
-            .title('Projects')
-            .items([
-              S.listItem()
-                .title('All Projects')
-                .child(
-                  S.documentTypeList('project')
-                    .title('All Projects')
-                    .defaultOrdering([{field: 'meta.year', direction: 'desc'}]),
-                ),
-              ...years.map((year) =>
-                S.listItem()
-                  .title(year)
-                  .child(
-                    S.documentList()
-                      .title(`Content from ${year}`)
-                      .filter(
-                        '_type == "project" && meta.year >= $startOfYear && meta.year < $startOfNextYear',
-                      )
-                      .schemaType('project')
-                      .params({
-                        startOfYear: `${year}-01-01`,
-                        startOfNextYear: `${parseInt(year, 10) + 1}-01-01`,
-                      })
-                      .defaultOrdering([{field: 'meta.year', direction: 'desc'}]),
-                  ),
-              ),
-            ])
-        }),
+      orderableDocumentListDeskItem({
+        type: 'project',
+        title: 'Projects',
+        S,
+        context,
+      }),
       S.divider(),
       S.listItem()
         .title('Archive')

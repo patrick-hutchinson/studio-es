@@ -4,7 +4,7 @@ const sourceType = 'post'
 const targetType = 'archivedPost'
 const batchSize = 50
 const shouldExecute = process.argv.includes('--execute')
-const token = process.env.SANITY_WRITE_TOKEN || process.env.FullAccessToken
+const token = process.env.SANITY_WRITE_TOKEN
 
 if (!token) {
   throw new Error('Set SANITY_WRITE_TOKEN in studio/.env before running this migration.')
@@ -50,8 +50,10 @@ const hasPostReference = (value, idMap) => {
   if (Array.isArray(value)) return value.some((item) => hasPostReference(item, idMap))
   if (!value || typeof value !== 'object') return false
 
-  return Object.entries(value).some(([key, child]) =>
-    (key === '_ref' && typeof child === 'string' && idMap.has(child)) || hasPostReference(child, idMap),
+  return Object.entries(value).some(
+    ([key, child]) =>
+      (key === '_ref' && typeof child === 'string' && idMap.has(child)) ||
+      hasPostReference(child, idMap),
   )
 }
 
@@ -78,7 +80,9 @@ const contentDocuments = await client.fetch(
   `*[_type != $sourceType && !(_type in ['sanity.imageAsset', 'sanity.fileAsset'])]`,
   {sourceType},
 )
-const documentsWithPostReferences = contentDocuments.filter((document) => hasPostReference(document, idMap))
+const documentsWithPostReferences = contentDocuments.filter((document) =>
+  hasPostReference(document, idMap),
+)
 
 await commitInBatches(
   posts,
@@ -105,7 +109,9 @@ await commitInBatches(
   (batch) => {
     const transaction = client.transaction()
 
-    batch.forEach((document) => transaction.createOrReplace(rewriteReferences(stripSystemFields(document), idMap)))
+    batch.forEach((document) =>
+      transaction.createOrReplace(rewriteReferences(stripSystemFields(document), idMap)),
+    )
 
     return transaction
   },
@@ -129,4 +135,6 @@ const [remainingPosts, archivedPosts] = await Promise.all([
   client.fetch(`count(*[_type == $targetType])`, {targetType}),
 ])
 
-console.log(`Finished. Remaining active posts: ${remainingPosts}. Archived posts: ${archivedPosts}.`)
+console.log(
+  `Finished. Remaining active posts: ${remainingPosts}. Archived posts: ${archivedPosts}.`,
+)

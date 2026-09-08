@@ -1,8 +1,8 @@
 import {defineField, defineType} from 'sanity'
 import GalleryDropzoneInput from '../../../components/GalleryDropzoneInput'
 
-export const gallery = defineType({
-  name: 'gallery',
+export const mediaGallery = defineType({
+  name: 'mediaGallery',
   title: 'Bilder Gallerie',
   type: 'array',
   of: [{type: 'imageAsset'}],
@@ -19,7 +19,7 @@ export const galleryRow = defineType({
     defineField({
       name: 'media',
       title: 'Media',
-      type: 'gallery',
+      type: 'mediaGallery',
       validation: (Rule) => Rule.required().min(1),
     }),
   ],

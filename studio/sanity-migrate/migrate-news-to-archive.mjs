@@ -4,7 +4,7 @@ const sourceType = 'news'
 const targetType = 'archivedNews'
 const batchSize = 50
 const shouldExecute = process.argv.includes('--execute')
-const token = process.env.SANITY_WRITE_TOKEN || process.env.FullAccessToken
+const token = process.env.SANITY_WRITE_TOKEN
 
 if (!token) {
   throw new Error('Set SANITY_WRITE_TOKEN in studio/.env before running this migration.')
@@ -50,8 +50,10 @@ const hasNewsReference = (value, idMap) => {
   if (Array.isArray(value)) return value.some((item) => hasNewsReference(item, idMap))
   if (!value || typeof value !== 'object') return false
 
-  return Object.entries(value).some(([key, child]) =>
-    (key === '_ref' && typeof child === 'string' && idMap.has(child)) || hasNewsReference(child, idMap),
+  return Object.entries(value).some(
+    ([key, child]) =>
+      (key === '_ref' && typeof child === 'string' && idMap.has(child)) ||
+      hasNewsReference(child, idMap),
   )
 }
 
@@ -78,7 +80,9 @@ const contentDocuments = await client.fetch(
   `*[_type != $sourceType && !(_type in ['sanity.imageAsset', 'sanity.fileAsset'])]`,
   {sourceType},
 )
-const documentsWithNewsReferences = contentDocuments.filter((document) => hasNewsReference(document, idMap))
+const documentsWithNewsReferences = contentDocuments.filter((document) =>
+  hasNewsReference(document, idMap),
+)
 
 await commitInBatches(
   newsDocuments,
@@ -105,7 +109,9 @@ await commitInBatches(
   (batch) => {
     const transaction = client.transaction()
 
-    batch.forEach((document) => transaction.createOrReplace(rewriteReferences(stripSystemFields(document), idMap)))
+    batch.forEach((document) =>
+      transaction.createOrReplace(rewriteReferences(stripSystemFields(document), idMap)),
+    )
 
     return transaction
   },

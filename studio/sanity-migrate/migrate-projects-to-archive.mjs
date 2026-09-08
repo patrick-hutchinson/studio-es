@@ -4,7 +4,7 @@ const sourceType = 'project'
 const targetType = 'archivedProject'
 const batchSize = 50
 const shouldExecute = process.argv.includes('--execute')
-const token = process.env.SANITY_WRITE_TOKEN || process.env.FullAccessToken
+const token = process.env.SANITY_WRITE_TOKEN
 
 if (!token) {
   throw new Error('Set SANITY_WRITE_TOKEN in studio/.env before running this migration.')
@@ -53,8 +53,10 @@ const hasProjectReference = (value, idMap) => {
   if (Array.isArray(value)) return value.some((item) => hasProjectReference(item, idMap))
   if (!value || typeof value !== 'object') return false
 
-  return Object.entries(value).some(([key, child]) =>
-    (key === '_ref' && typeof child === 'string' && idMap.has(child)) || hasProjectReference(child, idMap),
+  return Object.entries(value).some(
+    ([key, child]) =>
+      (key === '_ref' && typeof child === 'string' && idMap.has(child)) ||
+      hasProjectReference(child, idMap),
   )
 }
 
@@ -81,7 +83,9 @@ const contentDocuments = await client.fetch(
   `*[_type != $sourceType && !(_type in ['sanity.imageAsset', 'sanity.fileAsset'])]`,
   {sourceType},
 )
-const documentsWithProjectReferences = contentDocuments.filter((document) => hasProjectReference(document, idMap))
+const documentsWithProjectReferences = contentDocuments.filter((document) =>
+  hasProjectReference(document, idMap),
+)
 
 await commitInBatches(
   projects,
@@ -108,7 +112,9 @@ await commitInBatches(
   (batch) => {
     const transaction = client.transaction()
 
-    batch.forEach((document) => transaction.createOrReplace(rewriteReferences(stripSystemFields(document), idMap)))
+    batch.forEach((document) =>
+      transaction.createOrReplace(rewriteReferences(stripSystemFields(document), idMap)),
+    )
 
     return transaction
   },
@@ -132,4 +138,6 @@ const [remainingProjects, archivedProjects] = await Promise.all([
   client.fetch(`count(*[_type == $targetType])`, {targetType}),
 ])
 
-console.log(`Finished. Remaining active projects: ${remainingProjects}. Archived projects: ${archivedProjects}.`)
+console.log(
+  `Finished. Remaining active projects: ${remainingProjects}. Archived projects: ${archivedProjects}.`,
+)
