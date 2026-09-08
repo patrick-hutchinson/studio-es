@@ -78,5 +78,7 @@ export async function getStaticProps() {
       appearances,
       projects,
     },
+    // Refresh static preview and production pages from Sanity at most once per minute.
+    revalidate: 5,
   };
 }

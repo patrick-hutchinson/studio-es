@@ -60,5 +60,7 @@ export async function getStaticProps({ params }) {
       appearances,
       project,
     },
+    // Keep project pages current without requiring a new Vercel deployment.
+    revalidate: 5,
   };
 }

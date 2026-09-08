@@ -73,7 +73,7 @@ const projectFields = `{
   homePageCover[] ${mediaAssetFragment}
 }`;
 
-export const projectsQuery = `*[_type=="project" && defined(meta.slug.current)] | order(meta.year desc, meta.number desc) ${projectListFields}`;
+export const projectsQuery = `*[_type=="project" && defined(meta.slug.current)] | order(orderRank asc) ${projectListFields}`;
 
 export const projectBySlugQuery = `*[_type=="project" && meta.slug.current==$slug][0] ${projectFields}`;
 
