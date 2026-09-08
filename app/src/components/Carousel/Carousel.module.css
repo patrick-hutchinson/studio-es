@@ -1,0 +1,45 @@
+.carousel_outer {
+  max-width: 100vw;
+  margin: auto;
+  user-select: none;
+  cursor: grab;
+  overflow: hidden;
+  touch-action: pan-x pinch-zoom;
+  overscroll-behavior: contain;
+}
+
+.carousel_outer {
+  cursor: grab;
+}
+
+.carousel_outer:active,
+.carousel_outer:active * {
+  cursor: grabbing !important;
+}
+
+.carousel_inner {
+  display: flex;
+  touch-action: pan-x pinch-zoom;
+}
+.slide {
+  height: calc(100vw - (4 * var(--margin-page)));
+  margin-right: var(--margin-page);
+}
+
+@media screen and (min-width: 320px) {
+}
+
+/* iPads and other Tablets */
+@media screen and (min-width: 769px) {
+}
+
+/* Desktop */
+@media screen and (min-width: 1280px) {
+  .slide {
+    height: 80vh;
+  }
+}
+
+/* Large Format Screens */
+@media screen and (min-width: 2560px) {
+}

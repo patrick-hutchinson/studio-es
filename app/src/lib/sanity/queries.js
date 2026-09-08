@@ -40,12 +40,7 @@ const projectListFields = `{
     abbr,
     description
   },
-  homePageCover{
-    type,
-    image[0] ${mediaAssetFragment},
-    video[0] ${mediaAssetFragment},
-    gallery[] ${mediaAssetFragment}
-  }
+  homePageCover[] ${mediaAssetFragment}
 }`;
 
 const projectFields = `{
@@ -74,13 +69,8 @@ const projectFields = `{
     description
   },
   gallery[] ${mediaAssetFragment},
-  "coverMedia": coverImage[0] ${mediaAssetFragment},
-  homePageCover{
-    type,
-    image[0] ${mediaAssetFragment},
-    video[0] ${mediaAssetFragment},
-    gallery[] ${mediaAssetFragment}
-  }
+  "coverMedia": coverMedia[0] ${mediaAssetFragment},
+  homePageCover[] ${mediaAssetFragment}
 }`;
 
 export const projectsQuery = `*[_type=="project" && defined(meta.slug.current)] | order(meta.year desc, meta.number desc) ${projectListFields}`;

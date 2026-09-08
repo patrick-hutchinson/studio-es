@@ -3,6 +3,7 @@
 import {defineType, defineField} from 'sanity'
 import {orderRankField, orderRankOrdering} from '@sanity/orderable-document-list'
 import {Divider} from '../components/Divider'
+import ArchivedProjectImportInput from '../components/ArchivedProjectImportInput'
 
 export const project = defineType({
   name: 'project',
@@ -13,6 +14,16 @@ export const project = defineType({
 
   fields: [
     orderRankField({type: 'project'}),
+
+    defineField({
+      name: 'archivedSource',
+      title: 'Archiviertes Projekt importieren',
+      description:
+        'Wähle ein Projekt aus dem Archiv, klicke dann den import Button um eine neue Kopie anzulegen.',
+      type: 'reference',
+      to: [{type: 'archivedProject'}],
+      components: {input: ArchivedProjectImportInput},
+    }),
     defineField({
       name: 'title',
       title: 'Title',
@@ -23,45 +34,7 @@ export const project = defineType({
     defineField({
       name: 'homePageCover',
       title: 'Homepage Cover',
-      type: 'object',
-      fields: [
-        defineField({
-          name: 'type',
-          title: 'Cover Type',
-          type: 'string',
-          options: {
-            list: [
-              {title: 'Image', value: 'image'},
-              {title: 'Video', value: 'video'},
-              {title: 'Bilder Gallerie', value: 'gallery'},
-            ],
-            layout: 'radio',
-          },
-          validation: (Rule) => Rule.required(),
-        }),
-        defineField({
-          name: 'image',
-          title: 'Image',
-          type: 'array',
-          of: [{type: 'imageAsset'}],
-          hidden: ({parent}) => parent?.type !== 'image',
-          validation: (Rule) => Rule.max(1),
-        }),
-        defineField({
-          name: 'video',
-          title: 'Video',
-          type: 'array',
-          of: [{type: 'videoAsset'}],
-          hidden: ({parent}) => parent?.type !== 'video',
-          validation: (Rule) => Rule.max(1),
-        }),
-        defineField({
-          name: 'gallery',
-          title: 'Bilder Gallerie',
-          type: 'mediaGallery',
-          hidden: ({parent}) => parent?.type !== 'gallery',
-        }),
-      ],
+      type: 'mediaGallery',
     }),
     defineField({
       name: 'divider',
@@ -69,9 +42,9 @@ export const project = defineType({
       components: {field: Divider},
     }),
     defineField({
-      name: 'coverImage',
-      title: 'Cover Bild (Unterseite)',
-      type: 'mediaAsset',
+      name: 'coverMedia',
+      title: 'Cover Media (Unterseite)',
+      type: 'mediaGallery',
     }),
     defineField({
       name: 'description',
@@ -97,7 +70,7 @@ export const project = defineType({
 
     defineField({
       name: 'categories',
-      title: 'Categories',
+      title: 'Alle Kategorien (zum Filtern)',
       type: 'array',
       of: [
         {

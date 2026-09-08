@@ -41,24 +41,22 @@ export default function Studio({ appearances = [], projects = [] }) {
           <ScaleText text="Es" className={styles.scaleText} fullViewport />
           <div className={styles.projects} data-project-count={projects.length}>
             {visibleProjects.map((project, index) => {
-              const cover = project.homePageCover;
-              const image = cover?.image?.medium;
-              const video = cover?.video?.medium;
+              const cover = project.homePageCover || [];
+              const medium = cover[0]?.medium;
               const href = project.slug ? `/projects/${project.slug}` : undefined;
 
-              if (cover?.type === "gallery") {
-                return <GalleryPreview gallery={cover.gallery} href={href} key={project._id} />;
+              if (cover.length > 1) {
+                return <GalleryPreview gallery={cover} href={href} key={project._id} />;
               }
 
-              const medium = cover?.type === "video" ? video : image;
               const backgroundImage = getPreviewBackgroundImage(medium);
 
               return (
                 <ShrinkProjectPreview
                   backgroundImage={backgroundImage}
-                  backgroundMedium={cover?.type === "image" ? image : undefined}
+                  backgroundMedium={medium?.type === "image" ? medium : undefined}
                   key={project._id}
-                  foregroundMedium={cover?.type === "video" ? video : undefined}
+                  foregroundMedium={medium?.type === "video" ? medium : undefined}
                   index={index}
                   href={href}
                 />

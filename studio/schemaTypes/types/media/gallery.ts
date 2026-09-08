@@ -5,7 +5,7 @@ export const mediaGallery = defineType({
   name: 'mediaGallery',
   title: 'Bilder Gallerie',
   type: 'array',
-  of: [{type: 'imageAsset'}],
+  of: [{type: 'imageAsset'}, {type: 'videoAsset'}],
   components: {
     input: GalleryDropzoneInput,
   },
