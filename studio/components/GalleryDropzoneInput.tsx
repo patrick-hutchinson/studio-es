@@ -1,4 +1,4 @@
-import {type ChangeEvent, type DragEvent, useRef, useState} from 'react'
+import {type ChangeEvent, type DragEvent, useEffect, useRef, useState} from 'react'
 import {Button, Card, Flex, Stack, Text} from '@sanity/ui'
 import {ArrayOfObjectsInputProps, set, useClient} from 'sanity'
 
@@ -11,13 +11,21 @@ const createKey = () => {
 }
 
 export default function GalleryDropzoneInput(props: ArrayOfObjectsInputProps) {
+  const hasMedia = (props.value?.length || 0) > 0
   const inputRef = useRef<HTMLInputElement | null>(null)
+  const hadMediaRef = useRef(hasMedia)
   const [isDragging, setIsDragging] = useState(false)
+  const [isDropzoneVisible, setIsDropzoneVisible] = useState(!hasMedia)
   const [isUploading, setIsUploading] = useState(false)
   const [statusMessage, setStatusMessage] = useState<string>('')
   const [uploadProgress, setUploadProgress] = useState({uploaded: 0, total: 0})
 
   const client = useClient({apiVersion: '2024-01-01'})
+
+  useEffect(() => {
+    if (!hadMediaRef.current && hasMedia) setIsDropzoneVisible(false)
+    hadMediaRef.current = hasMedia
+  }, [hasMedia])
 
   const appendImages = async (files: File[]) => {
     const acceptedImages = files.filter((file) => file.type.startsWith('image/'))
@@ -93,39 +101,54 @@ export default function GalleryDropzoneInput(props: ArrayOfObjectsInputProps) {
 
   return (
     <Stack space={4}>
-      <Card
-        padding={4}
-        radius={2}
-        border
-        tone={isDragging ? 'primary' : 'default'}
-        onDragOver={(event) => {
-          event.preventDefault()
-          setIsDragging(true)
-        }}
-        onDragLeave={(event) => {
-          event.preventDefault()
-          setIsDragging(false)
-        }}
-        onDrop={onDrop}
-      >
-        <Stack space={3}>
-          <Text size={1}>Hier kannst du auch per drag and drop hochladen :)</Text>
-          <Flex gap={2} align="center">
-            <Button
-              mode="ghost"
-              text={isUploading ? 'Bilder laden...' : 'Bilder Auswählen'}
-              disabled={isUploading}
-              onClick={() => inputRef.current?.click()}
-            />
-            {isUploading ? (
-              <Text size={1}>
-                {uploadProgress.uploaded} / {uploadProgress.total} geladen...
-              </Text>
-            ) : null}
-            {statusMessage ? <Text size={1}>{statusMessage}</Text> : null}
-          </Flex>
-        </Stack>
-      </Card>
+      {!isDropzoneVisible ? (
+        <Flex justify="flex-end">
+          <Button mode="ghost" text="Show Drag&Drop" onClick={() => setIsDropzoneVisible(true)} />
+        </Flex>
+      ) : null}
+
+      {isDropzoneVisible ? (
+        <Card
+          padding={4}
+          radius={2}
+          border
+          tone={isDragging ? 'primary' : 'default'}
+          onDragOver={(event) => {
+            event.preventDefault()
+            setIsDragging(true)
+          }}
+          onDragLeave={(event) => {
+            event.preventDefault()
+            setIsDragging(false)
+          }}
+          onDrop={onDrop}
+        >
+          <Stack space={3}>
+            <Flex justify="space-between" align="center">
+              <Text size={1}>Hier kannst du auch per drag and drop hochladen :)</Text>
+              <Button
+                mode="ghost"
+                text="Hide Drag&Drop"
+                onClick={() => setIsDropzoneVisible(false)}
+              />
+            </Flex>
+            <Flex gap={2} align="center">
+              <Button
+                mode="ghost"
+                text={isUploading ? 'Bilder laden...' : 'Bilder Auswählen'}
+                disabled={isUploading}
+                onClick={() => inputRef.current?.click()}
+              />
+              {isUploading ? (
+                <Text size={1}>
+                  {uploadProgress.uploaded} / {uploadProgress.total} geladen...
+                </Text>
+              ) : null}
+              {statusMessage ? <Text size={1}>{statusMessage}</Text> : null}
+            </Flex>
+          </Stack>
+        </Card>
+      ) : null}
 
       <input
         ref={inputRef}
