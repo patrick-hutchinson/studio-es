@@ -1,6 +1,8 @@
 .carousel_outer {
+  grid-column: 1 / -1;
+  width: 100vw;
   max-width: 100vw;
-  margin: auto;
+  margin-left: calc(50% - 50vw);
   user-select: none;
   cursor: grab;
   overflow: hidden;

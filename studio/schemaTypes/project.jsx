@@ -42,8 +42,8 @@ export const project = defineType({
       components: {field: Divider},
     }),
     defineField({
-      name: 'coverMedia',
-      title: 'Cover Media (Unterseite)',
+      name: 'slideshow',
+      title: 'Slideshow (Unterseite)',
       type: 'mediaGallery',
     }),
     defineField({

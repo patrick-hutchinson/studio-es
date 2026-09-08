@@ -110,11 +110,11 @@ export default function ArchivedProjectImportInput(props: ReferenceInputProps) {
         throw new Error('Das ausgewählte (archivierte) Projekt konnte nicht gefunden werden.')
       }
 
-      const coverMedia = convertHeaderImages(archivedProject.headerImages)
+      const slideshow = convertHeaderImages(archivedProject.headerImages)
       const appearance = convertAppearance(archivedProject.appearance)
       const importedFields = {
         ...(archivedProject.title ? {title: archivedProject.title} : {}),
-        ...(coverMedia.length ? {coverMedia} : {}),
+        ...(slideshow.length ? {slideshow} : {}),
         ...(archivedProject.descriptionBlocks?.length
           ? {description: convertDescription(archivedProject.descriptionBlocks)}
           : {}),
@@ -125,8 +125,8 @@ export default function ArchivedProjectImportInput(props: ReferenceInputProps) {
 
       patch.execute([{set: importedFields}])
 
-      const importedMediaLabel = `${coverMedia.length} media item${
-        coverMedia.length === 1 ? '' : 's'
+      const importedMediaLabel = `${slideshow.length} media item${
+        slideshow.length === 1 ? '' : 's'
       }`
       setStatusMessage(
         `Imported ${importedMediaLabel}. Das archivierte Projekt wurde nicht verändert.`,
@@ -155,7 +155,7 @@ export default function ArchivedProjectImportInput(props: ReferenceInputProps) {
         <Stack space={3}>
           <Text size={1}>
             Hiermit kopierst du Titel, Beschreibung, Farbkombination, Metadaten und Kategorien in
-            ein neues Projekt. Die Header Gallerie des archivierten Projekts wird als Cover Media
+            ein neues Projekt. Die Header Gallerie des archivierten Projekts wird als Slideshow
             übertragen. Die archivierte Version bleibt wie sie ist! 🌈
           </Text>
           <Flex align="center" gap={3} wrap="wrap">

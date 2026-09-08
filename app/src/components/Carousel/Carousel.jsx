@@ -12,18 +12,18 @@ import { DeviceContext } from "@/context/DeviceContext";
 const Carousel = ({ array, onIndexChange }) => {
   const [isDragging, setIsDragging] = useState(false);
   const { isTouch } = useContext(DeviceContext);
-  if (!array) return;
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, dragResistance: 1, dragFree: isTouch ? true : false }, []);
-
-  // Triple the date in case it is not long enough to fill the width of the screen
-  const carouselMedia = [...array, ...array, ...array];
+  const media = array ?? [];
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { align: "start", loop: media.length > 1, dragResistance: 1, dragFree: isTouch ? true : false },
+    [],
+  );
 
   useEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || !media.length) return;
 
     const updateIndex = () => {
       const index = emblaApi.selectedScrollSnap();
-      onIndexChange?.(index % array.length); // normalize for tripled array
+      onIndexChange?.(index);
     };
 
     updateIndex();
@@ -34,10 +34,10 @@ const Carousel = ({ array, onIndexChange }) => {
       emblaApi.off("select", updateIndex);
       emblaApi.off("scroll", updateIndex);
     };
-  }, [emblaApi, array.length, onIndexChange]);
+  }, [emblaApi, media.length, onIndexChange]);
 
   useEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || media.length < 2) return;
 
     const handleKeyDown = (e) => {
       if (e.key === "ArrowRight") {
@@ -85,14 +85,16 @@ const Carousel = ({ array, onIndexChange }) => {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [emblaApi, isDragging]);
+  }, [emblaApi, isDragging, media.length]);
+
+  if (!media.length) return null;
 
   return (
     <motion.div className={`${styles.carousel_outer} embla`} ref={emblaRef}>
       <div className={`${styles.carousel_inner} embla__container`}>
-        {carouselMedia.map((item) => {
+        {media.map((item, index) => {
           return (
-            <li key={item._id} className={`${styles.slide} embla__slide`}>
+            <li key={item._key ?? item.medium?._id ?? index} className={`${styles.slide} embla__slide`}>
               <Media medium={item.medium} />
             </li>
           );

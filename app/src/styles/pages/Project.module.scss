@@ -1,0 +1,45 @@
+.projectTitle {
+  background: var(--random-background);
+  color: var(--random-foreground);
+  grid-column: 1 / -1;
+  overflow: visible;
+}
+
+.projectTitle > div,
+.projectTitle > div > div {
+  overflow: visible;
+}
+
+.projectTitle svg {
+  width: auto;
+  max-width: none;
+  overflow: visible;
+}
+
+.block {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.projectInfo {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--content-grid-gap);
+
+  grid-column: 1 / -1;
+
+  .description {
+    grid-column: 9 / 12;
+  }
+}
+
+.repeatMediaGrid {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.placeholder {
+  width: 100%;
+  height: 100vh;
+  background: red;
+}

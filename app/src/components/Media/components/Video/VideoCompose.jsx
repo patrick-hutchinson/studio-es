@@ -8,7 +8,7 @@ import Placeholder from "../Placeholder";
 
 import styles from "../../Media.module.css";
 
-const VideoFrame = ({ medium, className, eager = false, objectFit, paused, showPlaceholder = true }) => {
+const VideoFrame = ({ medium, className, eager = false, objectFit = "cover", paused, showPlaceholder = true }) => {
   const videoRef = useRef(null);
 
   const [isLoaded, setIsLoaded] = useState(false);

@@ -1,8 +1,7 @@
-import { LayoutGroup, motion } from "framer-motion";
-import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { DeviceContext } from "@/context/DeviceContext";
-import Placeholder from "@/components/Media/components/Placeholder";
 import styles from "./RepeatMediaGrid.module.css";
 
 const DESKTOP_CELL_COUNT = 12;
@@ -11,19 +10,19 @@ const DESKTOP_COLUMNS = 4;
 const DESKTOP_ROWS = 3;
 const MOBILE_COLUMNS = 2;
 const MOBILE_ROWS = 4;
-
-const getCoverScale = (image, cellAspectRatio) => {
-  const imageAspectRatio = image.width && image.height ? image.width / image.height : 1;
-
-  return Math.max(cellAspectRatio / imageAspectRatio, imageAspectRatio / cellAspectRatio, 1);
-};
+const LOOP_COPY_COUNT = 3;
 
 const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
-  const gridRef = useRef(null);
-  const [activeCellIndex, setActiveCellIndex] = useState(null);
-  const [pendingCellIndex, setPendingCellIndex] = useState(null);
-  const [cellAspectRatio, setCellAspectRatio] = useState(1);
+  const [activeCell, setActiveCell] = useState(null);
+  const [isAligningCell, setIsAligningCell] = useState(false);
+  const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
   const { isMobile } = useContext(DeviceContext);
+  const viewportRef = useRef(null);
+  const alignmentRef = useRef(null);
+  const scrollEndTimerRef = useRef(null);
+  const dragRef = useRef(null);
+  const inertiaFrameRef = useRef(null);
+  const suppressClickRef = useRef(false);
   const images = useMemo(() => gallery.filter((item) => item?.url), [gallery]);
 
   const repeatedImages = useMemo(() => {
@@ -44,49 +43,104 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
   const columnCount = isMobile ? MOBILE_COLUMNS : DESKTOP_COLUMNS;
   const rowCount = isMobile ? MOBILE_ROWS : DESKTOP_ROWS;
 
-  useLayoutEffect(() => {
-    if (activeCellIndex !== null) return undefined;
-
-    const grid = gridRef.current;
-    if (!grid) return undefined;
-
-    const updateCellAspectRatio = () => {
-      const { height, width } = grid.getBoundingClientRect();
-      const nextCellAspectRatio = height > 0 ? (width / columnCount) / (height / rowCount) : 1;
-
-      setCellAspectRatio((current) => (current === nextCellAspectRatio ? current : nextCellAspectRatio));
+  useEffect(() => {
+    const updateViewportSize = () => {
+      setViewportSize({ width: window.innerWidth, height: window.innerHeight });
     };
 
-    const resizeObserver = new ResizeObserver(updateCellAspectRatio);
-    resizeObserver.observe(grid);
-    updateCellAspectRatio();
+    updateViewportSize();
+    window.addEventListener("resize", updateViewportSize);
 
-    return () => resizeObserver.disconnect();
-  }, [activeCellIndex, columnCount, rowCount]);
+    return () => window.removeEventListener("resize", updateViewportSize);
+  }, []);
 
   useEffect(() => {
-    if (activeCellIndex === null) return undefined;
+    const viewport = viewportRef.current;
+    if (!viewport) return undefined;
+
+    const frame = window.requestAnimationFrame(() => {
+      viewport.scrollLeft = viewport.scrollWidth / LOOP_COPY_COUNT;
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => () => window.cancelAnimationFrame(inertiaFrameRef.current), []);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport || isAligningCell) return undefined;
+
+    const repeatTrack = () => {
+      const constellationWidth = viewport.scrollWidth / LOOP_COPY_COUNT;
+
+      if (viewport.scrollLeft < constellationWidth * 0.5) {
+        viewport.scrollLeft += constellationWidth;
+      } else if (viewport.scrollLeft > constellationWidth * 1.5) {
+        viewport.scrollLeft -= constellationWidth;
+      }
+    };
+
+    viewport.addEventListener("scroll", repeatTrack, { passive: true });
+    return () => viewport.removeEventListener("scroll", repeatTrack);
+  }, [isAligningCell]);
+
+  useEffect(() => {
+    if (!isAligningCell) return undefined;
+
+    const viewport = viewportRef.current;
+    const alignment = alignmentRef.current;
+    if (!viewport || !alignment) return undefined;
+
+    const finishAlignment = () => {
+      window.clearTimeout(scrollEndTimerRef.current);
+      setActiveCell({ copyIndex: alignment.copyIndex, index: alignment.index });
+      setIsAligningCell(false);
+    };
+    const waitForScrollToSettle = () => {
+      window.clearTimeout(scrollEndTimerRef.current);
+      scrollEndTimerRef.current = window.setTimeout(finishAlignment, 120);
+    };
+
+    viewport.addEventListener("scroll", waitForScrollToSettle, { passive: true });
+    viewport.scrollTo({ left: alignment.left, behavior: "smooth" });
+    waitForScrollToSettle();
+
+    return () => {
+      viewport.removeEventListener("scroll", waitForScrollToSettle);
+      window.clearTimeout(scrollEndTimerRef.current);
+    };
+  }, [isAligningCell]);
+
+  useEffect(() => {
+    if (activeCell === null) return undefined;
 
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
-        setActiveCellIndex(null);
+        setActiveCell(null);
         return;
       }
 
       if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
         event.preventDefault();
-        setActiveCellIndex((currentIndex) => {
-          if (currentIndex === null) return currentIndex;
-          return (currentIndex - 1 + repeatedImages.length) % repeatedImages.length;
+        setActiveCell((currentCell) => {
+          if (currentCell === null) return currentCell;
+          return {
+            ...currentCell,
+            index: (currentCell.index - 1 + repeatedImages.length) % repeatedImages.length,
+          };
         });
         return;
       }
 
       if (event.key === "ArrowRight" || event.key === "ArrowDown") {
         event.preventDefault();
-        setActiveCellIndex((currentIndex) => {
-          if (currentIndex === null) return currentIndex;
-          return (currentIndex + 1) % repeatedImages.length;
+        setActiveCell((currentCell) => {
+          if (currentCell === null) return currentCell;
+          return {
+            ...currentCell,
+            index: (currentCell.index + 1) % repeatedImages.length,
+          };
         });
       }
     };
@@ -96,89 +150,191 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [activeCellIndex, repeatedImages.length]);
+  }, [activeCell, repeatedImages.length]);
 
   if (!repeatedImages.length) return null;
 
-  const pendingImage = pendingCellIndex === null ? null : repeatedImages[pendingCellIndex];
-
-  const openCell = (index) => {
-    if (activeCellIndex === index) {
-      setActiveCellIndex(null);
+  const openCell = (copyIndex, index, event) => {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false;
       return;
     }
 
-    if (pendingCellIndex !== null) return;
+    if (activeCell?.copyIndex === copyIndex && activeCell.index === index) {
+      setActiveCell(null);
+      return;
+    }
 
-    setPendingCellIndex(index);
+    if (isAligningCell) return;
+
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const viewportRect = viewport.getBoundingClientRect();
+    const cellRect = event.currentTarget.getBoundingClientRect();
+
+    alignmentRef.current = {
+      copyIndex,
+      index,
+      left: viewport.scrollLeft + cellRect.left - viewportRect.left,
+    };
+    setIsAligningCell(true);
   };
 
-  const revealPendingCell = (index) => {
-    setActiveCellIndex(index);
-    setPendingCellIndex(null);
+  const stopInertia = () => {
+    window.cancelAnimationFrame(inertiaFrameRef.current);
+    inertiaFrameRef.current = null;
   };
 
-  const activeColumn = activeCellIndex === null ? null : activeCellIndex % columnCount;
-  const activeRow = activeCellIndex === null ? null : Math.floor(activeCellIndex / columnCount);
-  const columnTemplate = Array.from({ length: columnCount }, (_, index) =>
-    activeColumn === null ? "1fr" : index === activeColumn ? "1fr" : "0fr",
-  ).join(" ");
-  const rowTemplate = Array.from({ length: rowCount }, (_, index) =>
-    activeRow === null ? "1fr" : index === activeRow ? "1fr" : "0fr",
-  ).join(" ");
+  const startInertia = (initialVelocity) => {
+    const viewport = viewportRef.current;
+    if (!viewport || Math.abs(initialVelocity) < 0.01) return;
+
+    let velocity = initialVelocity;
+    let previousTime = window.performance.now();
+
+    const animate = (currentTime) => {
+      const elapsed = currentTime - previousTime;
+      previousTime = currentTime;
+      viewport.scrollLeft += velocity * elapsed;
+      velocity *= Math.pow(0.92, elapsed / 16.67);
+
+      if (Math.abs(velocity) < 0.01) {
+        inertiaFrameRef.current = null;
+        return;
+      }
+
+      inertiaFrameRef.current = window.requestAnimationFrame(animate);
+    };
+
+    inertiaFrameRef.current = window.requestAnimationFrame(animate);
+  };
+
+  const beginDrag = (event) => {
+    const viewport = viewportRef.current;
+    if (!viewport || event.pointerType !== "mouse") return;
+
+    stopInertia();
+
+    // Do not retain a previous drag's suppression state for the next click.
+    suppressClickRef.current = false;
+    dragRef.current = {
+      lastScrollLeft: viewport.scrollLeft,
+      lastTime: window.performance.now(),
+      moved: false,
+      startScrollLeft: viewport.scrollLeft,
+      startX: event.clientX,
+      velocity: 0,
+    };
+  };
+
+  const drag = (event) => {
+    const viewport = viewportRef.current;
+    const dragState = dragRef.current;
+    if (!viewport || !dragState) return;
+
+    const distance = event.clientX - dragState.startX;
+    const nextScrollLeft = dragState.startScrollLeft - distance;
+    const currentTime = window.performance.now();
+    const elapsed = currentTime - dragState.lastTime;
+
+    if (Math.abs(distance) > 4) dragState.moved = true;
+    viewport.scrollLeft = nextScrollLeft;
+
+    if (elapsed > 0) {
+      dragState.velocity = (nextScrollLeft - dragState.lastScrollLeft) / elapsed;
+      dragState.lastScrollLeft = nextScrollLeft;
+      dragState.lastTime = currentTime;
+    }
+  };
+
+  const endDrag = () => {
+    const viewport = viewportRef.current;
+    const dragState = dragRef.current;
+    if (!viewport || !dragState) return;
+
+    suppressClickRef.current = dragState.moved;
+    dragRef.current = null;
+
+    if (dragState.moved) startInertia(dragState.velocity);
+  };
+
+  const activeColumn = activeCell === null ? null : activeCell.index % columnCount;
+  const activeRow = activeCell === null ? null : Math.floor(activeCell.index / columnCount);
+  const defaultColumnWidth = `${100 / columnCount}vw`;
+  const defaultRowHeight = `${100 / rowCount}%`;
+  const activeMedium = activeCell === null ? null : repeatedImages[activeCell.index];
+  const activeAspectRatio = Number(activeMedium?.width) / Number(activeMedium?.height);
+  const activeMediaWidth = Number.isFinite(activeAspectRatio) && viewportSize.height > 0
+    ? Math.min(viewportSize.width, viewportSize.height * activeAspectRatio)
+    : null;
+  const expandedGridWidth = activeMediaWidth === null
+    ? "100vw"
+    : `calc(100vw - ${defaultColumnWidth} + ${activeMediaWidth}px)`;
 
   return (
-    <LayoutGroup>
-      <motion.section
-        ref={gridRef}
-        className={[styles.grid, className].filter(Boolean).join(" ")}
-        data-expanded={activeCellIndex === null ? undefined : ""}
-        animate={{
-          gridTemplateColumns: columnTemplate,
-          gridTemplateRows: rowTemplate,
-        }}
-        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {pendingImage ? (
-          <div className={styles.placeholderPreload} aria-hidden="true">
-            <Placeholder
-              key={pendingImage._repeatKey}
-              medium={pendingImage}
-              persistent
-              onError={() => revealPendingCell(pendingCellIndex)}
-              onLoad={() => revealPendingCell(pendingCellIndex)}
-            />
-          </div>
-        ) : null}
-        {repeatedImages.map((image, index) => {
+    <section
+      ref={viewportRef}
+      className={[styles.viewport, className].filter(Boolean).join(" ")}
+      onPointerDown={beginDrag}
+      onPointerMove={drag}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onPointerLeave={endDrag}
+    >
+      <div className={styles.track}>
+        {Array.from({ length: LOOP_COPY_COUNT }, (_, copyIndex) => {
+          const isActiveGrid = activeCell?.copyIndex === copyIndex;
+
           return (
-              <motion.button
-                type="button"
-                layout
-                key={image._repeatKey}
-                className={styles.cell}
-                data-active={activeCellIndex === index ? "" : undefined}
-                onClick={() => openCell(index)}
-              transition={{
-                layout: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
-              }}
-              >
-                {activeCellIndex === index ? <Placeholder className={styles.placeholder} medium={image} persistent /> : null}
-                <motion.img
-                  layoutId={`repeat-media-${image._repeatKey}`}
-                alt={image.alt || ""}
-                  className={styles.image}
-                  draggable={false}
-                  src={image.url}
-                  animate={{ scale: activeCellIndex === index ? 1 : getCoverScale(image, cellAspectRatio) }}
-                  initial={false}
-                  transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                />
-            </motion.button>
+            <motion.div
+              key={copyIndex}
+              className={styles.grid}
+              data-expanded={isActiveGrid ? "" : undefined}
+              animate={{ width: isActiveGrid ? expandedGridWidth : "100vw" }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {Array.from({ length: columnCount }, (_, columnIndex) => {
+                const isActiveColumn = isActiveGrid && activeColumn === columnIndex;
+
+                return (
+                  <motion.div
+                    key={columnIndex}
+                    className={styles.column}
+                    animate={{ width: isActiveColumn && activeMediaWidth !== null ? `${activeMediaWidth}px` : defaultColumnWidth }}
+                    transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    {Array.from({ length: rowCount }, (_, rowIndex) => {
+                      const index = rowIndex * columnCount + columnIndex;
+                      const image = repeatedImages[index];
+                      const isActiveCell = isActiveColumn && activeRow === rowIndex;
+
+                      return (
+                        <motion.button
+                          type="button"
+                          key={image._repeatKey}
+                          className={styles.cell}
+                          data-active={isActiveCell ? "" : undefined}
+                          onClick={(event) => openCell(copyIndex, index, event)}
+                          animate={{ height: isActiveColumn ? (isActiveCell ? "100%" : "0%") : defaultRowHeight }}
+                          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                        >
+                          <img
+                            alt={image.alt || ""}
+                            className={styles.image}
+                            draggable={false}
+                            src={image.url}
+                          />
+                        </motion.button>
+                      );
+                    })}
+                  </motion.div>
+                );
+              })}
+            </motion.div>
           );
         })}
-      </motion.section>
-    </LayoutGroup>
+      </div>
+    </section>
   );
 };
 

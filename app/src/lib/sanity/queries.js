@@ -69,7 +69,7 @@ const projectFields = `{
     description
   },
   gallery[] ${mediaAssetFragment},
-  "coverMedia": coverMedia[0] ${mediaAssetFragment},
+  "slideshow": slideshow[] ${mediaAssetFragment},
   homePageCover[] ${mediaAssetFragment}
 }`;
 
