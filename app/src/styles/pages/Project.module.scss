@@ -20,6 +20,11 @@
   width: 100%;
 }
 
+.entryMedia {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
 .projectInfo {
   padding: var(--margin);
   display: grid;

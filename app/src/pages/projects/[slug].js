@@ -3,8 +3,10 @@ import Media from "@/components/Media/Media";
 import MediaSpotlight from "@/components/MediaSpotlight/MediaSpotlight";
 import RepeatMediaGrid from "@/components/RepeatMediaGrid/RepeatMediaGrid";
 import ScaleText from "@/components/ScaleText/ScaleText";
+import usePageEntryMediaScroll from "@/hooks/usePageEntryMediaScroll";
 import { getAppearances, getProject, getProjects } from "@/lib/sanity";
 import styles from "@/styles/pages/Project.module.scss";
+import { useRef } from "react";
 
 import Text from "@/components/Text/Text";
 
@@ -16,6 +18,9 @@ const getGalleryImages = (project) =>
 export default function Project({ appearances = [], project }) {
   const galleryImages = getGalleryImages(project);
   const slideshow = project.slideshow ?? [];
+  const firstMediaRef = useRef(null);
+
+  usePageEntryMediaScroll(firstMediaRef, project.slug);
 
   console.log(project.slideshow, "slideshow");
   return (
@@ -23,13 +28,21 @@ export default function Project({ appearances = [], project }) {
       <main className="main">
         <div className="content grid">
           <ScaleText className={styles.projectTitle} text={project.title.toUpperCase()} letterSpacing={-60} />
-          <Carousel array={slideshow} />
+          {slideshow.length ? (
+            <div ref={firstMediaRef} className={styles.entryMedia}>
+              <Carousel array={slideshow} />
+            </div>
+          ) : null}
 
           <div className={styles.projectInfo}>
             <Text className={styles.description} text={project.description} typo="h3" />
           </div>
 
-          {galleryImages.length > 1 ? <RepeatMediaGrid className={styles.repeatMediaGrid} gallery={galleryImages} /> : null}
+          {galleryImages.length > 1 ? (
+            <div ref={slideshow.length ? undefined : firstMediaRef} className={styles.entryMedia}>
+              <RepeatMediaGrid className={styles.repeatMediaGrid} gallery={galleryImages} />
+            </div>
+          ) : null}
         </div>
       </main>
     </div>

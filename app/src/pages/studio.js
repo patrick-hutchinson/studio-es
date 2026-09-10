@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import styles from "@/styles/pages/Studio.module.css";
 
@@ -7,6 +7,7 @@ import GalleryPreview from "@/components/GalleryPreview/GalleryPreview";
 import ShrinkProjectPreview from "@/components/ShrinkProjectPreview/ShrinkProjectPreview";
 import { DEFAULT_COLOR_PAIR, getRandomColorPair } from "@/lib/getRandomColorPair";
 import { getAppearances, getProjects } from "@/lib/sanity";
+import usePageEntryMediaScroll from "@/hooks/usePageEntryMediaScroll";
 
 const PROJECT_COUNT = 10;
 
@@ -22,7 +23,10 @@ const getPreviewBackgroundImage = (medium) => {
 export default function Studio({ appearances = [], projects = [] }) {
   console.log(projects, "projects");
   const [colors, setColors] = useState(DEFAULT_COLOR_PAIR);
+  const projectsRef = useRef(null);
   const visibleProjects = projects;
+
+  usePageEntryMediaScroll(projectsRef, "studio");
 
   useEffect(() => {
     setColors(getRandomColorPair(appearances));
@@ -39,7 +43,7 @@ export default function Studio({ appearances = [], projects = [] }) {
       <main className="main">
         <div className="content grid">
           <ScaleText text="Es" className={styles.scaleText} fullViewport />
-          <div className={styles.projects} data-project-count={projects.length}>
+          <div ref={projectsRef} className={styles.projects} data-project-count={projects.length}>
             {visibleProjects.map((project, index) => {
               const cover = project.homePageCover || [];
               const medium = cover[0]?.medium;

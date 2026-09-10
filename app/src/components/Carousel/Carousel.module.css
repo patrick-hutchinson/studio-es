@@ -38,7 +38,7 @@
 /* Desktop */
 @media screen and (min-width: 1280px) {
   .slide {
-    height: 80vh;
+    height: 100vh;
   }
 }
 
