@@ -15,6 +15,16 @@
   overflow: visible;
 }
 
+.projectCode {
+  position: fixed;
+  top: var(--margin);
+  right: var(--margin);
+  z-index: 1001;
+  pointer-events: none;
+  color: #fff;
+  mix-blend-mode: difference;
+}
+
 .block {
   grid-column: 1 / -1;
   width: 100%;

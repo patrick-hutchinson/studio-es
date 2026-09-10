@@ -29,6 +29,11 @@ export default function Project({ appearances = [], nextProject, project }) {
   console.log(project.slideshow, "slideshow");
   return (
     <div className="page">
+      {project.slug ? (
+        <div className={styles.projectCode} typo="h3">
+          {project.slug.toUpperCase()}
+        </div>
+      ) : null}
       <main className="main">
         <div className="content grid">
           <ScaleText className={styles.projectTitle} text={project.title.toUpperCase()} letterSpacing={-60} />

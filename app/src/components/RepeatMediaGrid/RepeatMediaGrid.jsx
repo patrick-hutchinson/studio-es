@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { DeviceContext } from "@/context/DeviceContext";
+import { useLenisContext } from "@/context/LenisContext";
 import styles from "./RepeatMediaGrid.module.css";
 
 const DESKTOP_CELL_COUNT = 12;
@@ -12,15 +13,18 @@ const MOBILE_COLUMNS = 2;
 const MOBILE_ROWS = 4;
 const LOOP_COPY_COUNT = 3;
 const CELL_TRANSITION_DURATION = 550;
+const CELL_ALIGNMENT_DURATION = 600;
+const PAGE_SCROLL_DURATION = 1.3;
 
 const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
   const [activeCell, setActiveCell] = useState(null);
   const [isAligningCell, setIsAligningCell] = useState(false);
   const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
   const { isMobile } = useContext(DeviceContext);
+  const lenis = useLenisContext();
   const viewportRef = useRef(null);
   const alignmentRef = useRef(null);
-  const scrollEndTimerRef = useRef(null);
+  const alignmentFrameRef = useRef(null);
   const openCellTimerRef = useRef(null);
   const dragRef = useRef(null);
   const inertiaFrameRef = useRef(null);
@@ -70,6 +74,7 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
   useEffect(
     () => () => {
       window.cancelAnimationFrame(inertiaFrameRef.current);
+      window.cancelAnimationFrame(alignmentFrameRef.current);
       window.clearTimeout(openCellTimerRef.current);
     },
     [],
@@ -101,22 +106,31 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
     if (!viewport || !alignment) return undefined;
 
     const finishAlignment = () => {
-      window.clearTimeout(scrollEndTimerRef.current);
       setActiveCell({ copyIndex: alignment.copyIndex, index: alignment.index });
       setIsAligningCell(false);
     };
-    const waitForScrollToSettle = () => {
-      window.clearTimeout(scrollEndTimerRef.current);
-      scrollEndTimerRef.current = window.setTimeout(finishAlignment, 120);
+    const startScrollLeft = viewport.scrollLeft;
+    const distance = alignment.left - startScrollLeft;
+    const startTime = window.performance.now();
+    const animateAlignment = (currentTime) => {
+      const progress = Math.min((currentTime - startTime) / CELL_ALIGNMENT_DURATION, 1);
+      const easedProgress = 1 - (1 - progress) ** 3;
+
+      viewport.scrollLeft = startScrollLeft + distance * easedProgress;
+
+      if (progress < 1) {
+        alignmentFrameRef.current = window.requestAnimationFrame(animateAlignment);
+        return;
+      }
+
+      alignmentFrameRef.current = null;
+      finishAlignment();
     };
 
-    viewport.addEventListener("scroll", waitForScrollToSettle, { passive: true });
-    viewport.scrollTo({ left: alignment.left, behavior: "smooth" });
-    waitForScrollToSettle();
+    alignmentFrameRef.current = window.requestAnimationFrame(animateAlignment);
 
     return () => {
-      viewport.removeEventListener("scroll", waitForScrollToSettle);
-      window.clearTimeout(scrollEndTimerRef.current);
+      window.cancelAnimationFrame(alignmentFrameRef.current);
     };
   }, [isAligningCell]);
 
@@ -175,6 +189,7 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
 
     const viewport = viewportRef.current;
     if (!viewport) return;
+
     const cell = event.currentTarget;
     const startAlignment = () => {
       const viewportRect = viewport.getBoundingClientRect();
@@ -187,17 +202,26 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
       };
       setIsAligningCell(true);
     };
+    const scrollGridIntoView = () => {
+      if (lenis?.scrollTo) {
+        lenis.scrollTo(viewport, { duration: PAGE_SCROLL_DURATION, offset: 0, onComplete: startAlignment });
+        return;
+      }
+
+      viewport.scrollIntoView({ behavior: "smooth", block: "start" });
+      openCellTimerRef.current = window.setTimeout(startAlignment, PAGE_SCROLL_DURATION * 1000);
+    };
 
     if (activeCell !== null || isAligningCell) {
       closeActiveCellForInteraction();
       window.clearTimeout(openCellTimerRef.current);
       openCellTimerRef.current = window.setTimeout(() => {
-        startAlignment();
+        scrollGridIntoView();
       }, CELL_TRANSITION_DURATION);
       return;
     }
 
-    startAlignment();
+    scrollGridIntoView();
   };
 
   const stopInertia = () => {
@@ -214,7 +238,7 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
       viewport.scrollTo({ left: viewport.scrollLeft, behavior: "auto" });
     }
 
-    window.clearTimeout(scrollEndTimerRef.current);
+    window.cancelAnimationFrame(alignmentFrameRef.current);
     window.clearTimeout(openCellTimerRef.current);
     alignmentRef.current = null;
     setActiveCell(null);
