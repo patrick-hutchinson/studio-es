@@ -37,7 +37,7 @@ const getSvgAspectRatio = (svg) => {
   return width > 0 && height > 0 ? width / height : 0;
 };
 
-const ScaleText = ({ text, className = "", fullViewport = false, style, letterSpacing = 0 }) => {
+const ScaleText = ({ text, className = "", expandOnEnter = false, fullViewport = false, style, letterSpacing = 0 }) => {
   const regionRef = useRef(null);
   const stageRef = useRef(null);
   const scaleContainerRef = useRef(null);
@@ -76,10 +76,13 @@ const ScaleText = ({ text, className = "", fullViewport = false, style, letterSp
       const minSvgWidth = svg ? getPixelValue(window.getComputedStyle(svg).minWidth) : 0;
       const minHeight = svgAspectRatio ? minSvgWidth / svgAspectRatio : 0;
       const shrink = followingBox ? Math.max(contentBottom - followingBox.top, 0) : 0;
-      const nextHeightValue = Math.min(Math.max(maxHeight - shrink, minHeight), maxHeight);
+      const entryProgress = Math.min(Math.max((window.innerHeight - stageBox.top) / Math.max(maxHeight, 1), 0), 1);
+      const shrinkingHeight = Math.min(Math.max(maxHeight - shrink, minHeight), maxHeight);
+      const expandingHeight = Math.min(Math.max(maxHeight * entryProgress, minHeight), maxHeight);
+      const nextHeightValue = expandOnEnter ? expandingHeight : shrinkingHeight;
       const nextHeight = `${nextHeightValue}px`;
       const stageHeight = `${maxHeight}px`;
-      const isPinned = stageBox.top <= pinTop && nextHeightValue > 0;
+      const isPinned = !expandOnEnter && stageBox.top <= pinTop && nextHeightValue > 0;
 
       scaleContainer.style.setProperty("--scale-container-top", `${pinTop}px`);
 
@@ -152,7 +155,7 @@ const ScaleText = ({ text, className = "", fullViewport = false, style, letterSp
         window.cancelAnimationFrame(loopFrameRef.current);
       }
     };
-  }, [fullViewport]);
+  }, [expandOnEnter, fullViewport]);
 
   return (
     <div ref={regionRef} className={[styles.scaleRegion, className].filter(Boolean).join(" ")} style={style}>

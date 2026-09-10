@@ -11,6 +11,7 @@ const DESKTOP_ROWS = 3;
 const MOBILE_COLUMNS = 2;
 const MOBILE_ROWS = 4;
 const LOOP_COPY_COUNT = 3;
+const CELL_TRANSITION_DURATION = 550;
 
 const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
   const [activeCell, setActiveCell] = useState(null);
@@ -20,6 +21,7 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
   const viewportRef = useRef(null);
   const alignmentRef = useRef(null);
   const scrollEndTimerRef = useRef(null);
+  const openCellTimerRef = useRef(null);
   const dragRef = useRef(null);
   const inertiaFrameRef = useRef(null);
   const suppressClickRef = useRef(false);
@@ -65,7 +67,13 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
     return () => window.cancelAnimationFrame(frame);
   }, []);
 
-  useEffect(() => () => window.cancelAnimationFrame(inertiaFrameRef.current), []);
+  useEffect(
+    () => () => {
+      window.cancelAnimationFrame(inertiaFrameRef.current);
+      window.clearTimeout(openCellTimerRef.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -165,24 +173,54 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
       return;
     }
 
-    if (isAligningCell) return;
-
     const viewport = viewportRef.current;
     if (!viewport) return;
-    const viewportRect = viewport.getBoundingClientRect();
-    const cellRect = event.currentTarget.getBoundingClientRect();
+    const cell = event.currentTarget;
+    const startAlignment = () => {
+      const viewportRect = viewport.getBoundingClientRect();
+      const cellRect = cell.getBoundingClientRect();
 
-    alignmentRef.current = {
-      copyIndex,
-      index,
-      left: viewport.scrollLeft + cellRect.left - viewportRect.left,
+      alignmentRef.current = {
+        copyIndex,
+        index,
+        left: viewport.scrollLeft + cellRect.left - viewportRect.left,
+      };
+      setIsAligningCell(true);
     };
-    setIsAligningCell(true);
+
+    if (activeCell !== null || isAligningCell) {
+      closeActiveCellForInteraction();
+      window.clearTimeout(openCellTimerRef.current);
+      openCellTimerRef.current = window.setTimeout(() => {
+        startAlignment();
+      }, CELL_TRANSITION_DURATION);
+      return;
+    }
+
+    startAlignment();
   };
 
   const stopInertia = () => {
     window.cancelAnimationFrame(inertiaFrameRef.current);
     inertiaFrameRef.current = null;
+  };
+
+  const closeActiveCellForInteraction = () => {
+    if (activeCell === null && !isAligningCell) return false;
+
+    const viewport = viewportRef.current;
+
+    if (isAligningCell && viewport) {
+      viewport.scrollTo({ left: viewport.scrollLeft, behavior: "auto" });
+    }
+
+    window.clearTimeout(scrollEndTimerRef.current);
+    window.clearTimeout(openCellTimerRef.current);
+    alignmentRef.current = null;
+    setActiveCell(null);
+    setIsAligningCell(false);
+
+    return true;
   };
 
   const startInertia = (initialVelocity) => {
@@ -213,10 +251,13 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
     const viewport = viewportRef.current;
     if (!viewport || event.pointerType !== "mouse") return;
 
+    const isCellInteraction = event.target.closest(`.${styles.cell}`);
+    const closedActiveCell = isCellInteraction ? false : closeActiveCellForInteraction();
+
     stopInertia();
 
     // Do not retain a previous drag's suppression state for the next click.
-    suppressClickRef.current = false;
+    suppressClickRef.current = closedActiveCell;
     dragRef.current = {
       lastScrollLeft: viewport.scrollLeft,
       lastTime: window.performance.now(),
@@ -237,7 +278,13 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
     const currentTime = window.performance.now();
     const elapsed = currentTime - dragState.lastTime;
 
-    if (Math.abs(distance) > 4) dragState.moved = true;
+    if (Math.abs(distance) > 4 && !dragState.moved) {
+      dragState.moved = true;
+
+      if (closeActiveCellForInteraction()) {
+        suppressClickRef.current = true;
+      }
+    }
     viewport.scrollLeft = nextScrollLeft;
 
     if (elapsed > 0) {
@@ -252,7 +299,7 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
     const dragState = dragRef.current;
     if (!viewport || !dragState) return;
 
-    suppressClickRef.current = dragState.moved;
+    suppressClickRef.current = suppressClickRef.current || dragState.moved;
     dragRef.current = null;
 
     if (dragState.moved) startInertia(dragState.velocity);

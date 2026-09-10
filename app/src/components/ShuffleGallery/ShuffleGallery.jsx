@@ -17,8 +17,8 @@ const getImageAtOffset = (images, index, offset) => {
 
 const isPortrait = (image) => image.width && image.height && image.height > image.width;
 
-const getGalleryMaxHeight = (images, allowPortraitOverflow) => {
-  if (!allowPortraitOverflow) return window.innerHeight;
+const getGalleryMaxHeight = (images, usePortraitPreviewSizing) => {
+  if (!usePortraitPreviewSizing) return window.innerHeight;
 
   const firstImage = images[0];
 
@@ -36,13 +36,13 @@ const getImageWidth = (image, height) => {
 };
 
 const ShuffleGallery = ({
-  allowPortraitOverflow = false,
   className = "",
   eager = false,
   href,
   images = [],
   interactive = true,
   shuffle = true,
+  usePortraitPreviewSizing = false,
 }) => {
   const regionRef = useRef(null);
   const galleryRef = useRef(null);
@@ -137,7 +137,7 @@ const ShuffleGallery = ({
     return () => {
       resizeObserver.disconnect();
     };
-  }, [allowPortraitOverflow, visibleImages]);
+  }, [visibleImages]);
 
   useEffect(() => {
     const updateGallery = () => {
@@ -146,7 +146,7 @@ const ShuffleGallery = ({
 
       if (!region || !gallery) return;
 
-      const maxHeight = Math.max(getGalleryMaxHeight(visibleImages, allowPortraitOverflow), 0);
+      const maxHeight = Math.max(getGalleryMaxHeight(visibleImages, usePortraitPreviewSizing), 0);
       region.style.height = `${maxHeight}px`;
       const regionBox = region.getBoundingClientRect();
       const followingBox = region.nextElementSibling?.getBoundingClientRect();
@@ -184,7 +184,7 @@ const ShuffleGallery = ({
         window.cancelAnimationFrame(loopFrameRef.current);
       }
     };
-  }, [allowPortraitOverflow, visibleImages]);
+  }, [usePortraitPreviewSizing, visibleImages]);
 
   if (!visibleImages.length) return null;
 

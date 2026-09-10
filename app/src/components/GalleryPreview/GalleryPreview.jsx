@@ -1,7 +1,7 @@
 import ShuffleGallery from "@/components/ShuffleGallery/ShuffleGallery";
 import styles from "./GalleryPreview.module.css";
 
-const GalleryPreview = ({ className = "", gallery = [], href }) => {
+const GalleryPreview = ({ className = "", gallery = [], href, usePortraitPreviewSizing = false }) => {
   const images = gallery.map((item) => item?.medium).filter((medium) => medium?.type === "image" && medium.url);
 
   return (
@@ -11,8 +11,8 @@ const GalleryPreview = ({ className = "", gallery = [], href }) => {
       href={href}
       images={images}
       interactive={false}
-      allowPortraitOverflow
       shuffle={false}
+      usePortraitPreviewSizing={usePortraitPreviewSizing}
     />
   );
 };

@@ -7,6 +7,7 @@ import usePageEntryMediaScroll from "@/hooks/usePageEntryMediaScroll";
 import { getAppearances, getProject, getProjects } from "@/lib/sanity";
 import styles from "@/styles/pages/Project.module.scss";
 import { useRef } from "react";
+import Link from "next/link";
 
 import Text from "@/components/Text/Text";
 
@@ -15,7 +16,7 @@ import Carousel from "@/components/Carousel/Carousel";
 const getGalleryImages = (project) =>
   (project.gallery ?? []).map((item) => item?.medium).filter((medium) => medium?.type === "image" && medium.url);
 
-export default function Project({ appearances = [], project }) {
+export default function Project({ appearances = [], nextProject, project }) {
   const galleryImages = getGalleryImages(project);
   const slideshow = project.slideshow ?? [];
   const firstMediaRef = useRef(null);
@@ -43,6 +44,12 @@ export default function Project({ appearances = [], project }) {
               <RepeatMediaGrid className={styles.repeatMediaGrid} gallery={galleryImages} />
             </div>
           ) : null}
+
+          {nextProject?.slug ? (
+            <Link className={styles.nextProject} href={`/projects/${nextProject.slug}`}>
+              <ScaleText className={styles.projectTitle} expandOnEnter letterSpacing={-60} text="See Next" />
+            </Link>
+          ) : null}
         </div>
       </main>
     </div>
@@ -59,8 +66,7 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }) {
-  const project = await getProject(params?.slug);
-  const appearances = await getAppearances();
+  const [project, appearances, projects] = await Promise.all([getProject(params?.slug), getAppearances(), getProjects()]);
 
   if (!project) {
     return {
@@ -68,9 +74,13 @@ export async function getStaticProps({ params }) {
     };
   }
 
+  const projectIndex = projects.findIndex((entry) => entry.slug === project.slug);
+  const nextProject = projectIndex >= 0 && projects.length > 1 ? projects[(projectIndex + 1) % projects.length] : null;
+
   return {
     props: {
       appearances,
+      nextProject,
       project,
     },
     // Keep project pages current without requiring a new Vercel deployment.

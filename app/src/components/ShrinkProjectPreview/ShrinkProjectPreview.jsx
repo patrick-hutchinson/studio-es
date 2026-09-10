@@ -13,7 +13,15 @@ const getAspectRatio = (value) => {
   return Number.isFinite(width) && Number.isFinite(height) && height > 0 ? `${width} / ${height}` : "16 / 9";
 };
 
-const ShrinkProjectPreview = ({ backgroundImage, backgroundMedium, className = "", foregroundMedium, index, href }) => {
+const ShrinkProjectPreview = ({
+  backgroundImage,
+  backgroundMedium,
+  className = "",
+  foregroundMedium,
+  index,
+  href,
+  usePortraitPreviewSizing = false,
+}) => {
   const regionRef = useRef(null);
   const previewRef = useRef(null);
   const loopFrameRef = useRef(null);
@@ -34,7 +42,7 @@ const ShrinkProjectPreview = ({ backgroundImage, backgroundMedium, className = "
 
       if (!region || !preview) return;
 
-      const maxHeight = Math.max(getPreviewMaxHeight(), 0);
+      const maxHeight = usePortraitPreviewSizing ? Math.max(getPreviewMaxHeight(), 0) : window.innerHeight;
       region.style.height = `${maxHeight}px`;
       const regionBox = region.getBoundingClientRect();
       const followingBox = region.nextElementSibling?.getBoundingClientRect();
@@ -48,7 +56,7 @@ const ShrinkProjectPreview = ({ backgroundImage, backgroundMedium, className = "
         preview.style.height = nextHeight;
       }
 
-      if (isPortrait) {
+      if (usePortraitPreviewSizing && isPortrait) {
         preview.style.setProperty("--preview-portrait-width", `${portraitWidth}px`);
       }
 
@@ -77,7 +85,7 @@ const ShrinkProjectPreview = ({ backgroundImage, backgroundMedium, className = "
         window.cancelAnimationFrame(loopFrameRef.current);
       }
     };
-  }, [isPortrait]);
+  }, [isPortrait, usePortraitPreviewSizing]);
 
   const RegionElement = href ? Link : "section";
   const regionProps = href ? { href, prefetch: false } : {};
@@ -91,7 +99,7 @@ const ShrinkProjectPreview = ({ backgroundImage, backgroundMedium, className = "
     >
       <article
         ref={previewRef}
-        className={[styles.preview, isPortrait ? styles.portrait : ""].filter(Boolean).join(" ")}
+        className={[styles.preview, usePortraitPreviewSizing && isPortrait ? styles.portrait : ""].filter(Boolean).join(" ")}
         style={{
           "--preview-background-image": backgroundImage ? `url("${backgroundImage}")` : "none",
           "--preview-media-aspect-ratio": getAspectRatio(foregroundMedium?.aspect_ratio),
