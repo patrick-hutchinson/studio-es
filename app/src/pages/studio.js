@@ -48,9 +48,10 @@ export default function Studio({ appearances = [], projects = [] }) {
               const cover = project.homePageCover || [];
               const medium = cover[0]?.medium;
               const href = project.slug ? `/projects/${project.slug}` : undefined;
+              const code = project.slug?.toUpperCase();
 
               if (cover.length > 1) {
-                return <GalleryPreview gallery={cover} href={href} key={project._id} />;
+                return <GalleryPreview code={code} gallery={cover} href={href} key={project._id} title={project.title} />;
               }
 
               const backgroundImage = getPreviewBackgroundImage(medium);
@@ -59,10 +60,12 @@ export default function Studio({ appearances = [], projects = [] }) {
                 <ShrinkProjectPreview
                   backgroundImage={backgroundImage}
                   backgroundMedium={medium?.type === "image" ? medium : undefined}
+                  code={code}
                   key={project._id}
                   foregroundMedium={medium?.type === "video" ? medium : undefined}
                   index={index}
                   href={href}
+                  title={project.title}
                 />
               );
             })}

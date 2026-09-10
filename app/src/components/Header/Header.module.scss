@@ -4,6 +4,8 @@ header.header {
   padding: var(--margin) 0;
   width: 100%;
   padding: var(--margin);
+  mix-blend-mode: difference;
+  color: #fff;
 
   .nav {
     grid-column: 1 / 13;

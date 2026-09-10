@@ -1,0 +1,30 @@
+.header {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--margin);
+  padding: var(--margin);
+  overflow: hidden;
+  pointer-events: none;
+  color: #fff;
+  mix-blend-mode: difference;
+}
+
+.title,
+.code {
+  display: block;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.code {
+  flex: 0 0 auto;
+  text-align: right;
+}

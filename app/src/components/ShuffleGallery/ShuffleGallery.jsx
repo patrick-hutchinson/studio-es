@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 
+import ProjectPreviewHeader from "@/components/ProjectPreviewHeader/ProjectPreviewHeader";
 import styles from "./ShuffleGallery.module.css";
 
 const INTERVAL = 200;
@@ -37,11 +38,13 @@ const getImageWidth = (image, height) => {
 
 const ShuffleGallery = ({
   className = "",
+  code,
   eager = false,
   href,
   images = [],
   interactive = true,
   shuffle = true,
+  title,
   usePortraitPreviewSizing = false,
 }) => {
   const regionRef = useRef(null);
@@ -223,6 +226,7 @@ const ShuffleGallery = ({
           "--shuffle-item-size": `${layout.itemSize}px`,
         }}
       >
+        <ProjectPreviewHeader code={code} title={title} />
         <div className={styles.track}>
           {items.map(({ image, offset, width }) => {
             return (

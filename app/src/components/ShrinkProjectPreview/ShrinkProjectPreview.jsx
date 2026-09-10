@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 
 import styles from "./ShrinkProjectPreview.module.css";
 import Media from "@/components/Media/Media";
+import ProjectPreviewHeader from "@/components/ProjectPreviewHeader/ProjectPreviewHeader";
 import VideoFrameStrip from "@/components/VideoFrameStrip/VideoFrameStrip";
 import Link from "next/link";
 
@@ -17,9 +18,11 @@ const ShrinkProjectPreview = ({
   backgroundImage,
   backgroundMedium,
   className = "",
+  code,
   foregroundMedium,
   index,
   href,
+  title,
   usePortraitPreviewSizing = false,
 }) => {
   const regionRef = useRef(null);
@@ -105,6 +108,7 @@ const ShrinkProjectPreview = ({
           "--preview-media-aspect-ratio": getAspectRatio(foregroundMedium?.aspect_ratio),
         }}
       >
+        <ProjectPreviewHeader code={code} title={title} />
         {foregroundMedium?.type === "video" ? <VideoFrameStrip medium={foregroundMedium} /> : null}
         {foregroundMedium ? (
           <div className={styles.projectMedia}>

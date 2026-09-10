@@ -1,6 +1,7 @@
 import Description from "@/components/Description/Description";
 import Media from "@/components/Media/Media";
 import MediaSpotlight from "@/components/MediaSpotlight/MediaSpotlight";
+import ProjectSlideshowPreview from "@/components/ProjectSlideshowPreview/ProjectSlideshowPreview";
 import RepeatMediaGrid from "@/components/RepeatMediaGrid/RepeatMediaGrid";
 import ScaleText from "@/components/ScaleText/ScaleText";
 import usePageEntryMediaScroll from "@/hooks/usePageEntryMediaScroll";
@@ -19,6 +20,8 @@ const getGalleryImages = (project) =>
 export default function Project({ appearances = [], nextProject, project }) {
   const galleryImages = getGalleryImages(project);
   const slideshow = project.slideshow ?? [];
+  const singleSlideshowMedium = slideshow.length === 1 ? slideshow[0]?.medium : null;
+  const hasSingleSlideshowPreview = singleSlideshowMedium?.type === "image" || singleSlideshowMedium?.type === "video";
   const firstMediaRef = useRef(null);
 
   usePageEntryMediaScroll(firstMediaRef, project.slug);
@@ -29,7 +32,13 @@ export default function Project({ appearances = [], nextProject, project }) {
       <main className="main">
         <div className="content grid">
           <ScaleText className={styles.projectTitle} text={project.title.toUpperCase()} letterSpacing={-60} />
-          {slideshow.length ? (
+          {hasSingleSlideshowPreview ? (
+            <ProjectSlideshowPreview
+              ref={firstMediaRef}
+              className={styles.entryMedia}
+              medium={singleSlideshowMedium}
+            />
+          ) : slideshow.length ? (
             <div ref={firstMediaRef} className={styles.entryMedia}>
               <Carousel array={slideshow} />
             </div>
