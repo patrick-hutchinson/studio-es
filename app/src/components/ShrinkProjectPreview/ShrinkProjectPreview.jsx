@@ -14,6 +14,8 @@ const getAspectRatio = (value) => {
   return Number.isFinite(width) && Number.isFinite(height) && height > 0 ? `${width} / ${height}` : "16 / 9";
 };
 
+const BACKGROUND_TILE_OVERLAP = 1;
+
 const ShrinkProjectPreview = ({
   backgroundImage,
   backgroundMedium,
@@ -54,6 +56,7 @@ const ShrinkProjectPreview = ({
       const nextHeight = `${height}px`;
       const isPinned = regionBox.top <= 0 && regionBox.bottom > 0 && height > 0;
       const portraitWidth = (window.innerWidth * 0.5 * height) / Math.max(maxHeight, 1);
+      const backgroundAspectRatio = Number(backgroundMedium?.width) / Number(backgroundMedium?.height);
 
       if (preview.style.height !== nextHeight) {
         preview.style.height = nextHeight;
@@ -61,6 +64,12 @@ const ShrinkProjectPreview = ({
 
       if (usePortraitPreviewSizing && isPortrait) {
         preview.style.setProperty("--preview-portrait-width", `${portraitWidth}px`);
+      }
+
+      if (Number.isFinite(backgroundAspectRatio) && backgroundAspectRatio > 0) {
+        preview.style.setProperty("--preview-background-tile-width", `${height * backgroundAspectRatio + BACKGROUND_TILE_OVERLAP}px`);
+      } else {
+        preview.style.removeProperty("--preview-background-tile-width");
       }
 
       if (preview.hasAttribute("data-pinned") !== isPinned) {
@@ -88,7 +97,7 @@ const ShrinkProjectPreview = ({
         window.cancelAnimationFrame(loopFrameRef.current);
       }
     };
-  }, [isPortrait, usePortraitPreviewSizing]);
+  }, [backgroundMedium?.height, backgroundMedium?.width, isPortrait, usePortraitPreviewSizing]);
 
   const RegionElement = href ? Link : "section";
   const regionProps = href ? { href, prefetch: false } : {};

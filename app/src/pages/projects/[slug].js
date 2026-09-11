@@ -50,6 +50,9 @@ export default function Project({ appearances = [], nextProject, project }) {
           ) : null}
 
           <div className={styles.projectInfo}>
+            <div className={styles.projectInfoTitle} typo="h3">
+              {project.title}
+            </div>
             <Text className={styles.description} text={project.description} typo="h3" />
           </div>
 

@@ -20,7 +20,7 @@
   background-image: var(--preview-background-image);
   background-position: top left;
   background-repeat: repeat-x;
-  background-size: auto 100%;
+  background-size: var(--preview-background-tile-width, auto) 100%;
   color: inherit;
   text-decoration: none;
 }
