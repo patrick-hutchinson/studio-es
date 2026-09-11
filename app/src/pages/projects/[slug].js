@@ -58,11 +58,11 @@ export default function Project({ appearances = [], nextProject, project }) {
             </div>
           ) : null}
 
-          {nextProject?.slug ? (
+          {/* {nextProject?.slug ? (
             <Link className={styles.nextProject} href={`/projects/${nextProject.slug}`}>
               <ScaleText className={styles.projectTitle} expandOnEnter letterSpacing={-60} text="See Next" />
             </Link>
-          ) : null}
+          ) : null} */}
         </div>
       </main>
     </div>
