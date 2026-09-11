@@ -37,3 +37,21 @@ export const mediaAssetFragment = `{
     ),
   }
 }`;
+
+export const rasterGalleryAssetFragment = `{
+  "expandable": coalesce(expandable, true),
+  "medium": {
+    "type": select(
+      _type == "rasterGalleryItem" && media[0]._type == "imageAsset" => "image",
+      _type == "rasterGalleryItem" && media[0]._type == "videoAsset" => "video",
+      _type == "imageAsset" => "image",
+      _type == "videoAsset" => "video",
+      true => null
+    ),
+    "_id": coalesce(media[0].file.asset->_id, file.asset->_id),
+    "url": coalesce(media[0].file.asset->url, file.asset->url),
+    "width": coalesce(media[0].file.asset->metadata.dimensions.width, file.asset->metadata.dimensions.width),
+    "height": coalesce(media[0].file.asset->metadata.dimensions.height, file.asset->metadata.dimensions.height),
+    "altText": coalesce(media[0].altText, altText)
+  }
+}`;

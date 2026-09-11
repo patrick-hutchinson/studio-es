@@ -33,7 +33,7 @@ import {site} from './site'
 import {imageAsset} from './types/media/imageAsset'
 import {mediaAsset} from './types/media/mediaAsset'
 import {videoAsset} from './types/media/videoAsset'
-import {mediaGallery} from './types/media/gallery'
+import {mediaGallery, rasterGallery, rasterGalleryItem} from './types/media/gallery'
 
 export const schemaTypes = [
   site,
@@ -73,4 +73,6 @@ export const schemaTypes = [
   mediaAsset,
   videoAsset,
   mediaGallery,
+  rasterGallery,
+  rasterGalleryItem,
 ]

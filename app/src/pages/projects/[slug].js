@@ -15,7 +15,9 @@ import Text from "@/components/Text/Text";
 import Carousel from "@/components/Carousel/Carousel";
 
 const getGalleryImages = (project) =>
-  (project.gallery ?? []).map((item) => item?.medium).filter((medium) => medium?.type === "image" && medium.url);
+  (project.gallery ?? [])
+    .map((item) => ({ ...item?.medium, expandable: item?.expandable !== false }))
+    .filter((medium) => medium?.type === "image" && medium.url);
 
 export default function Project({ appearances = [], nextProject, project }) {
   const galleryImages = getGalleryImages(project);
@@ -54,7 +56,7 @@ export default function Project({ appearances = [], nextProject, project }) {
 
           {galleryImages.length > 1 ? (
             <div ref={slideshow.length ? undefined : firstMediaRef} className={styles.entryMedia}>
-              <Gallery className={styles.Gallery} gallery={galleryImages} />
+              <Gallery className={styles.Gallery} gallery={galleryImages} layout={project.galleryLayout} />
             </div>
           ) : null}
 

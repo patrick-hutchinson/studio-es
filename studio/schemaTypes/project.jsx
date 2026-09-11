@@ -52,8 +52,21 @@ export const project = defineType({
     }),
     defineField({
       name: 'gallery',
-      title: 'Raster Gallerie',
-      type: 'mediaGallery',
+      title: 'Raster Galerie',
+      type: 'rasterGallery',
+    }),
+    defineField({
+      name: 'galleryLayout',
+      title: 'Raster Galerie Layout',
+      type: 'string',
+      initialValue: '4x3',
+      options: {
+        list: [
+          {title: '4 x 3', value: '4x3'},
+          {title: '8 x 6', value: '8x6'},
+        ],
+        layout: 'radio',
+      },
     }),
 
     defineField({

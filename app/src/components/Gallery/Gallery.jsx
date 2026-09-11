@@ -5,18 +5,18 @@ import { DeviceContext } from "@/context/DeviceContext";
 import { useLenisContext } from "@/context/LenisContext";
 import styles from "./Gallery.module.css";
 
-const DESKTOP_CELL_COUNT = 12;
-const MOBILE_CELL_COUNT = 8;
-const DESKTOP_COLUMNS = 4;
-const DESKTOP_ROWS = 3;
-const MOBILE_COLUMNS = 2;
-const MOBILE_ROWS = 4;
+const GALLERY_LAYOUTS = {
+  "4x3": { columns: 4, rows: 3 },
+  "8x6": { columns: 8, rows: 6 },
+};
+const DEFAULT_LAYOUT = "4x3";
+const MOBILE_LAYOUT = { columns: 2, rows: 4 };
 const LOOP_COPY_COUNT = 3;
 const CELL_TRANSITION_DURATION = 550;
 const CELL_ALIGNMENT_DURATION = 600;
 const PAGE_SCROLL_DURATION = 1.3;
 
-const Gallery = ({ gallery = [], className = "" }) => {
+const Gallery = ({ gallery = [], layout = DEFAULT_LAYOUT, className = "" }) => {
   const [activeCell, setActiveCell] = useState(null);
   const [isAligningCell, setIsAligningCell] = useState(false);
   const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
@@ -32,11 +32,15 @@ const Gallery = ({ gallery = [], className = "" }) => {
   const isProgrammaticAlignmentRef = useRef(false);
   const suppressClickRef = useRef(false);
   const images = useMemo(() => gallery.filter((item) => item?.url), [gallery]);
+  const desktopLayout = GALLERY_LAYOUTS[layout] ?? GALLERY_LAYOUTS[DEFAULT_LAYOUT];
+  const gridLayout = isMobile ? MOBILE_LAYOUT : desktopLayout;
+  const columnCount = gridLayout.columns;
+  const rowCount = gridLayout.rows;
 
   const repeatedImages = useMemo(() => {
     if (!images.length) return [];
 
-    const targetCount = isMobile ? MOBILE_CELL_COUNT : DESKTOP_CELL_COUNT;
+    const targetCount = columnCount * rowCount;
 
     return Array.from({ length: targetCount }, (_, index) => {
       const image = images[index % images.length];
@@ -46,10 +50,7 @@ const Gallery = ({ gallery = [], className = "" }) => {
         _repeatKey: `${image._id}-${index}`,
       };
     });
-  }, [images, isMobile]);
-
-  const columnCount = isMobile ? MOBILE_COLUMNS : DESKTOP_COLUMNS;
-  const rowCount = isMobile ? MOBILE_ROWS : DESKTOP_ROWS;
+  }, [columnCount, images, rowCount]);
 
   useEffect(() => {
     const updateViewportSize = () => {
@@ -415,7 +416,8 @@ const Gallery = ({ gallery = [], className = "" }) => {
                           key={image._repeatKey}
                           className={styles.cell}
                           data-active={isActiveCell ? "" : undefined}
-                          onClick={(event) => openCell(copyIndex, index, event)}
+                          disabled={!image.expandable}
+                          onClick={image.expandable ? (event) => openCell(copyIndex, index, event) : undefined}
                           animate={{ height: isActiveColumn ? (isActiveCell ? "100%" : "0%") : defaultRowHeight }}
                           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
                         >

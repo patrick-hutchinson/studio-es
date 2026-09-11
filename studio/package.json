@@ -14,7 +14,8 @@
     "migrate:projects-to-archive": "node --env-file=.env sanity-migrate/migrate-projects-to-archive.mjs",
     "migrate:news-to-archive": "node --env-file=.env sanity-migrate/migrate-news-to-archive.mjs",
     "migrate:posts-to-archive": "node --env-file=.env sanity-migrate/migrate-posts-to-archive.mjs",
-    "migrate:homepage-covers-to-media-gallery": "node --env-file=.env sanity-migrate/migrate-homepage-covers-to-media-gallery.mjs"
+    "migrate:homepage-covers-to-media-gallery": "node --env-file=.env sanity-migrate/migrate-homepage-covers-to-media-gallery.mjs",
+    "migrate:raster-gallery-items": "node --env-file=.env sanity-migrate/migrate-raster-gallery-items.mjs"
   },
   "keywords": [
     "sanity"

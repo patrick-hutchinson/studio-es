@@ -11,6 +11,7 @@ const createKey = () => {
 }
 
 export default function GalleryDropzoneInput(props: ArrayOfObjectsInputProps) {
+  const isRasterGallery = props.schemaType.name === 'rasterGallery'
   const hasMedia = (props.value?.length || 0) > 0
   const inputRef = useRef<HTMLInputElement | null>(null)
   const hadMediaRef = useRef(hasMedia)
@@ -56,7 +57,7 @@ export default function GalleryDropzoneInput(props: ArrayOfObjectsInputProps) {
             uploaded: prev.uploaded + 1,
           }))
 
-          return {
+          const imageAsset = {
             _type: 'imageAsset',
             _key: createKey(),
             file: {
@@ -67,6 +68,17 @@ export default function GalleryDropzoneInput(props: ArrayOfObjectsInputProps) {
               },
             },
           }
+
+          if (isRasterGallery) {
+            return {
+              _type: 'rasterGalleryItem',
+              _key: createKey(),
+              media: [imageAsset],
+              expandable: true,
+            }
+          }
+
+          return imageAsset
         }),
       )
 

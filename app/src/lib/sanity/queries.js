@@ -1,4 +1,4 @@
-import { mediaAssetFragment } from "../fragments";
+import { mediaAssetFragment, rasterGalleryAssetFragment } from "../fragments";
 
 export const siteQuery = `*[_type=="site"][0]{
   title,
@@ -68,7 +68,8 @@ const projectFields = `{
     abbr,
     description
   },
-  gallery[] ${mediaAssetFragment},
+  galleryLayout,
+  gallery[] ${rasterGalleryAssetFragment},
   "slideshow": slideshow[] ${mediaAssetFragment},
   homePageCover[] ${mediaAssetFragment}
 }`;
