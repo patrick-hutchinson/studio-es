@@ -3,7 +3,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { DeviceContext } from "@/context/DeviceContext";
 import { useLenisContext } from "@/context/LenisContext";
-import styles from "./RepeatMediaGrid.module.css";
+import styles from "./Gallery.module.css";
 
 const DESKTOP_CELL_COUNT = 12;
 const MOBILE_CELL_COUNT = 8;
@@ -16,7 +16,7 @@ const CELL_TRANSITION_DURATION = 550;
 const CELL_ALIGNMENT_DURATION = 600;
 const PAGE_SCROLL_DURATION = 1.3;
 
-const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
+const Gallery = ({ gallery = [], className = "" }) => {
   const [activeCell, setActiveCell] = useState(null);
   const [isAligningCell, setIsAligningCell] = useState(false);
   const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
@@ -362,12 +362,12 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
   const defaultRowHeight = `${100 / rowCount}%`;
   const activeMedium = activeCell === null ? null : repeatedImages[activeCell.index];
   const activeAspectRatio = Number(activeMedium?.width) / Number(activeMedium?.height);
-  const activeMediaWidth = Number.isFinite(activeAspectRatio) && viewportSize.height > 0
-    ? Math.min(viewportSize.width, viewportSize.height * activeAspectRatio)
-    : null;
-  const expandedGridWidth = activeMediaWidth === null
-    ? "100vw"
-    : `calc(100vw - ${defaultColumnWidth} + ${activeMediaWidth}px)`;
+  const activeMediaWidth =
+    Number.isFinite(activeAspectRatio) && viewportSize.height > 0
+      ? Math.min(viewportSize.width, viewportSize.height * activeAspectRatio)
+      : null;
+  const expandedGridWidth =
+    activeMediaWidth === null ? "100vw" : `calc(100vw - ${defaultColumnWidth} + ${activeMediaWidth}px)`;
 
   return (
     <section
@@ -398,13 +398,16 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
                   <motion.div
                     key={columnIndex}
                     className={styles.column}
-                    animate={{ width: isActiveColumn && activeMediaWidth !== null ? `${activeMediaWidth}px` : defaultColumnWidth }}
+                    animate={{
+                      width: isActiveColumn && activeMediaWidth !== null ? `${activeMediaWidth}px` : defaultColumnWidth,
+                    }}
                     transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
                   >
                     {Array.from({ length: rowCount }, (_, rowIndex) => {
                       const index = rowIndex * columnCount + columnIndex;
                       const image = repeatedImages[index];
                       const isActiveCell = isActiveColumn && activeRow === rowIndex;
+                      const isPortrait = Number(image.height) > Number(image.width);
 
                       return (
                         <motion.button
@@ -418,7 +421,7 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
                         >
                           <img
                             alt={image.alt || ""}
-                            className={styles.image}
+                            className={[styles.image, isPortrait ? styles.portrait : ""].filter(Boolean).join(" ")}
                             draggable={false}
                             src={image.url}
                           />
@@ -436,4 +439,4 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
   );
 };
 
-export default RepeatMediaGrid;
+export default Gallery;

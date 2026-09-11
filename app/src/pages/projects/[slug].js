@@ -2,7 +2,7 @@ import Description from "@/components/Description/Description";
 import Media from "@/components/Media/Media";
 import MediaSpotlight from "@/components/MediaSpotlight/MediaSpotlight";
 import ProjectSlideshowPreview from "@/components/ProjectSlideshowPreview/ProjectSlideshowPreview";
-import RepeatMediaGrid from "@/components/RepeatMediaGrid/RepeatMediaGrid";
+import Gallery from "@/components/Gallery/Gallery";
 import ScaleText from "@/components/ScaleText/ScaleText";
 import usePageEntryMediaScroll from "@/hooks/usePageEntryMediaScroll";
 import { getAppearances, getProject, getProjects } from "@/lib/sanity";
@@ -38,11 +38,7 @@ export default function Project({ appearances = [], nextProject, project }) {
         <div className="content grid">
           <ScaleText className={styles.projectTitle} text={project.title.toUpperCase()} letterSpacing={-60} />
           {hasSingleSlideshowPreview ? (
-            <ProjectSlideshowPreview
-              ref={firstMediaRef}
-              className={styles.entryMedia}
-              medium={singleSlideshowMedium}
-            />
+            <ProjectSlideshowPreview ref={firstMediaRef} className={styles.entryMedia} medium={singleSlideshowMedium} />
           ) : slideshow.length ? (
             <div ref={firstMediaRef} className={styles.entryMedia}>
               <Carousel array={slideshow} />
@@ -58,7 +54,7 @@ export default function Project({ appearances = [], nextProject, project }) {
 
           {galleryImages.length > 1 ? (
             <div ref={slideshow.length ? undefined : firstMediaRef} className={styles.entryMedia}>
-              <RepeatMediaGrid className={styles.repeatMediaGrid} gallery={galleryImages} />
+              <Gallery className={styles.Gallery} gallery={galleryImages} />
             </div>
           ) : null}
 

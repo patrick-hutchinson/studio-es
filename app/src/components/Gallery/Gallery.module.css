@@ -64,11 +64,15 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: left top;
   transform-origin: left center;
   user-select: none;
   z-index: 1;
+}
+
+.image.portrait {
+  object-fit: contain;
 }
 
 /* .placeholder {
