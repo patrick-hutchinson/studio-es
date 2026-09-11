@@ -28,6 +28,8 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
   const openCellTimerRef = useRef(null);
   const dragRef = useRef(null);
   const inertiaFrameRef = useRef(null);
+  const isLoopNormalizingRef = useRef(false);
+  const isProgrammaticAlignmentRef = useRef(false);
   const suppressClickRef = useRef(false);
   const images = useMemo(() => gallery.filter((item) => item?.url), [gallery]);
 
@@ -85,6 +87,8 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
     if (!viewport || isAligningCell) return undefined;
 
     const repeatTrack = () => {
+      if (isLoopNormalizingRef.current || isProgrammaticAlignmentRef.current) return;
+
       const constellationWidth = viewport.scrollWidth / LOOP_COPY_COUNT;
 
       if (viewport.scrollLeft < constellationWidth * 0.5) {
@@ -106,6 +110,7 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
     if (!viewport || !alignment) return undefined;
 
     const finishAlignment = () => {
+      isProgrammaticAlignmentRef.current = false;
       setActiveCell({ copyIndex: alignment.copyIndex, index: alignment.index });
       setIsAligningCell(false);
     };
@@ -193,13 +198,34 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
     const cell = event.currentTarget;
     const startAlignment = () => {
       const viewportRect = viewport.getBoundingClientRect();
+      const constellationWidth = viewport.scrollWidth / LOOP_COPY_COUNT;
+
+      if (!constellationWidth) return;
+
+      // Recenter to an identical loop position so the next forward target never reaches the finite track edge.
+      const normalizedScrollLeft = ((viewport.scrollLeft % constellationWidth) + constellationWidth) % constellationWidth;
+
+      if (Math.abs(viewport.scrollLeft - normalizedScrollLeft) > 0.5) {
+        isLoopNormalizingRef.current = true;
+        viewport.scrollLeft = normalizedScrollLeft;
+        window.requestAnimationFrame(() => {
+          isLoopNormalizingRef.current = false;
+        });
+      }
+
       const cellRect = cell.getBoundingClientRect();
+      const rawLeft = viewport.scrollLeft + cellRect.left - viewportRect.left;
+      const cellOffset = ((rawLeft % constellationWidth) + constellationWidth) % constellationWidth;
+      const alignedLeft = cellOffset < viewport.scrollLeft ? cellOffset + constellationWidth : cellOffset;
+      const alignedCopyIndex = Math.min(Math.floor(alignedLeft / constellationWidth), LOOP_COPY_COUNT - 1);
 
       alignmentRef.current = {
-        copyIndex,
+        copyIndex: alignedCopyIndex,
         index,
-        left: viewport.scrollLeft + cellRect.left - viewportRect.left,
+        // The visible cell is represented by its next rightward duplicate within the normalized track.
+        left: alignedLeft,
       };
+      isProgrammaticAlignmentRef.current = true;
       setIsAligningCell(true);
     };
     const scrollGridIntoView = () => {
@@ -241,6 +267,7 @@ const RepeatMediaGrid = ({ gallery = [], className = "" }) => {
     window.cancelAnimationFrame(alignmentFrameRef.current);
     window.clearTimeout(openCellTimerRef.current);
     alignmentRef.current = null;
+    isProgrammaticAlignmentRef.current = false;
     setActiveCell(null);
     setIsAligningCell(false);
 

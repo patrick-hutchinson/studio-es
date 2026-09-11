@@ -20,12 +20,15 @@
 }
 
 .carousel_inner {
+  --carousel-slide-overlap: 1px;
   display: flex;
   touch-action: pan-x pinch-zoom;
 }
 .slide {
+  flex: 0 0 auto;
   height: calc(100vw - (4 * var(--margin-page)));
-  margin-right: var(--margin-page);
+  /* The negative end margin is included in Embla's measured track width, including the loop boundary. */
+  margin-right: calc(var(--margin-page, 0px) - var(--carousel-slide-overlap));
 }
 
 @media screen and (min-width: 320px) {
