@@ -26,7 +26,8 @@ export function getProductionClient() {
   if (!productionClient) {
     productionClient = createClient({
       ...config,
-      useCdn: true,
+      // ISR already caches page output. Query Sanity's API directly so each regeneration sees fresh content.
+      useCdn: false,
     });
   }
 
