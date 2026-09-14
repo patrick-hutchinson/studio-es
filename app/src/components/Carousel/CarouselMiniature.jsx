@@ -12,7 +12,7 @@ import { DeviceContext } from "@/context/DeviceContext";
 const AUTO_SCROLL_DELAY = 3000;
 const MINIMUM_PAUSE_DURATION = 10000;
 
-const Carousel = ({ array, onIndexChange }) => {
+const CarouselMiniature = ({ array, onIndexChange }) => {
   const [isDragging, setIsDragging] = useState(false);
   const { isTouch } = useContext(DeviceContext);
   const pauseUntilRef = useRef(0);
@@ -121,7 +121,7 @@ const Carousel = ({ array, onIndexChange }) => {
   if (!media.length) return null;
 
   return (
-    <motion.div className={`${styles.carouselOuter} ${styles.carouselFullscreen}`} ref={emblaRef}>
+    <motion.div className={`${styles.carouselOuter} ${styles.carouselMiniature}`} ref={emblaRef}>
       <div className={`${styles.carouselInner}`}>
         {media.map((item, index) => {
           return (
@@ -135,4 +135,4 @@ const Carousel = ({ array, onIndexChange }) => {
   );
 };
 
-export default Carousel;
+export default CarouselMiniature;

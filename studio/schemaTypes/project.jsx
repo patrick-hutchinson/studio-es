@@ -51,6 +51,11 @@ export const project = defineType({
       type: 'portableText',
     }),
     defineField({
+      name: 'supportingMedia',
+      title: 'Beistellbild/er',
+      type: 'mediaGallery',
+    }),
+    defineField({
       name: 'gallery',
       title: 'Raster Galerie',
       type: 'rasterGallery',

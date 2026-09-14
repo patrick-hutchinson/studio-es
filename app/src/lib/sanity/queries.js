@@ -71,6 +71,7 @@ const projectFields = `{
   galleryLayout,
   gallery[] ${rasterGalleryAssetFragment},
   "slideshow": slideshow[] ${mediaAssetFragment},
+  "supportingMedia": supportingMedia[] ${mediaAssetFragment},
   homePageCover[] ${mediaAssetFragment}
 }`;
 

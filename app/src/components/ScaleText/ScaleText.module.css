@@ -5,12 +5,15 @@
 
 .scaleStage {
   height: var(--content-height);
+  max-height: 100%;
   width: 100%;
+  overflow: hidden;
 }
 
 .scaleContainer {
   position: relative;
   height: var(--content-height);
+  max-height: 100%;
   width: 100%;
   overflow: hidden;
 }

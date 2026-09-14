@@ -63,7 +63,7 @@
   border-bottom: 1px solid #000;
 }
 
-.carousel_outer {
+.carouselOuter {
   max-width: 100vw;
   margin: auto;
   user-select: none;
@@ -71,7 +71,7 @@
   pointer-events: none;
 }
 
-.carousel_inner {
+.carouselInner {
   display: flex;
   width: max-content;
   margin-left: calc(2px * -1);
@@ -85,7 +85,7 @@
   animation-play-state: paused;
 }
 
-.carousel_inner.isAnimating {
+.carouselInner.isAnimating {
   animation-play-state: running;
 }
 

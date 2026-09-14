@@ -61,7 +61,7 @@
   inset: auto;
 }
 
-.carousel_outer {
+.carouselOuter {
   max-width: 100vw;
   margin: auto;
   user-select: none;
@@ -69,7 +69,7 @@
   pointer-events: none;
 }
 
-.carousel_inner {
+.carouselInner {
   display: flex;
   width: max-content;
   margin-left: calc(2px * -1);
@@ -83,7 +83,7 @@
   animation-play-state: paused;
 }
 
-.carousel_inner.isAnimating {
+.carouselInner.isAnimating {
   animation-play-state: running;
 }
 
@@ -93,7 +93,7 @@
   white-space: nowrap;
 }
 
-.carousel_outer.h1 .slide {
+.carouselOuter.h1 .slide {
   padding-left: calc(var(--fontSize-1) / 12);
 }
 

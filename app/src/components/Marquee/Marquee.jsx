@@ -68,10 +68,7 @@ const Marquee = ({ text, className = "", direction = "forward", targetSpeed = MA
       const containerWidth = outer.clientWidth || window.innerWidth || 1;
       const nextItemWidth = measure.scrollWidth || 1;
       const minimumScrollableWidth = containerWidth * MARQUEE_SCROLLABLE_WIDTH_MULTIPLIER;
-      const nextRepeatCount = Math.max(
-        MARQUEE_MIN_REPEAT_COUNT,
-        Math.ceil(minimumScrollableWidth / nextItemWidth) + 1,
-      );
+      const nextRepeatCount = Math.max(MARQUEE_MIN_REPEAT_COUNT, Math.ceil(minimumScrollableWidth / nextItemWidth) + 1);
 
       setItemWidth(nextItemWidth);
       setRepeatCount(nextRepeatCount);
@@ -92,7 +89,7 @@ const Marquee = ({ text, className = "", direction = "forward", targetSpeed = MA
 
   return (
     <div
-      className={`${styles.carousel_outer} ${className}`}
+      className={`${styles.carouselOuter} ${className}`}
       ref={outerRef}
       style={{
         "--marquee-distance": `${itemWidth}px`,
@@ -101,7 +98,7 @@ const Marquee = ({ text, className = "", direction = "forward", targetSpeed = MA
       }}
     >
       <div
-        className={[styles.carousel_inner, isAnimating ? styles.isAnimating : ""].filter(Boolean).join(" ")}
+        className={[styles.carouselInner, isAnimating ? styles.isAnimating : ""].filter(Boolean).join(" ")}
         typo={`${typo} compensate`}
       >
         {slides.map((_, index) => (
@@ -110,7 +107,12 @@ const Marquee = ({ text, className = "", direction = "forward", targetSpeed = MA
           </span>
         ))}
       </div>
-      <div ref={measureRef} className={`${styles.slide} ${styles.measure_slide}`} typo={`${typo} compensate`} aria-hidden="true">
+      <div
+        ref={measureRef}
+        className={`${styles.slide} ${styles.measure_slide}`}
+        typo={`${typo} compensate`}
+        aria-hidden="true"
+      >
         <Text text={text} />
       </div>
     </div>

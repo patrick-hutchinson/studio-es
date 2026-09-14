@@ -354,7 +354,7 @@ const ScaleMarquee = ({
         <div ref={scaleContainerRef} className={styles.scaleContainer} style={style}>
           <div ref={contentRef} className={styles.scaleContent}>
             <div
-              className={`${styles.carousel_outer} ${typo === "h1" ? styles.h1 : ""}`}
+              className={`${styles.carouselOuter} ${typo === "h1" ? styles.h1 : ""}`}
               ref={outerRef}
               style={{
                 "--marquee-distance": `${itemWidth}px`,
@@ -364,7 +364,7 @@ const ScaleMarquee = ({
             >
               <div
                 ref={innerRef}
-                className={[styles.carousel_inner, isAnimating ? styles.isAnimating : ""].filter(Boolean).join(" ")}
+                className={[styles.carouselInner, isAnimating ? styles.isAnimating : ""].filter(Boolean).join(" ")}
                 typo={`${typo} compensate`}
               >
                 {slides.map((_, index) => (

@@ -13,6 +13,7 @@ import Link from "next/link";
 import Text from "@/components/Text/Text";
 
 import Carousel from "@/components/Carousel/Carousel";
+import CarouselMiniature from "@/components/Carousel/CarouselMiniature";
 
 const getGalleryImages = (project) =>
   (project.gallery ?? [])
@@ -22,13 +23,13 @@ const getGalleryImages = (project) =>
 export default function Project({ appearances = [], nextProject, project }) {
   const galleryImages = getGalleryImages(project);
   const slideshow = project.slideshow ?? [];
+  const supportingMedia = project.supportingMedia ?? [];
   const singleSlideshowMedium = slideshow.length === 1 ? slideshow[0]?.medium : null;
   const hasSingleSlideshowPreview = singleSlideshowMedium?.type === "image" || singleSlideshowMedium?.type === "video";
   const firstMediaRef = useRef(null);
 
   usePageEntryMediaScroll(firstMediaRef, project.slug);
 
-  console.log(project.slideshow, "slideshow");
   return (
     <div className="page">
       {project.slug ? (
@@ -51,6 +52,11 @@ export default function Project({ appearances = [], nextProject, project }) {
             <div className={styles.projectInfoTitle} typo="h3">
               {project.title}
             </div>
+            {supportingMedia ? (
+              <div className={styles.carouselMiniature}>
+                <CarouselMiniature array={supportingMedia} />
+              </div>
+            ) : null}
             <Text className={styles.description} text={project.description} typo="h3" />
           </div>
 
@@ -59,12 +65,6 @@ export default function Project({ appearances = [], nextProject, project }) {
               <Gallery className={styles.Gallery} gallery={galleryImages} layout={project.galleryLayout} />
             </div>
           ) : null}
-
-          {/* {nextProject?.slug ? (
-            <Link className={styles.nextProject} href={`/projects/${nextProject.slug}`}>
-              <ScaleText className={styles.projectTitle} expandOnEnter letterSpacing={-60} text="See Next" />
-            </Link>
-          ) : null} */}
         </div>
       </main>
     </div>

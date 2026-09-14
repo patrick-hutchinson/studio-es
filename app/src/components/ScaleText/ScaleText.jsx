@@ -65,31 +65,35 @@ const ScaleText = ({ text, className = "", expandOnEnter = false, fullViewport =
       const paddingTop = getPixelValue(regionStyles.paddingTop);
       const verticalPadding = paddingTop + getPixelValue(regionStyles.paddingBottom);
       const pinTop = paddingTop || margin;
-      const availableHeight = fullViewport ? window.innerHeight : window.innerHeight - margin * 2;
-      // Keep the padded region within the available height instead of adding its block padding on top.
-      const maxHeight = Math.max(availableHeight - verticalPadding, 0);
+      // The stage plus the region's block padding should always occupy one viewport.
+      const intendedStageHeight = Math.max(window.innerHeight - verticalPadding, 0);
+      const intendedStageHeightValue = `${intendedStageHeight}px`;
+
+      if (intendedStageHeightValue !== lastStageHeightRef.current) {
+        stage.style.height = intendedStageHeightValue;
+        lastStageHeightRef.current = intendedStageHeightValue;
+      }
+
+      // Respect any layout constraint on the stage before sizing its child container.
+      const maxHeight = Math.min(intendedStageHeight, stage.clientHeight);
       const contentBottom = fullViewport ? window.innerHeight : window.innerHeight - margin;
+      const shrinkTrigger = contentBottom + pinTop;
       const stageBox = stage.getBoundingClientRect();
       const followingBox = followingElement?.getBoundingClientRect();
       const svg = scaleContainer.querySelector("svg");
       const svgAspectRatio = getSvgAspectRatio(svg);
       const minSvgWidth = svg ? getPixelValue(window.getComputedStyle(svg).minWidth) : 0;
       const minHeight = svgAspectRatio ? minSvgWidth / svgAspectRatio : 0;
-      const shrink = followingBox ? Math.max(contentBottom - followingBox.top, 0) : 0;
+      // Begin shrinking one inset before the following module reaches the stage.
+      const shrink = followingBox ? Math.max(shrinkTrigger - followingBox.top, 0) : 0;
       const entryProgress = Math.min(Math.max((window.innerHeight - stageBox.top) / Math.max(maxHeight, 1), 0), 1);
       const shrinkingHeight = Math.min(Math.max(maxHeight - shrink, minHeight), maxHeight);
       const expandingHeight = Math.min(Math.max(maxHeight * entryProgress, minHeight), maxHeight);
       const nextHeightValue = expandOnEnter ? expandingHeight : shrinkingHeight;
       const nextHeight = `${nextHeightValue}px`;
-      const stageHeight = `${maxHeight}px`;
       const isPinned = !expandOnEnter && stageBox.top <= pinTop && nextHeightValue > 0;
 
       scaleContainer.style.setProperty("--scale-container-top", `${pinTop}px`);
-
-      if (stageHeight !== lastStageHeightRef.current) {
-        stage.style.height = stageHeight;
-        lastStageHeightRef.current = stageHeight;
-      }
 
       if (nextHeight !== lastHeightRef.current) {
         scaleContainer.style.height = nextHeight;

@@ -69,6 +69,15 @@ const convertHeaderImages = (items: LegacyHeaderItem[] = []) =>
     return []
   })
 
+const convertHeaderImagesToRasterGallery = (items: LegacyHeaderItem[] = []) =>
+  convertHeaderImages(items).map((medium) => ({
+    _key: createKey(),
+    _type: 'rasterGalleryItem',
+    // Raster gallery items wrap one media asset, unlike the flat slideshow array.
+    media: [{...medium, _key: createKey()}],
+    expandable: true,
+  }))
+
 const convertDescription = (blocks: Array<Record<string, unknown>> = []) =>
   blocks.map((block) => ({
     ...block,
@@ -111,10 +120,12 @@ export default function ArchivedProjectImportInput(props: ReferenceInputProps) {
       }
 
       const slideshow = convertHeaderImages(archivedProject.headerImages)
+      const gallery = convertHeaderImagesToRasterGallery(archivedProject.headerImages)
       const appearance = convertAppearance(archivedProject.appearance)
       const importedFields = {
         ...(archivedProject.title ? {title: archivedProject.title} : {}),
         ...(slideshow.length ? {slideshow} : {}),
+        ...(gallery.length ? {gallery} : {}),
         ...(archivedProject.descriptionBlocks?.length
           ? {description: convertDescription(archivedProject.descriptionBlocks)}
           : {}),
@@ -155,8 +166,8 @@ export default function ArchivedProjectImportInput(props: ReferenceInputProps) {
         <Stack space={3}>
           <Text size={1}>
             Hiermit kopierst du Titel, Beschreibung, Farbkombination, Metadaten und Kategorien in
-            ein neues Projekt. Die Header Gallerie des archivierten Projekts wird als Slideshow
-            übertragen. Die archivierte Version bleibt wie sie ist! 🌈
+            ein neues Projekt. Die Header Gallerie des archivierten Projekts wird als Slideshow und
+            Raster Galerie übertragen. Die archivierte Version bleibt wie sie ist! 🌈
           </Text>
           <Flex align="center" gap={3} wrap="wrap">
             <Button
