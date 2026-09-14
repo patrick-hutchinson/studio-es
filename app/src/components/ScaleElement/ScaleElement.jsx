@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-import styles from "./ScaleBlock.module.css";
+import styles from "./ScaleElement.module.css";
 
 const getPixelValue = (value) => {
   const number = Number.parseFloat(value);
@@ -31,7 +31,7 @@ const getVerticalFollowingElement = (region) => {
   return null;
 };
 
-const ScaleBlock = ({
+const ScaleElement = ({
   children,
   className = "",
   containerClassName = "",
@@ -127,7 +127,9 @@ const ScaleBlock = ({
     };
 
     const resizeObserver = new ResizeObserver(scheduleUpdate);
-    const observedElements = [regionRef.current, stageRef.current, scaleContainerRef.current, contentRef.current].filter(Boolean);
+    const observedElements = [regionRef.current, stageRef.current, scaleContainerRef.current, contentRef.current].filter(
+      Boolean,
+    );
     const runMeasurementLoop = () => {
       updateScaleHeight();
       loopFrameRef.current = window.requestAnimationFrame(runMeasurementLoop);
@@ -159,7 +161,7 @@ const ScaleBlock = ({
 
   return (
     <div ref={regionRef} className={[styles.scaleRegion, className].filter(Boolean).join(" ")} style={style}>
-        <div ref={stageRef} className={styles.scaleStage}>
+      <div ref={stageRef} className={styles.scaleStage}>
         <div
           ref={scaleContainerRef}
           className={[styles.scaleContainer, containerClassName].filter(Boolean).join(" ")}
@@ -167,7 +169,9 @@ const ScaleBlock = ({
         >
           <div
             ref={contentRef}
-            className={[styles.scaleContent, scaleContent ? styles.scaleContentTransform : "", contentClassName].filter(Boolean).join(" ")}
+            className={[styles.scaleContent, scaleContent ? styles.scaleContentTransform : "", contentClassName]
+              .filter(Boolean)
+              .join(" ")}
           >
             {children}
           </div>
@@ -177,4 +181,4 @@ const ScaleBlock = ({
   );
 };
 
-export default ScaleBlock;
+export default ScaleElement;

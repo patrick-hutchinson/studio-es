@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 
-import styles from "./ProjectPreviewHeader.module.css";
+import styles from "./ProjectHeader.module.css";
 
-const ProjectPreviewHeader = ({ code, title }) => {
+const ProjectHeader = ({ code, title }) => {
   if (!title && !code) return null;
 
   return (
@@ -29,4 +29,4 @@ const ProjectPreviewHeader = ({ code, title }) => {
   );
 };
 
-export default ProjectPreviewHeader;
+export default ProjectHeader;

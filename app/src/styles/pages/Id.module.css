@@ -4,6 +4,16 @@
 
 .scaleText {
   grid-column: 1 / 9;
+  height: 100vh;
+  overflow: visible;
+  padding: var(--margin);
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.scaleText svg {
+  width: auto;
+  max-width: none;
 }
 
 .rowOne {

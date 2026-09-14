@@ -3,8 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import styles from "@/styles/pages/Studio.module.css";
 
 import ScaleText from "@/components/ScaleText/ScaleText";
-import GalleryPreview from "@/components/GalleryPreview/GalleryPreview";
-import ShrinkProjectPreview from "@/components/ShrinkProjectPreview/ShrinkProjectPreview";
+import ScaleMediaStrip from "@/components/ScaleMediaStrip/ScaleMediaStrip";
 import { DEFAULT_COLOR_PAIR, getRandomColorPair } from "@/lib/getRandomColorPair";
 import { getAppearances, getProjects } from "@/lib/sanity";
 import usePageEntryMediaScroll from "@/hooks/usePageEntryMediaScroll";
@@ -24,7 +23,6 @@ export default function Studio({ appearances = [], projects = [] }) {
   console.log(projects, "projects");
   const [colors, setColors] = useState(DEFAULT_COLOR_PAIR);
   const projectsRef = useRef(null);
-  const visibleProjects = projects;
 
   usePageEntryMediaScroll(projectsRef, "studio");
 
@@ -42,33 +40,30 @@ export default function Studio({ appearances = [], projects = [] }) {
     >
       <main className="main">
         <div className="content grid">
-          <ScaleText text="Es" className={styles.scaleText} fullViewport />
+          <ScaleText text="Es" className={styles.scaleText} />
           <div ref={projectsRef} className={styles.projects} data-project-count={projects.length}>
-            {visibleProjects.map((project, index) => {
+            {projects.map((project, index) => {
               const cover = project.homePageCover || [];
               const medium = cover[0]?.medium;
               const href = project.slug ? `/projects/${project.slug}` : undefined;
               const code = project.slug?.toUpperCase();
-
-              if (cover.length > 1) {
-                return <GalleryPreview code={code} gallery={cover} href={href} key={project._id} title={project.title} />;
-              }
-
-              const backgroundImage = getPreviewBackgroundImage(medium);
+              const gallery = cover.length > 1 ? cover : undefined;
 
               return (
-                <ShrinkProjectPreview
-                  backgroundImage={backgroundImage}
-                  backgroundMedium={medium?.type === "image" ? medium : undefined}
+                <ScaleMediaStrip
+                  backgroundImage={gallery ? undefined : getPreviewBackgroundImage(medium)}
+                  backgroundMedium={gallery || medium?.type !== "image" ? undefined : medium}
                   code={code}
-                  key={project._id}
-                  foregroundMedium={medium?.type === "video" ? medium : undefined}
-                  index={index}
+                  foregroundMedium={gallery || medium?.type !== "video" ? undefined : medium}
+                  gallery={gallery}
                   href={href}
+                  index={index}
+                  key={project._id}
                   title={project.title}
                 />
               );
             })}
+            <div className={styles.endCap}>Test</div>
           </div>
         </div>
       </main>

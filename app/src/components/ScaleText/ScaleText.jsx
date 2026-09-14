@@ -37,11 +37,12 @@ const getSvgAspectRatio = (svg) => {
   return width > 0 && height > 0 ? width / height : 0;
 };
 
-const ScaleText = ({ text, className = "", expandOnEnter = false, fullViewport = false, style, letterSpacing = 0 }) => {
+const ScaleText = ({ text, className = "", expandOnEnter = false, style, letterSpacing = 0 }) => {
   const regionRef = useRef(null);
   const stageRef = useRef(null);
   const scaleContainerRef = useRef(null);
   const frameRef = useRef(null);
+  const revealFrameRef = useRef(null);
   const loopFrameRef = useRef(null);
   const timeoutRefs = useRef([]);
   const lastHeightRef = useRef("");
@@ -76,7 +77,7 @@ const ScaleText = ({ text, className = "", expandOnEnter = false, fullViewport =
 
       // Respect any layout constraint on the stage before sizing its child container.
       const maxHeight = Math.min(intendedStageHeight, stage.clientHeight);
-      const contentBottom = fullViewport ? window.innerHeight : window.innerHeight - margin;
+      const contentBottom = window.innerHeight - margin;
       const shrinkTrigger = contentBottom + pinTop;
       const stageBox = stage.getBoundingClientRect();
       const followingBox = followingElement?.getBoundingClientRect();
@@ -111,6 +112,14 @@ const ScaleText = ({ text, className = "", expandOnEnter = false, fullViewport =
       } else {
         scaleContainer.style.left = "";
         scaleContainer.style.width = "";
+      }
+
+      if (!region.hasAttribute("data-ready") && maxHeight > 0) {
+        // Reveal on the following frame, after the measured geometry can paint once.
+        revealFrameRef.current = window.requestAnimationFrame(() => {
+          region.setAttribute("data-ready", "");
+          revealFrameRef.current = null;
+        });
       }
     };
 
@@ -155,11 +164,15 @@ const ScaleText = ({ text, className = "", expandOnEnter = false, fullViewport =
         window.cancelAnimationFrame(frameRef.current);
       }
 
+      if (revealFrameRef.current) {
+        window.cancelAnimationFrame(revealFrameRef.current);
+      }
+
       if (loopFrameRef.current) {
         window.cancelAnimationFrame(loopFrameRef.current);
       }
     };
-  }, [expandOnEnter, fullViewport]);
+  }, [expandOnEnter]);
 
   return (
     <div ref={regionRef} className={[styles.scaleRegion, className].filter(Boolean).join(" ")} style={style}>

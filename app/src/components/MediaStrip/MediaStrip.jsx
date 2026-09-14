@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 
 import Media from "@/components/Media/Media";
 import VideoFrameStrip from "@/components/VideoFrameStrip/VideoFrameStrip";
-import styles from "./ProjectSlideshowPreview.module.css";
+import styles from "./MediaStrip.module.css";
 
 const getAspectRatio = (value) => {
   if (typeof value !== "string") return "16 / 9";
@@ -12,7 +12,7 @@ const getAspectRatio = (value) => {
   return Number.isFinite(width) && Number.isFinite(height) && height > 0 ? `${width} / ${height}` : "16 / 9";
 };
 
-const ProjectSlideshowPreview = forwardRef(function ProjectSlideshowPreview({ className = "", medium }, forwardedRef) {
+const MediaStrip = forwardRef(function MediaStrip({ className = "", medium }, forwardedRef) {
   if (medium?.type !== "image" && medium?.type !== "video") return null;
 
   const isVideo = medium.type === "video";
@@ -36,4 +36,4 @@ const ProjectSlideshowPreview = forwardRef(function ProjectSlideshowPreview({ cl
   );
 });
 
-export default ProjectSlideshowPreview;
+export default MediaStrip;

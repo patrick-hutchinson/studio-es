@@ -1,6 +1,6 @@
 import Text from "@/components/Text/Text";
 import RenderSVG from "@/components/RenderSVG/RenderSVG";
-import ScaleBlock from "@/components/ScaleBlock/ScaleBlock";
+import ScaleElement from "@/components/ScaleElement/ScaleElement";
 
 import Spacing from "@/components/Spacing/Spacing";
 
@@ -32,23 +32,23 @@ const Description = ({ appearance, className = "", colorPair, text }) => {
   return (
     <section className={[styles.description, className].filter(Boolean).join(" ")} style={colorStyle}>
       <Spacing spacing={6} />
-      <ScaleBlock className={`${styles.first}`} scaleContent>
+      <ScaleElement className={`${styles.first}`} scaleContent>
         <p typo="h3">Client: Fotografie im Diskurs</p>
-      </ScaleBlock>
+      </ScaleElement>
 
-      <ScaleBlock scaleContent>
+      <ScaleElement scaleContent>
         <p typo="h3">Id-001-2026</p>
-      </ScaleBlock>
+      </ScaleElement>
 
-      <ScaleBlock className={`${styles.last}`} scaleContent>
+      <ScaleElement className={`${styles.last}`} scaleContent>
         <p typo="h3">Year: 2026</p>
-      </ScaleBlock>
+      </ScaleElement>
 
       <Spacing spacing={2} />
 
-      <ScaleBlock className={styles.textScale} scaleContent>
+      <ScaleElement className={styles.textScale} scaleContent>
         <Text className={styles.text} text={descriptionText} typo="h2" />
-      </ScaleBlock>
+      </ScaleElement>
 
       {/* <Spacing spacing={2} /> */}
     </section>

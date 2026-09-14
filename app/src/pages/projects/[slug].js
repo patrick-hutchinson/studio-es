@@ -1,14 +1,13 @@
-import Description from "@/components/Description/Description";
-import Media from "@/components/Media/Media";
-import MediaSpotlight from "@/components/MediaSpotlight/MediaSpotlight";
-import ProjectSlideshowPreview from "@/components/ProjectSlideshowPreview/ProjectSlideshowPreview";
+import MediaStrip from "@/components/MediaStrip/MediaStrip";
 import Gallery from "@/components/Gallery/Gallery";
 import ScaleText from "@/components/ScaleText/ScaleText";
 import usePageEntryMediaScroll from "@/hooks/usePageEntryMediaScroll";
 import { getAppearances, getProject, getProjects } from "@/lib/sanity";
 import styles from "@/styles/pages/Project.module.scss";
 import { useRef } from "react";
-import Link from "next/link";
+
+import SnapContainer from "@/components/Snap/SnapContainer";
+import SnapElement from "@/components/Snap/SnapElement";
 
 import Text from "@/components/Text/Text";
 
@@ -28,7 +27,7 @@ export default function Project({ appearances = [], nextProject, project }) {
   const hasSingleSlideshowPreview = singleSlideshowMedium?.type === "image" || singleSlideshowMedium?.type === "video";
   const firstMediaRef = useRef(null);
 
-  usePageEntryMediaScroll(firstMediaRef, project.slug);
+  usePageEntryMediaScroll(firstMediaRef, project.slug, { native: true });
 
   return (
     <div className="page">
@@ -40,31 +39,40 @@ export default function Project({ appearances = [], nextProject, project }) {
       <main className="main">
         <div className="content grid">
           <ScaleText className={styles.projectTitle} text={project.title.toUpperCase()} letterSpacing={-60} />
-          {hasSingleSlideshowPreview ? (
-            <ProjectSlideshowPreview ref={firstMediaRef} className={styles.entryMedia} medium={singleSlideshowMedium} />
-          ) : slideshow.length ? (
-            <div ref={firstMediaRef} className={styles.entryMedia}>
-              <Carousel array={slideshow} />
-            </div>
-          ) : null}
 
-          <div className={styles.projectInfo}>
-            <div className={styles.projectInfoTitle} typo="h3">
-              {project.title}
-            </div>
-            {supportingMedia ? (
-              <div className={styles.carouselMiniature}>
-                <CarouselMiniature array={supportingMedia} />
+          <SnapContainer>
+            <SnapElement>
+              {hasSingleSlideshowPreview ? (
+                <MediaStrip ref={firstMediaRef} className={styles.entryMedia} medium={singleSlideshowMedium} />
+              ) : slideshow.length ? (
+                <div ref={firstMediaRef} className={styles.entryMedia}>
+                  <Carousel array={slideshow} />
+                </div>
+              ) : null}
+            </SnapElement>
+
+            <SnapElement>
+              <div className={styles.projectInfo}>
+                <div className={styles.projectInfoTitle} typo="h3">
+                  {project.title}
+                </div>
+                {supportingMedia ? (
+                  <div className={styles.carouselMiniature}>
+                    <CarouselMiniature array={supportingMedia} />
+                  </div>
+                ) : null}
+                <Text className={styles.description} text={project.description} typo="h3" />
               </div>
-            ) : null}
-            <Text className={styles.description} text={project.description} typo="h3" />
-          </div>
+            </SnapElement>
 
-          {galleryImages.length > 1 ? (
-            <div ref={slideshow.length ? undefined : firstMediaRef} className={styles.entryMedia}>
-              <Gallery className={styles.Gallery} gallery={galleryImages} layout={project.galleryLayout} />
-            </div>
-          ) : null}
+            <SnapElement>
+              {galleryImages.length > 1 ? (
+                <div ref={slideshow.length ? undefined : firstMediaRef} className={styles.entryMedia}>
+                  <Gallery className={styles.Gallery} gallery={galleryImages} layout={project.galleryLayout} />
+                </div>
+              ) : null}
+            </SnapElement>
+          </SnapContainer>
         </div>
       </main>
     </div>

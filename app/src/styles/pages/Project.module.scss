@@ -3,6 +3,9 @@
   height: 100vh;
   overflow: visible;
   padding: var(--margin);
+  padding-right: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
 .projectTitle svg {
@@ -28,6 +31,7 @@
 .entryMedia {
   grid-column: 1 / -1;
   width: 100%;
+  display: grid;
 }
 
 .projectInfo {

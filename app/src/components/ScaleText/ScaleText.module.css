@@ -1,6 +1,11 @@
 .scaleRegion {
   width: 100%;
   min-width: 0;
+  visibility: hidden;
+}
+
+.scaleRegion[data-ready] {
+  visibility: visible;
 }
 
 .scaleStage {

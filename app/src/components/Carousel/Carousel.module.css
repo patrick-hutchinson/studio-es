@@ -7,7 +7,7 @@
   cursor: grab;
   overflow: hidden;
   touch-action: pan-x pinch-zoom;
-  overscroll-behavior: contain;
+  /* overscroll-behavior: contain; */
 }
 
 .carouselFullscreen {

@@ -166,7 +166,9 @@ function LenisContextProvider({ children }) {
 }
 
 export default function LenisProvider({ children }) {
+  const router = useRouter();
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const skipLenis = router.pathname === "/projects/[slug]";
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -179,6 +181,10 @@ export default function LenisProvider({ children }) {
       mediaQuery.removeEventListener("change", updatePreference);
     };
   }, []);
+
+  if (skipLenis) {
+    return <LenisContext.Provider value={null}>{children}</LenisContext.Provider>;
+  }
 
   return (
     <ReactLenis
