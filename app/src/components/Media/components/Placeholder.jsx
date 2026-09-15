@@ -12,6 +12,7 @@ const Placeholder = ({ medium, className, isLoaded, onError, onLoad, persistent 
       className={className}
       src={src}
       fill
+      draggable={false}
       loading="eager"
       onError={onError}
       onLoad={onLoad}

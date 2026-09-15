@@ -62,7 +62,10 @@ const getHomepageCoverPreview = (document: ContentDocument) => {
 }
 
 const getDocumentTitle = (document: ContentDocument) => {
-  if (typeof document.title === 'string' && document.title.trim()) return document.title
+  const truncateAnnouncement = (title: string) =>
+    document._type === 'post' && title.length > 25 ? `${title.slice(0, 25)}...` : title
+
+  if (typeof document.title === 'string' && document.title.trim()) return truncateAnnouncement(document.title)
 
   if (Array.isArray(document.title)) {
     const title = document.title
@@ -71,7 +74,7 @@ const getDocumentTitle = (document: ContentDocument) => {
       .join('')
       .trim()
 
-    if (title) return title
+    if (title) return truncateAnnouncement(title)
   }
 
   return 'Untitled'

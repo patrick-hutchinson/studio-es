@@ -1,6 +1,7 @@
 import {defineType, defineField} from 'sanity'
 import {orderRankOrdering} from '@sanity/orderable-document-list'
 import {sharedOrderRankField} from './helpers/sharedOrderRank'
+import {getNextPostCode, postCodeSource} from './helpers/postCode'
 import ArchivedPostImportInput from '../components/ArchivedPostImportInput'
 
 // Keep the former field set independent so archived documents remain editable
@@ -62,6 +63,15 @@ export const post = defineType({
           },
           validation: (Rule) => Rule.required(),
         }),
+        defineField({
+          name: 'slug',
+          title: 'Code',
+          type: 'slug',
+          options: {
+            source: postCodeSource(),
+          },
+          validation: (Rule) => Rule.required(),
+        }),
       ],
     }),
     defineField({
@@ -73,15 +83,24 @@ export const post = defineType({
       type: 'appearance',
     }),
   ],
-  initialValue: async () => ({
-    date: new Date().toISOString().slice(0, 10),
-    category: [
-      {
-        _ref: '6cdcc60d-e006-4005-9822-1d05caf410a7',
-        _type: 'reference',
+  initialValue: async (_, {getClient}) => {
+    const date = new Date().toISOString().slice(0, 10)
+    const code = await getNextPostCode(date, getClient)
+
+    return {
+      date,
+      meta: {
+        year: date,
+        slug: {_type: 'slug', current: code},
       },
-    ],
-  }),
+      category: [
+        {
+          _ref: '6cdcc60d-e006-4005-9822-1d05caf410a7',
+          _type: 'reference',
+        },
+      ],
+    }
+  },
   preview: {
     select: {
       blocks: 'title',

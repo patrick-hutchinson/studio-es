@@ -63,7 +63,7 @@
   cursor: default;
 }
 
-.image {
+.media {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -75,9 +75,20 @@
   z-index: 1;
 }
 
-.image.portrait {
-  object-fit: contain;
-  object-position: left top;
+.media :global(img),
+.media :global(video) {
+  object-position: center;
+  transform-origin: left center;
+  user-select: none;
+}
+
+.media.portrait {
+  transform-origin: left top;
+}
+
+.media.portrait :global(img),
+.media.portrait :global(video) {
+  object-position: left top !important;
 }
 
 /* .placeholder {

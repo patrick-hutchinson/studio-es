@@ -52,6 +52,14 @@ export const rasterGalleryAssetFragment = `{
     "url": coalesce(media[0].file.asset->url, file.asset->url),
     "width": coalesce(media[0].file.asset->metadata.dimensions.width, file.asset->metadata.dimensions.width),
     "height": coalesce(media[0].file.asset->metadata.dimensions.height, file.asset->metadata.dimensions.height),
-    "altText": coalesce(media[0].altText, altText)
+    "altText": coalesce(media[0].altText, altText),
+    "playbackId": coalesce(media[0].file.asset->playbackId, file.asset->playbackId),
+    "aspect_ratio": coalesce(media[0].file.asset->data.aspect_ratio, file.asset->data.aspect_ratio),
+    "staticRenditions": coalesce(
+      media[0].file.asset->static_renditions,
+      media[0].file.asset->data.static_renditions,
+      file.asset->static_renditions,
+      file.asset->data.static_renditions
+    )
   }
 }`;

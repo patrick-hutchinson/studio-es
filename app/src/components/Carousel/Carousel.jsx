@@ -13,13 +13,14 @@ const AUTO_SCROLL_DELAY = 3000;
 const MINIMUM_PAUSE_DURATION = 10000;
 
 const Carousel = ({ array, onIndexChange }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const { isTouch } = useContext(DeviceContext);
+  const { isDesktop, isTouch } = useContext(DeviceContext);
   const pauseUntilRef = useRef(0);
   const dragStartedRef = useRef(false);
   const media = array ?? [];
   const [emblaRef, emblaApi] = useEmblaCarousel(
-    { align: "start", loop: media.length > 1, dragResistance: 1, dragFree: isTouch ? true : false },
+    { align: "start", watchDrag: !isDesktop, dragResistance: 1, dragFree: isTouch ? true : false, loop: media.length > 1 },
     [],
   );
 
@@ -42,6 +43,7 @@ const Carousel = ({ array, onIndexChange }) => {
 
     const updateIndex = () => {
       const index = emblaApi.selectedScrollSnap();
+      setActiveIndex(index);
       onIndexChange?.(index);
     };
 
@@ -83,7 +85,7 @@ const Carousel = ({ array, onIndexChange }) => {
   }, [emblaApi, pauseAutoScroll]);
 
   useEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || isDesktop) return;
 
     const onDragStart = () => {
       dragStartedRef.current = true;
@@ -104,7 +106,27 @@ const Carousel = ({ array, onIndexChange }) => {
       emblaApi.off("pointerUp", onDragEnd);
       emblaApi.off("dragEnd", onDragEnd);
     };
-  }, [emblaApi, pauseAutoScroll]);
+  }, [emblaApi, isDesktop, pauseAutoScroll]);
+
+  const handleDesktopClick = useCallback(
+    (event) => {
+      if (!isDesktop || !emblaApi || media.length < 2) return;
+
+      const interactiveTarget = event.target.closest("a, button, input, select, textarea");
+      if (interactiveTarget) return;
+
+      const { left, width } = event.currentTarget.getBoundingClientRect();
+      pauseAutoScroll();
+
+      if (event.clientX - left < width / 2) {
+        emblaApi.scrollPrev();
+        return;
+      }
+
+      emblaApi.scrollNext();
+    },
+    [emblaApi, isDesktop, media.length, pauseAutoScroll],
+  );
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -121,7 +143,11 @@ const Carousel = ({ array, onIndexChange }) => {
   if (!media.length) return null;
 
   return (
-    <motion.div className={`${styles.carouselOuter} ${styles.carouselFullscreen}`} ref={emblaRef}>
+    <motion.div
+      className={`${styles.carouselOuter} ${styles.carouselFullscreen} ${isDesktop ? styles.desktopClickNavigation : ""}`}
+      onClick={handleDesktopClick}
+      ref={emblaRef}
+    >
       <div className={`${styles.carouselInner}`}>
         {media.map((item, index) => {
           return (
@@ -130,6 +156,9 @@ const Carousel = ({ array, onIndexChange }) => {
             </li>
           );
         })}
+      </div>
+      <div aria-live="polite" className={styles.mediaCounter} typo="h3">
+        {activeIndex + 1}/{media.length}
       </div>
     </motion.div>
   );

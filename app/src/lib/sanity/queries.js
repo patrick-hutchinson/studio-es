@@ -22,6 +22,7 @@ const projectListFields = `{
   _type,
   orderRank,
   title,
+  openable,
   showOnHomepage,
   isActive,
   appearance,
@@ -86,7 +87,7 @@ const projectFields = `{
   homePageCover[] ${mediaAssetFragment}
 }`;
 
-export const projectsQuery = `*[_type=="project" && defined(meta.slug.current)] | order(orderRank asc) ${projectListFields}`;
+export const projectsQuery = `*[_type=="project" && (openable == false || defined(meta.slug.current))] | order(orderRank asc) ${projectListFields}`;
 
 export const projectBySlugQuery = `*[_type=="project" && meta.slug.current==$slug][0] ${projectFields}`;
 

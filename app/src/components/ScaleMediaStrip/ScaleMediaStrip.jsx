@@ -1,9 +1,10 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import styles from "./ScaleMediaStrip.module.css";
 import Media from "@/components/Media/Media";
 import ProjectHeader from "@/components/ProjectHeader/ProjectHeader";
 import VideoFrameStrip from "@/components/VideoFrameStrip/VideoFrameStrip";
+import { useLenisContext } from "@/context/LenisContext";
 import Link from "next/link";
 
 const getAspectRatio = (value) => {
@@ -44,7 +45,7 @@ const ScaleMediaStrip = ({
   const regionRef = useRef(null);
   const previewRef = useRef(null);
   const galleryRef = useRef(null);
-  const loopFrameRef = useRef(null);
+  const lenis = useLenisContext();
   const [galleryLayout, setGalleryLayout] = useState({ itemSize: 0, sideCount: MIN_SIDE_COUNT });
   const galleryImages = useMemo(
     () => gallery.map((item) => item?.medium ?? item).filter((medium) => medium?.type === "image" && medium.url),
@@ -53,13 +54,13 @@ const ScaleMediaStrip = ({
   const hasGallery = galleryImages.length > 0;
   const isPortrait = backgroundMedium?.width && backgroundMedium?.height && backgroundMedium.height > backgroundMedium.width;
 
-  const getPreviewMaxHeight = () => {
+  const getPreviewMaxHeight = useCallback(() => {
     if (!isPortrait) return window.innerHeight;
 
     const portraitHeight = (window.innerWidth * 0.5 * backgroundMedium.height) / backgroundMedium.width;
 
     return Math.max(window.innerHeight, portraitHeight);
-  };
+  }, [backgroundMedium?.height, backgroundMedium?.width, isPortrait]);
 
   useLayoutEffect(() => {
     if (!hasGallery) return undefined;
@@ -94,67 +95,79 @@ const ScaleMediaStrip = ({
     return () => resizeObserver.disconnect();
   }, [galleryImages, hasGallery]);
 
-  useEffect(() => {
-    const updatePreview = () => {
-      const region = regionRef.current;
-      const preview = hasGallery ? galleryRef.current : previewRef.current;
+  const updatePreview = useCallback(() => {
+    const region = regionRef.current;
+    const preview = hasGallery ? galleryRef.current : previewRef.current;
 
-      if (!region || !preview) return;
+    if (!region || !preview) return;
 
-      const maxHeight = usePortraitPreviewSizing ? Math.max(getPreviewMaxHeight(), 0) : window.innerHeight;
-      region.style.height = `${maxHeight}px`;
-      const regionBox = region.getBoundingClientRect();
-      const followingBox = region.nextElementSibling?.getBoundingClientRect();
-      const followingTop = followingBox?.top ?? window.innerHeight;
-      const height = Math.min(Math.max(followingTop, 0), maxHeight);
-      const nextHeight = `${height}px`;
-      const isPinned = regionBox.top <= 0 && regionBox.bottom > 0 && height > 0;
-      const portraitWidth = (window.innerWidth * 0.5 * height) / Math.max(maxHeight, 1);
-      const backgroundAspectRatio = Number(backgroundMedium?.width) / Number(backgroundMedium?.height);
+    const maxHeight = usePortraitPreviewSizing ? Math.max(getPreviewMaxHeight(), 0) : window.innerHeight;
+    region.style.height = `${maxHeight}px`;
+    const regionBox = region.getBoundingClientRect();
+    const followingBox = region.nextElementSibling?.getBoundingClientRect();
+    const followingTop = followingBox?.top ?? window.innerHeight;
+    const height = Math.min(Math.max(followingTop, 0), maxHeight);
+    const nextHeight = `${height}px`;
+    const isPinned = regionBox.top <= 0 && regionBox.bottom > 0 && height > 0;
+    const portraitWidth = (window.innerWidth * 0.5 * height) / Math.max(maxHeight, 1);
+    const backgroundAspectRatio = Number(backgroundMedium?.width) / Number(backgroundMedium?.height);
 
-      if (preview.style.height !== nextHeight) {
-        preview.style.height = nextHeight;
-      }
+    if (preview.style.height !== nextHeight) {
+      preview.style.height = nextHeight;
+    }
 
-      if (usePortraitPreviewSizing && isPortrait) {
-        preview.style.setProperty("--preview-portrait-width", `${portraitWidth}px`);
-      }
+    if (usePortraitPreviewSizing && isPortrait) {
+      preview.style.setProperty("--preview-portrait-width", `${portraitWidth}px`);
+    }
 
-      if (Number.isFinite(backgroundAspectRatio) && backgroundAspectRatio > 0) {
-        preview.style.setProperty(
-          "--preview-background-tile-width",
-          `${height * backgroundAspectRatio + BACKGROUND_TILE_OVERLAP}px`,
-        );
-      } else {
-        preview.style.removeProperty("--preview-background-tile-width");
-      }
+    if (Number.isFinite(backgroundAspectRatio) && backgroundAspectRatio > 0) {
+      preview.style.setProperty(
+        "--preview-background-tile-width",
+        `${height * backgroundAspectRatio + BACKGROUND_TILE_OVERLAP}px`,
+      );
+    } else {
+      preview.style.removeProperty("--preview-background-tile-width");
+    }
 
-      if (preview.hasAttribute("data-pinned") !== isPinned) {
-        preview.toggleAttribute("data-pinned", isPinned);
-      }
+    if (preview.hasAttribute("data-pinned") !== isPinned) {
+      preview.toggleAttribute("data-pinned", isPinned);
+    }
 
-      if (isPinned) {
-        preview.style.left = `${regionBox.left}px`;
-        preview.style.width = `${regionBox.width}px`;
-      } else {
-        preview.style.left = "";
-        preview.style.width = "";
-      }
+    if (isPinned) {
+      preview.style.left = `${regionBox.left}px`;
+      preview.style.width = `${regionBox.width}px`;
+    } else {
+      preview.style.left = "";
+      preview.style.width = "";
+    }
+  }, [backgroundMedium?.height, backgroundMedium?.width, getPreviewMaxHeight, hasGallery, isPortrait, usePortraitPreviewSizing]);
+
+  useLayoutEffect(() => {
+    let frameId = null;
+
+    const scheduleUpdate = () => {
+      if (frameId) return;
+
+      frameId = window.requestAnimationFrame(() => {
+        frameId = null;
+        updatePreview();
+      });
     };
 
-    const runMeasurementLoop = () => {
-      updatePreview();
-      loopFrameRef.current = window.requestAnimationFrame(runMeasurementLoop);
-    };
-
-    loopFrameRef.current = window.requestAnimationFrame(runMeasurementLoop);
+    updatePreview();
+    const unsubscribe = lenis?.on?.("scroll", updatePreview);
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
 
     return () => {
-      if (loopFrameRef.current) {
-        window.cancelAnimationFrame(loopFrameRef.current);
-      }
+      if (typeof unsubscribe === "function") unsubscribe();
+      else lenis?.off?.("scroll", updatePreview);
+
+      window.cancelAnimationFrame(frameId);
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
     };
-  }, [backgroundMedium?.height, backgroundMedium?.width, hasGallery, isPortrait, usePortraitPreviewSizing]);
+  }, [lenis, updatePreview]);
 
   const RegionElement = href ? Link : "section";
   const regionProps = href ? { href, prefetch: false } : {};

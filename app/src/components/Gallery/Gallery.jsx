@@ -3,6 +3,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { DeviceContext } from "@/context/DeviceContext";
 import { useLenisContext } from "@/context/LenisContext";
+import Media from "@/components/Media/Media";
 import styles from "./Gallery.module.css";
 
 const GALLERY_LAYOUTS = {
@@ -15,6 +16,17 @@ const LOOP_COPY_COUNT = 3;
 const CELL_TRANSITION_DURATION = 550;
 const CELL_ALIGNMENT_DURATION = 600;
 const PAGE_SCROLL_DURATION = 1.3;
+
+const getMediumDimensions = (medium) => {
+  const width = Number(medium?.width);
+  const height = Number(medium?.height);
+
+  if (width > 0 && height > 0) return { width, height };
+
+  const [aspectWidth, aspectHeight] = String(medium?.aspect_ratio || "").split(":").map(Number);
+
+  return aspectWidth > 0 && aspectHeight > 0 ? { width: aspectWidth, height: aspectHeight } : { width: 1, height: 1 };
+};
 
 const Gallery = ({ gallery = [], layout = DEFAULT_LAYOUT, className = "" }) => {
   const [activeCell, setActiveCell] = useState(null);
@@ -31,7 +43,10 @@ const Gallery = ({ gallery = [], layout = DEFAULT_LAYOUT, className = "" }) => {
   const isLoopNormalizingRef = useRef(false);
   const isProgrammaticAlignmentRef = useRef(false);
   const suppressClickRef = useRef(false);
-  const images = useMemo(() => gallery.filter((item) => item?.url), [gallery]);
+  const images = useMemo(
+    () => gallery.filter((item) => (item?.type === "image" && item.url) || (item?.type === "video" && item.playbackId)),
+    [gallery],
+  );
   const desktopLayout = GALLERY_LAYOUTS[layout] ?? GALLERY_LAYOUTS[DEFAULT_LAYOUT];
   const gridLayout = isMobile ? MOBILE_LAYOUT : desktopLayout;
   const columnCount = gridLayout.columns;
@@ -362,7 +377,8 @@ const Gallery = ({ gallery = [], layout = DEFAULT_LAYOUT, className = "" }) => {
   const defaultColumnWidth = `${100 / columnCount}vw`;
   const defaultRowHeight = `${100 / rowCount}%`;
   const activeMedium = activeCell === null ? null : repeatedImages[activeCell.index];
-  const activeAspectRatio = Number(activeMedium?.width) / Number(activeMedium?.height);
+  const activeDimensions = getMediumDimensions(activeMedium);
+  const activeAspectRatio = activeDimensions.width / activeDimensions.height;
   const activeMediaWidth =
     Number.isFinite(activeAspectRatio) && viewportSize.height > 0
       ? Math.min(viewportSize.width, viewportSize.height * activeAspectRatio)
@@ -408,7 +424,8 @@ const Gallery = ({ gallery = [], layout = DEFAULT_LAYOUT, className = "" }) => {
                       const index = rowIndex * columnCount + columnIndex;
                       const image = repeatedImages[index];
                       const isActiveCell = isActiveColumn && activeRow === rowIndex;
-                      const isPortrait = Number(image.height) > Number(image.width);
+                      const { height, width } = getMediumDimensions(image);
+                      const isPortrait = height >= width;
 
                       return (
                         <motion.button
@@ -421,11 +438,11 @@ const Gallery = ({ gallery = [], layout = DEFAULT_LAYOUT, className = "" }) => {
                           animate={{ height: isActiveColumn ? (isActiveCell ? "100%" : "0%") : defaultRowHeight }}
                           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
                         >
-                          <img
-                            alt={image.alt || ""}
-                            className={[styles.image, isPortrait ? styles.portrait : ""].filter(Boolean).join(" ")}
-                            draggable={false}
-                            src={image.url}
+                          <Media
+                            className={[styles.media, isPortrait ? styles.portrait : ""].filter(Boolean).join(" ")}
+                            eager
+                            medium={image}
+                            objectFit={isPortrait ? "contain" : "cover"}
                           />
                         </motion.button>
                       );

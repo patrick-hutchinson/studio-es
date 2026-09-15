@@ -1,5 +1,6 @@
 import {defineType, defineField} from 'sanity'
 import {FcNews} from 'react-icons/fc'
+import {postCodeSource} from './helpers/postCode'
 
 // Keep the former field set independent so archived documents remain editable
 // after the active post schema is rebuilt.
@@ -41,6 +42,15 @@ export const legacyPost = defineType({
           type: 'date',
           options: {
             dateFormat: 'YYYY-MM-DD',
+          },
+          validation: (Rule) => Rule.required(),
+        }),
+        defineField({
+          name: 'slug',
+          title: 'Code',
+          type: 'slug',
+          options: {
+            source: postCodeSource(),
           },
           validation: (Rule) => Rule.required(),
         }),

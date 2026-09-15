@@ -18,7 +18,7 @@ import CarouselMiniature from "@/components/Carousel/CarouselMiniature";
 const getGalleryImages = (project) =>
   (project.gallery ?? [])
     .map((item) => ({ ...item?.medium, expandable: item?.expandable !== false }))
-    .filter((medium) => medium?.type === "image" && medium.url);
+    .filter((medium) => (medium?.type === "image" && medium.url) || (medium?.type === "video" && medium.playbackId));
 
 export default function Project({ appearances = [], nextProject, project }) {
   const galleryImages = getGalleryImages(project);
@@ -42,7 +42,12 @@ export default function Project({ appearances = [], nextProject, project }) {
       <main className="main">
         <div className="content grid">
           {showTitle ? (
-            <ScaleText ref={titleRef} className={styles.projectTitle} text={project.slug.toUpperCase()} letterSpacing={-60} />
+            <ScaleText
+              ref={titleRef}
+              className={styles.projectTitle}
+              text={project.slug.toUpperCase()}
+              letterSpacing={-60}
+            />
           ) : null}
 
           <SnapContainer>
@@ -70,13 +75,13 @@ export default function Project({ appearances = [], nextProject, project }) {
               </div>
             </SnapElement>
 
-            <SnapElement>
-              {galleryImages.length > 1 ? (
+            {galleryImages.length > 1 ? (
+              <SnapElement>
                 <div ref={slideshow.length ? undefined : firstMediaRef} className={styles.entryMedia}>
                   <Gallery className={styles.Gallery} gallery={galleryImages} layout={project.galleryLayout} />
                 </div>
-              ) : null}
-            </SnapElement>
+              </SnapElement>
+            ) : null}
           </SnapContainer>
         </div>
       </main>

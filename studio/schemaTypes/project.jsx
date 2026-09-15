@@ -6,11 +6,21 @@ import {Divider} from '../components/Divider'
 import ArchivedProjectImportInput from '../components/ArchivedProjectImportInput'
 import {sharedOrderRankField} from './helpers/sharedOrderRank'
 
+const hideWhenNotOpenable = ({document}) => document?.openable === false
+const requiredWhenOpenable = (value, {document}) =>
+  document?.openable === false || value ? true : 'Required when “Öffenbar?” is enabled.'
+
 export const project = defineType({
   name: 'project',
   title: 'Project',
   type: 'document',
   orderings: [orderRankOrdering],
+  fieldsets: [
+    {
+      name: 'homepageOptions',
+      options: {columns: 2},
+    },
+  ],
   // icon: FcGallery,
 
   fields: [
@@ -20,6 +30,15 @@ export const project = defineType({
       title: 'Auf Startseite anzeigen?',
       initialValue: true,
       type: 'boolean',
+      fieldset: 'homepageOptions',
+    }),
+    defineField({
+      name: 'openable',
+      title: 'Öffenbar?',
+      description: 'Wenn deaktiviert, wird das Projekt auf der Startseite nur als Cover angezeigt.',
+      initialValue: true,
+      type: 'boolean',
+      fieldset: 'homepageOptions',
     }),
     defineField({
       name: 'archivedSource',
@@ -29,12 +48,14 @@ export const project = defineType({
       type: 'reference',
       to: [{type: 'archivedProject'}],
       components: {input: ArchivedProjectImportInput},
+      hidden: hideWhenNotOpenable,
     }),
     defineField({
       name: 'title',
       title: 'Title',
       type: 'string',
-      validation: (Rule) => Rule.required(),
+      hidden: hideWhenNotOpenable,
+      validation: (Rule) => Rule.custom(requiredWhenOpenable),
     }),
 
     defineField({
@@ -46,31 +67,37 @@ export const project = defineType({
       name: 'divider',
       type: 'string',
       components: {field: Divider},
+      hidden: hideWhenNotOpenable,
     }),
     defineField({
       name: 'slideshow',
       title: 'Slideshow (Unterseite)',
       type: 'mediaGallery',
+      hidden: hideWhenNotOpenable,
     }),
     defineField({
       name: 'description',
       type: 'portableText',
+      hidden: hideWhenNotOpenable,
     }),
     defineField({
       name: 'supportingMedia',
       title: 'Beistellbild/er',
       type: 'mediaGallery',
+      hidden: hideWhenNotOpenable,
     }),
     defineField({
       name: 'gallery',
       title: 'Raster Galerie',
       type: 'rasterGallery',
+      hidden: hideWhenNotOpenable,
     }),
     defineField({
       name: 'galleryLayout',
       title: 'Raster Galerie Layout',
       type: 'string',
       initialValue: '4x3',
+      hidden: hideWhenNotOpenable,
       options: {
         list: [
           {title: '4 x 3', value: '4x3'},
@@ -85,17 +112,20 @@ export const project = defineType({
       title: 'Appearance',
       type: 'appearance',
       description: 'Font- & Backgroundcolor for News entries and the Project Page',
+      hidden: hideWhenNotOpenable,
     }),
     defineField({
       name: 'meta',
       type: 'meta',
       description: 'Categories, Project-Number, Year, Slug',
+      hidden: hideWhenNotOpenable,
     }),
 
     defineField({
       name: 'categories',
       title: 'Alle Kategorien (zum Filtern)',
       type: 'array',
+      hidden: hideWhenNotOpenable,
       of: [
         {
           type: 'reference',

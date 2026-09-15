@@ -96,7 +96,7 @@ export default function Studio({ appearances = [], contact = null, projects = []
 
               const cover = project.homePageCover || [];
               const medium = cover[0]?.medium;
-              const href = project.slug ? `/projects/${project.slug}` : undefined;
+              const href = project.openable !== false && project.slug ? `/projects/${project.slug}` : undefined;
               const code = project.slug?.toUpperCase();
               const gallery = cover.length > 1 ? cover : undefined;
 
