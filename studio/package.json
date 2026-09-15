@@ -21,6 +21,7 @@
     "sanity"
   ],
   "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
     "@sanity/client": "^6.28.4",
     "@sanity/color-input": "^4.0.3",
     "@sanity/icons": "^3.7.4",
@@ -28,6 +29,7 @@
     "@sanity/vision": "^4.22.0",
     "chroma-js": "^3.1.2",
     "node-fetch": "^3.3.2",
+    "lexorank": "^1.0.5",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-icons": "^5.4.0",

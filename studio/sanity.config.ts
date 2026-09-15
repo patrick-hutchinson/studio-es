@@ -21,7 +21,10 @@ export default defineConfig({
     }),
     visionTool(),
     colorInput(),
-    muxInput(),
+    muxInput({
+      // Request a downloadable MP4 rendition for every newly uploaded video.
+      static_renditions: ['highest'],
+    }),
     media(),
   ],
   form: {

@@ -1,14 +1,32 @@
 import {defineType, defineField} from 'sanity'
-import {FcNews} from 'react-icons/fc'
+import {orderRankOrdering} from '@sanity/orderable-document-list'
+import {sharedOrderRankField} from './helpers/sharedOrderRank'
+import ArchivedPostImportInput from '../components/ArchivedPostImportInput'
 
 // Keep the former field set independent so archived documents remain editable
 // after the active post schema is rebuilt.
-export const legacyPost = defineType({
+export const post = defineType({
   name: 'post',
   title: 'News Post',
   type: 'document',
-  icon: FcNews,
+  orderings: [orderRankOrdering],
   fields: [
+    defineField({
+      name: 'showOnHomepage',
+      title: 'Auf Startseite anzeigen?',
+      initialValue: true,
+      type: 'boolean',
+    }),
+    sharedOrderRankField(),
+    defineField({
+      name: 'archivedSource',
+      title: 'Archivierten Post importieren',
+      description:
+        'Wähle einen Post aus dem Archiv und klicke dann den Import-Button, um eine neue Kopie anzulegen.',
+      type: 'reference',
+      to: [{type: 'archivedPost'}],
+      components: {input: ArchivedPostImportInput},
+    }),
     defineField({
       name: 'category',
       title: 'Category',
@@ -48,17 +66,7 @@ export const legacyPost = defineType({
     }),
     defineField({
       name: 'title',
-      type: 'array',
-      of: [
-        {
-          type: 'block',
-          styles: [],
-          marks: {
-            decorators: [],
-          },
-        },
-      ],
-      validation: (rule) => rule.required(),
+      type: 'portableText',
     }),
     defineField({
       name: 'appearance',
@@ -67,10 +75,12 @@ export const legacyPost = defineType({
   ],
   initialValue: async () => ({
     date: new Date().toISOString().slice(0, 10),
-    category: {
-      _ref: '6cdcc60d-e006-4005-9822-1d05caf410a7',
-      _type: 'reference',
-    },
+    category: [
+      {
+        _ref: '6cdcc60d-e006-4005-9822-1d05caf410a7',
+        _type: 'reference',
+      },
+    ],
   }),
   preview: {
     select: {
@@ -89,11 +99,8 @@ export const legacyPost = defineType({
 
       return {
         title,
-        subtitle: `${date} | ${category0 || 'No Category'}`,
+        subtitle: `Post: ${date} | ${category0 || 'No Category'}`,
       }
     },
   },
 })
-
-// This continues to power active posts until the replacement schema is ready.
-export const post = legacyPost

@@ -1,9 +1,10 @@
 // import { createHeading } from "./helpers";
 
 import {defineType, defineField} from 'sanity'
-import {orderRankField, orderRankOrdering} from '@sanity/orderable-document-list'
+import {orderRankOrdering} from '@sanity/orderable-document-list'
 import {Divider} from '../components/Divider'
 import ArchivedProjectImportInput from '../components/ArchivedProjectImportInput'
+import {sharedOrderRankField} from './helpers/sharedOrderRank'
 
 export const project = defineType({
   name: 'project',
@@ -13,8 +14,13 @@ export const project = defineType({
   // icon: FcGallery,
 
   fields: [
-    orderRankField({type: 'project'}),
-
+    sharedOrderRankField(),
+    defineField({
+      name: 'showOnHomepage',
+      title: 'Auf Startseite anzeigen?',
+      initialValue: true,
+      type: 'boolean',
+    }),
     defineField({
       name: 'archivedSource',
       title: 'Archiviertes Projekt importieren',

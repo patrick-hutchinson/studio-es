@@ -1,4 +1,4 @@
-const FormatDate = ({ date, className }) => {
+const FormatDate = ({ date, className, typo }) => {
   const d = new Date(date);
   const options = { month: "short", year: "numeric" };
   const monthYear = d.toLocaleDateString("en-US", options);
@@ -11,7 +11,7 @@ const FormatDate = ({ date, className }) => {
 
   const day = getOrdinal(d.getDate());
 
-  return <time className={className}>{`${monthYear.split(" ")[0]} ${day}`}</time>;
+  return <time className={className} typo={typo}>{`${monthYear.split(" ")[0]} ${day}`}</time>;
 };
 
 export default FormatDate;

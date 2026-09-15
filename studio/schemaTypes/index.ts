@@ -16,7 +16,7 @@ import {home} from './home'
 import {intro} from './objects/intro'
 import {meta} from './objects/meta'
 import {news} from './news'
-import {post} from './post'
+import {post} from './post.jsx'
 
 import {legal} from './legal'
 import {person} from './objects/person'

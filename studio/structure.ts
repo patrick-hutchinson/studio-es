@@ -1,6 +1,24 @@
 import type {ConfigContext} from 'sanity'
 import {StructureBuilder} from 'sanity/structure'
-import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
+import MixedContentOrderList from './components/MixedContentOrderList'
+
+const mixedContentFilter = '_type in ["project", "post"]'
+
+const mixedContentList = (S: StructureBuilder) =>
+  Object.assign(
+    S.documentList()
+      .id('projects-and-posts-all')
+      .title('Alle')
+      .filter(mixedContentFilter)
+      .defaultOrdering([{field: 'orderRank', direction: 'asc'}])
+      .serialize(),
+    {
+      __preserveInstance: true,
+      component: MixedContentOrderList,
+      key: 'projects-and-posts-all',
+      type: 'component',
+    },
+  )
 
 export const structure = (S: StructureBuilder, context: ConfigContext) =>
   S.list()
@@ -51,12 +69,35 @@ export const structure = (S: StructureBuilder, context: ConfigContext) =>
       S.listItem()
         .title('Landing Page')
         .child(S.editor().schemaType('home').documentId('b7605842-c2ca-4d2e-aac8-96bd835dd082')),
-      orderableDocumentListDeskItem({
-        type: 'project',
-        title: 'Projects',
-        S,
-        context,
-      }),
+      S.listItem()
+        .title('Projects & Posts')
+        .child(
+          S.list()
+            .title('Projects & Posts')
+            .items([
+              S.listItem()
+                .title('Alle')
+                .child(mixedContentList(S)),
+              S.listItem()
+                .title('Auf der Homepage')
+                .child(
+                  S.documentList()
+                    .id('projects-and-posts-homepage')
+                    .title('Auf der Homepage')
+                    .filter(`${mixedContentFilter} && showOnHomepage == true`)
+                    .defaultOrdering([{field: 'orderRank', direction: 'asc'}]),
+                ),
+              S.listItem()
+                .title('Nicht angezeigt')
+                .child(
+                  S.documentList()
+                    .id('projects-and-posts-hidden')
+                    .title('Nicht angezeigt')
+                    .filter(`${mixedContentFilter} && showOnHomepage == false`)
+                    .defaultOrdering([{field: 'orderRank', direction: 'asc'}]),
+                ),
+            ]),
+        ),
 
       S.divider(),
       S.listItem().title('Kontakt').child(S.editor().schemaType('contact').documentId('contact')),

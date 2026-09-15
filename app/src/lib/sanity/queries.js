@@ -20,7 +20,9 @@ export const siteQuery = `*[_type=="site"][0]{
 const projectListFields = `{
   _id,
   _type,
+  orderRank,
   title,
+  showOnHomepage,
   isActive,
   appearance,
   meta{
@@ -98,4 +100,20 @@ export const contactQuery = `*[_type=="contact"][0]{
   _id,
   text,
   callToAction
+}`;
+
+export const postsQuery = `*[_type=="post"] | order(orderRank asc){
+  _id,
+  _type,
+  orderRank,
+  title,
+  "date": meta.year,
+  appearance,
+  showOnHomepage,
+  category->{
+    _id,
+    title,
+    abbr,
+    description
+  },
 }`;

@@ -1,0 +1,25 @@
+.post {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  padding: var(--margin);
+  overflow: hidden;
+  color: var(--post-foreground);
+  background: var(--post-background);
+  row-gap: var(--spacing-4);
+}
+
+.title {
+  max-width: 100%;
+
+  p {
+    margin: 0;
+  }
+}
+
+.date {
+  display: block;
+}

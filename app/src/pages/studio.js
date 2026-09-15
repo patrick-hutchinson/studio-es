@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import styles from "@/styles/pages/Studio.module.scss";
 
 import ScaleText from "@/components/ScaleText/ScaleText";
 import ScaleMediaStrip from "@/components/ScaleMediaStrip/ScaleMediaStrip";
+import Post from "@/components/Post/Post";
 import { useLenisContext } from "@/context/LenisContext";
 import { DEFAULT_COLOR_PAIR, getRandomColorPair } from "@/lib/getRandomColorPair";
-import { getAppearances, getContact, getProjects } from "@/lib/sanity";
+import { getAppearances, getContact, getPosts, getProjects } from "@/lib/sanity";
 import usePageEntryMediaScroll from "@/hooks/usePageEntryMediaScroll";
 import useScaleTextRemoval from "@/hooks/useScaleTextRemoval";
 import { useRouter } from "next/router";
@@ -24,8 +25,7 @@ const getPreviewBackgroundImage = (medium) => {
   return undefined;
 };
 
-export default function Studio({ appearances = [], contact = null, projects = [] }) {
-  console.log(projects, "projects");
+export default function Studio({ appearances = [], contact = null, projects = [], posts = [] }) {
   const [colors, setColors] = useState(DEFAULT_COLOR_PAIR);
   const projectsRef = useRef(null);
   const endCapRef = useRef(null);
@@ -44,6 +44,10 @@ export default function Studio({ appearances = [], contact = null, projects = []
     [lenis],
   );
   const { isVisible: showTitle, remove: removeTitle, titleRef } = useScaleTextRemoval(compensateTitleRemoval);
+  const content = useMemo(
+    () => [...projects, ...posts].sort((a, b) => (a.orderRank || "~").localeCompare(b.orderRank || "~")).slice(0, PROJECT_COUNT),
+    [posts, projects],
+  );
 
   usePageEntryMediaScroll(projectsRef, "studio", { enabled: !isContactRoute, onComplete: removeTitle });
 
@@ -82,8 +86,14 @@ export default function Studio({ appearances = [], contact = null, projects = []
       <main className="main">
         <div className="content grid">
           {showTitle ? <ScaleText ref={titleRef} text="Es" className={styles.scaleText} letterSpacing={-60} /> : null}
-          <div ref={projectsRef} className={styles.projects} data-project-count={projects.length}>
-            {projects.map((project, index) => {
+          <div ref={projectsRef} className={styles.projects} data-project-count={content.length}>
+            {content.map((project, index) => {
+              const isPost = project._type === "post";
+
+              if (isPost) {
+                return <Post key={project._id} post={project} />;
+              }
+
               const cover = project.homePageCover || [];
               const medium = cover[0]?.medium;
               const href = project.slug ? `/projects/${project.slug}` : undefined;
@@ -119,15 +129,19 @@ export default function Studio({ appearances = [], contact = null, projects = []
 }
 
 export async function getStaticProps() {
-  const projects = (await getProjects()).slice(0, PROJECT_COUNT);
-  const appearances = await getAppearances();
-  const contact = await getContact();
+  const [projects, appearances, contact, posts] = await Promise.all([
+    getProjects(),
+    getAppearances(),
+    getContact(),
+    getPosts(),
+  ]);
 
   return {
     props: {
       appearances,
       contact,
       projects,
+      posts,
     },
     // Refresh static preview and production pages from Sanity at most once per minute.
     revalidate: 5,
