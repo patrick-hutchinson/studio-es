@@ -1,8 +1,6 @@
 import { PortableText } from "@portabletext/react";
 import { cloneElement, isValidElement } from "react";
 
-import Link from "next/link";
-
 const isPortableTextBlockEmpty = (value) => {
   if (!value?.children?.length) return true;
 
@@ -33,6 +31,27 @@ const PortableTextParagraph = ({ children, value }) => {
   return <p>{renderSoftBreaks(children)}</p>;
 };
 
+const getLinkAttributes = (value) => {
+  const type = value?.type || "link";
+
+  if (type === "email") {
+    return value.email ? { href: `mailto:${value.email}` } : null;
+  }
+
+  if (type === "file") {
+    const href = value.file?.asset?.url;
+
+    return href
+      ? {
+          href,
+          download: value.file.asset.originalFilename || true,
+        }
+      : null;
+  }
+
+  return value.url ? { href: value.url } : null;
+};
+
 const Text = ({ text, typo, className, components, style }) => {
   if (!Array.isArray(text)) {
     return text ? (
@@ -54,9 +73,10 @@ const Text = ({ text, typo, className, components, style }) => {
           },
           marks: {
             link: ({ value, children }) => {
-              if (!value) return children;
+              const attributes = getLinkAttributes(value);
+              if (!attributes) return children;
 
-              return <Link link={value}>{children}</Link>;
+              return <a {...attributes}>{children}</a>;
             },
             ...components?.marks,
           },

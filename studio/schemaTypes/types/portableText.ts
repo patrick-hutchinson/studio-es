@@ -1,4 +1,5 @@
 import {defineType, defineArrayMember} from 'sanity'
+import {linkFields} from './link'
 
 export const portableText = defineType({
   name: 'portableText',
@@ -17,6 +18,14 @@ export const portableText = defineType({
         decorators: [
           {title: 'Emphasis', value: 'em'},
           {title: 'Strong', value: 'strong'},
+        ],
+        annotations: [
+          {
+            name: 'link',
+            title: 'Link',
+            type: 'object',
+            fields: linkFields,
+          },
         ],
       },
     }),

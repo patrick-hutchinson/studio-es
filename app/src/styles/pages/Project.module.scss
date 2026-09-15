@@ -16,7 +16,7 @@
 .projectCode {
   position: fixed;
   top: var(--margin);
-  right: var(--margin);
+  left: var(--margin);
   z-index: 1001;
   pointer-events: none;
   color: #fff;

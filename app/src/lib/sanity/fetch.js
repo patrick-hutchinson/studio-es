@@ -1,5 +1,5 @@
 import { getPreviewClient, getProductionClient } from "./client";
-import { appearancesQuery, projectBySlugQuery, projectsQuery, siteQuery } from "./queries";
+import { appearancesQuery, contactQuery, projectBySlugQuery, projectsQuery, siteQuery } from "./queries";
 
 export function getSanityClient() {
   const isProduction = process.env.VERCEL_ENV === "production";
@@ -54,6 +54,10 @@ export async function getAppearances() {
   const appearances = await getSanityClient().fetch(appearancesQuery);
 
   return Array.isArray(appearances) ? appearances : [];
+}
+
+export async function getContact() {
+  return getSanityClient().fetch(contactQuery);
 }
 
 export async function getProject(slug) {

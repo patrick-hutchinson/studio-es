@@ -1,14 +1,19 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import styles from "@/styles/pages/Studio.module.css";
+import styles from "@/styles/pages/Studio.module.scss";
 
 import ScaleText from "@/components/ScaleText/ScaleText";
 import ScaleMediaStrip from "@/components/ScaleMediaStrip/ScaleMediaStrip";
+import { useLenisContext } from "@/context/LenisContext";
 import { DEFAULT_COLOR_PAIR, getRandomColorPair } from "@/lib/getRandomColorPair";
-import { getAppearances, getProjects } from "@/lib/sanity";
+import { getAppearances, getContact, getProjects } from "@/lib/sanity";
 import usePageEntryMediaScroll from "@/hooks/usePageEntryMediaScroll";
+import useScaleTextRemoval from "@/hooks/useScaleTextRemoval";
+import { useRouter } from "next/router";
 
+import Text from "@/components/Text/Text";
 const PROJECT_COUNT = 10;
+const CONTACT_SCROLL_DELAY = 650;
 
 const getPreviewBackgroundImage = (medium) => {
   if (medium?.type === "image") return medium.url;
@@ -19,16 +24,52 @@ const getPreviewBackgroundImage = (medium) => {
   return undefined;
 };
 
-export default function Studio({ appearances = [], projects = [] }) {
+export default function Studio({ appearances = [], contact = null, projects = [] }) {
   console.log(projects, "projects");
   const [colors, setColors] = useState(DEFAULT_COLOR_PAIR);
   const projectsRef = useRef(null);
+  const endCapRef = useRef(null);
+  const lenis = useLenisContext();
+  const router = useRouter();
+  const isContactRoute = router.asPath.includes("contact=1");
+  const compensateTitleRemoval = useCallback(
+    (top) => {
+      if (lenis) {
+        lenis.scrollTo(top, { force: true, immediate: true });
+        return;
+      }
 
-  usePageEntryMediaScroll(projectsRef, "studio");
+      window.scrollTo({ top, behavior: "auto" });
+    },
+    [lenis],
+  );
+  const { isVisible: showTitle, remove: removeTitle, titleRef } = useScaleTextRemoval(compensateTitleRemoval);
+
+  usePageEntryMediaScroll(projectsRef, "studio", { enabled: !isContactRoute, onComplete: removeTitle });
 
   useEffect(() => {
     setColors(getRandomColorPair(appearances));
   }, [appearances]);
+
+  useEffect(() => {
+    if (!isContactRoute || !endCapRef.current) return undefined;
+
+    // Start at the page top, then wait for its transition before the contact scroll.
+    lenis?.scrollTo(0, { force: true, immediate: true });
+    window.scrollTo({ top: 0, behavior: "auto" });
+
+    const timer = window.setTimeout(() => {
+      if (lenis) {
+        lenis.start();
+        lenis.scrollTo(endCapRef.current, { duration: 2, offset: 0, onComplete: removeTitle });
+        return;
+      }
+
+      endCapRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, CONTACT_SCROLL_DELAY);
+
+    return () => window.clearTimeout(timer);
+  }, [isContactRoute, lenis]);
 
   return (
     <div
@@ -40,7 +81,7 @@ export default function Studio({ appearances = [], projects = [] }) {
     >
       <main className="main">
         <div className="content grid">
-          <ScaleText text="Es" className={styles.scaleText} />
+          {showTitle ? <ScaleText ref={titleRef} text="Es" className={styles.scaleText} letterSpacing={-60} /> : null}
           <div ref={projectsRef} className={styles.projects} data-project-count={projects.length}>
             {projects.map((project, index) => {
               const cover = project.homePageCover || [];
@@ -63,7 +104,13 @@ export default function Studio({ appearances = [], projects = [] }) {
                 />
               );
             })}
-            <div className={styles.endCap}>Test</div>
+            <div ref={endCapRef} className={`grid ${styles.contactContainer}`} id="contact">
+              <Text text={contact.text} className={styles.contactText} typo="h3 compensate" />
+              <Text text={contact.callToAction} className={styles.callToAction} typo="h3 compensate" />
+              <div className={styles.copyright} typo="h3 compensate">
+                Studio Es, 2026
+              </div>
+            </div>
           </div>
         </div>
       </main>
@@ -74,10 +121,12 @@ export default function Studio({ appearances = [], projects = [] }) {
 export async function getStaticProps() {
   const projects = (await getProjects()).slice(0, PROJECT_COUNT);
   const appearances = await getAppearances();
+  const contact = await getContact();
 
   return {
     props: {
       appearances,
+      contact,
       projects,
     },
     // Refresh static preview and production pages from Sanity at most once per minute.

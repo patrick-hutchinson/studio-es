@@ -13,6 +13,7 @@ const Header = ({ site = {} }) => {
       <nav className={`${styles.nav} grid`}>
         <Link href="/studio">The Studio</Link>
         <Link href="/id">The ID</Link>
+        <Link href="/studio?contact=1">Contact</Link>
       </nav>
     );
   };

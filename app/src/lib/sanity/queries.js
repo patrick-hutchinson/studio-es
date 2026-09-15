@@ -47,7 +47,16 @@ const projectFields = `{
   _id,
   _type,
   title,
-  description,
+  "description": description[]{
+    ...,
+    markDefs[]{
+      ...,
+      "file": file{
+        ...,
+        asset->{url, originalFilename}
+      }
+    }
+  },
   appearance,
   meta{
     number,
@@ -83,4 +92,10 @@ export const appearancesQuery = `*[_type=="appearanceCombination"] | order(title
   _id,
   title,
   appearance
+}`;
+
+export const contactQuery = `*[_type=="contact"][0]{
+  _id,
+  text,
+  callToAction
 }`;

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 
 import RenderSVG from "@/components/RenderSVG/RenderSVG";
 
@@ -37,7 +37,10 @@ const getSvgAspectRatio = (svg) => {
   return width > 0 && height > 0 ? width / height : 0;
 };
 
-const ScaleText = ({ text, className = "", expandOnEnter = false, style, letterSpacing = 0 }) => {
+const ScaleText = forwardRef(function ScaleText(
+  { text, className = "", expandOnEnter = false, style, letterSpacing = 0 },
+  forwardedRef,
+) {
   const regionRef = useRef(null);
   const stageRef = useRef(null);
   const scaleContainerRef = useRef(null);
@@ -48,6 +51,8 @@ const ScaleText = ({ text, className = "", expandOnEnter = false, style, letterS
   const lastHeightRef = useRef("");
   const lastPinnedRef = useRef(false);
   const lastStageHeightRef = useRef("");
+
+  useImperativeHandle(forwardedRef, () => regionRef.current);
 
   useEffect(() => {
     const updateScaleHeight = () => {
@@ -183,6 +188,6 @@ const ScaleText = ({ text, className = "", expandOnEnter = false, style, letterS
       </div>
     </div>
   );
-};
+});
 
 export default ScaleText;

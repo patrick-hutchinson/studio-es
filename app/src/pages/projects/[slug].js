@@ -2,9 +2,10 @@ import MediaStrip from "@/components/MediaStrip/MediaStrip";
 import Gallery from "@/components/Gallery/Gallery";
 import ScaleText from "@/components/ScaleText/ScaleText";
 import usePageEntryMediaScroll from "@/hooks/usePageEntryMediaScroll";
+import useScaleTextRemoval from "@/hooks/useScaleTextRemoval";
 import { getAppearances, getProject, getProjects } from "@/lib/sanity";
 import styles from "@/styles/pages/Project.module.scss";
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 
 import SnapContainer from "@/components/Snap/SnapContainer";
 import SnapElement from "@/components/Snap/SnapElement";
@@ -26,8 +27,10 @@ export default function Project({ appearances = [], nextProject, project }) {
   const singleSlideshowMedium = slideshow.length === 1 ? slideshow[0]?.medium : null;
   const hasSingleSlideshowPreview = singleSlideshowMedium?.type === "image" || singleSlideshowMedium?.type === "video";
   const firstMediaRef = useRef(null);
+  const compensateTitleRemoval = useCallback((top) => window.scrollTo({ top, behavior: "auto" }), []);
+  const { isVisible: showTitle, remove: removeTitle, titleRef } = useScaleTextRemoval(compensateTitleRemoval);
 
-  usePageEntryMediaScroll(firstMediaRef, project.slug, { native: true });
+  usePageEntryMediaScroll(firstMediaRef, project.slug, { native: true, onComplete: removeTitle });
 
   return (
     <div className="page">
@@ -38,7 +41,9 @@ export default function Project({ appearances = [], nextProject, project }) {
       ) : null}
       <main className="main">
         <div className="content grid">
-          <ScaleText className={styles.projectTitle} text={project.title.toUpperCase()} letterSpacing={-60} />
+          {showTitle ? (
+            <ScaleText ref={titleRef} className={styles.projectTitle} text={project.slug.toUpperCase()} letterSpacing={-60} />
+          ) : null}
 
           <SnapContainer>
             <SnapElement>

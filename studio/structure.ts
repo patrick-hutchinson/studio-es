@@ -6,12 +6,14 @@ export const structure = (S: StructureBuilder, context: ConfigContext) =>
   S.list()
     .title('Content')
     .items([
-      S.listItem().title('Website Settings').child(S.editor().schemaType('site').documentId('site')),
       S.listItem()
-        .title('Design Settings')
+        .title('Website Einstellungen')
+        .child(S.editor().schemaType('site').documentId('site')),
+      S.listItem()
+        .title('Design Einstellungen')
         .child(
           S.list()
-            .title('Design Settings')
+            .title('Design Einstellungen')
             .items([
               S.listItem()
                 .title('Appearance')
@@ -55,6 +57,10 @@ export const structure = (S: StructureBuilder, context: ConfigContext) =>
         S,
         context,
       }),
+
+      S.divider(),
+      S.listItem().title('Kontakt').child(S.editor().schemaType('contact').documentId('contact')),
+
       S.divider(),
       S.listItem()
         .title('Archive')

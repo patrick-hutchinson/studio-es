@@ -34,6 +34,7 @@ import {imageAsset} from './types/media/imageAsset'
 import {mediaAsset} from './types/media/mediaAsset'
 import {videoAsset} from './types/media/videoAsset'
 import {mediaGallery, rasterGallery, rasterGalleryItem} from './types/media/gallery'
+import {contact} from './contact'
 
 export const schemaTypes = [
   site,
@@ -68,7 +69,7 @@ export const schemaTypes = [
   videoCaption,
   portableText,
   link,
-
+  contact,
   imageAsset,
   mediaAsset,
   videoAsset,
