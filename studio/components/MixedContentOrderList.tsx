@@ -126,6 +126,7 @@ const ContentListItem = ({
       <ChildLink
         {...props}
         childId={document._id}
+        childParameters={{type: document._type}}
         style={{...props.style, color: 'inherit', textDecoration: 'none'}}
       />
     ),

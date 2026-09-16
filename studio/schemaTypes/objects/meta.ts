@@ -72,72 +72,72 @@ export const meta = defineType({
       },
       validation: (Rule) => Rule.required(),
     }),
-    defineField({
-      name: 'tags',
-      title: 'Badge',
-      type: 'array',
-      of: [{type: 'string'}],
-      hidden: true,
-    }),
-    defineField({
-      name: 'searchtag',
-      title: 'Search Tags',
-      description: 'Only used for searching projects',
-      type: 'array',
-      hidden: true,
-      of: [
-        {
-          type: 'reference',
-          to: [{type: 'category'}],
-          options: {
-            filter: ({document}) => {
-              // Always make sure to check for document properties
-              // before attempting to use them
-              if (!document.meta.category) {
-                return {
-                  filter: 'defined(parent)',
-                }
-              }
-              return {
-                filter: 'defined(parent._ref)',
-                // filter: 'parent._ref == $category',
-                // params: {category: document.meta.category._ref}
-              }
-            },
-          },
-        },
-      ],
-    }),
-    defineField({
-      name: 'location',
-      title: 'Location',
-      type: 'string',
-      fieldset: 'meta-2',
-      hidden: true,
-    }),
-    defineField({
-      name: 'client',
-      title: 'Client',
-      type: 'string',
-      fieldset: 'meta-2',
-      hidden: true,
-    }),
-    defineField({
-      name: 'team',
-      title: 'Team',
-      type: 'array',
-      of: [{type: 'person'}],
-      fieldset: 'meta-2',
-      hidden: true,
-    }),
-    defineField({
-      name: 'awards',
-      title: 'Awards',
-      type: 'array',
-      fieldset: 'meta-2',
-      of: [{type: 'text', rows: 3}],
-      hidden: true,
-    }),
+    // defineField({
+    //   name: 'tags',
+    //   title: 'Badge',
+    //   type: 'array',
+    //   of: [{type: 'string'}],
+    //   hidden: true,
+    // }),
+    // defineField({
+    //   name: 'searchtag',
+    //   title: 'Search Tags',
+    //   description: 'Only used for searching projects',
+    //   type: 'array',
+    //   hidden: true,
+    //   of: [
+    //     {
+    //       type: 'reference',
+    //       to: [{type: 'category'}],
+    //       options: {
+    //         filter: ({document}) => {
+    //           // Always make sure to check for document properties
+    //           // before attempting to use them
+    //           if (!document.meta.category) {
+    //             return {
+    //               filter: 'defined(parent)',
+    //             }
+    //           }
+    //           return {
+    //             filter: 'defined(parent._ref)',
+    //             // filter: 'parent._ref == $category',
+    //             // params: {category: document.meta.category._ref}
+    //           }
+    //         },
+    //       },
+    //     },
+    //   ],
+    // }),
+    // defineField({
+    //   name: 'location',
+    //   title: 'Location',
+    //   type: 'string',
+    //   fieldset: 'meta-2',
+    //   hidden: true,
+    // }),
+    // defineField({
+    //   name: 'client',
+    //   title: 'Client',
+    //   type: 'string',
+    //   fieldset: 'meta-2',
+    //   hidden: true,
+    // }),
+    // defineField({
+    //   name: 'team',
+    //   title: 'Team',
+    //   type: 'array',
+    //   of: [{type: 'person'}],
+    //   fieldset: 'meta-2',
+    //   hidden: true,
+    // }),
+    // defineField({
+    //   name: 'awards',
+    //   title: 'Awards',
+    //   type: 'array',
+    //   fieldset: 'meta-2',
+    //   of: [{type: 'text', rows: 3}],
+    //   hidden: true,
+    // }),
   ],
   options: {
     collapsible: true, // Makes the whole fieldset collapsible

@@ -20,6 +20,9 @@ body * {
 }
 
 :root {
+  --overshoot: 0.2em;
+  // --undershoot: 0.28em;
+
   --fontSize-1: clamp(20rem, calc(22.3547vw + 2.808rem), 35rem);
   --lineHeight-1: 1;
   --letterSpacing-1: clamp(-2rem, calc(-1.2774vw - 0.1605rem), -1.1429rem);
@@ -59,9 +62,7 @@ h2 p,
 }
 
 [typo~="h2"][typo~="compensate"] {
-  --h2-overshoot: 0.18em;
-
-  margin-top: calc(var(--h2-overshoot) * -1);
+  margin-top: calc(var(--overshoot) * -1);
 }
 
 h3,
@@ -76,11 +77,8 @@ h3 p,
 }
 
 [typo~="h3"][typo~="compensate"] {
-  --h3-overshoot: 0.18em;
-  --h3-undershoot: 0.18em;
-
-  margin-bottom: calc(var(--h3-undershoot) * -1) !important;
-  margin-top: calc(var(--h3-overshoot) * -1);
+  margin-bottom: calc(var(--undershoot) * -1) !important;
+  margin-top: calc(var(--overshoot) * -1);
 }
 
 /* Tablets */

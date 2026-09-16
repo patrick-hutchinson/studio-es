@@ -8,9 +8,10 @@ const mixedContentList = (S: StructureBuilder) =>
   Object.assign(
     S.documentList()
       .id('projects-and-posts-all')
-      .title('Alle')
+      .title('Projects & Posts')
       .filter(mixedContentFilter)
       .defaultOrdering([{field: 'orderRank', direction: 'asc'}])
+      .child((documentId, {params}) => S.document().documentId(documentId).schemaType(params.type || 'project'))
       .serialize(),
     {
       __preserveInstance: true,
@@ -71,33 +72,7 @@ export const structure = (S: StructureBuilder, context: ConfigContext) =>
         .child(S.editor().schemaType('home').documentId('b7605842-c2ca-4d2e-aac8-96bd835dd082')),
       S.listItem()
         .title('Projects & Posts')
-        .child(
-          S.list()
-            .title('Projects & Posts')
-            .items([
-              S.listItem()
-                .title('Alle')
-                .child(mixedContentList(S)),
-              S.listItem()
-                .title('Auf der Homepage')
-                .child(
-                  S.documentList()
-                    .id('projects-and-posts-homepage')
-                    .title('Auf der Homepage')
-                    .filter(`${mixedContentFilter} && showOnHomepage == true`)
-                    .defaultOrdering([{field: 'orderRank', direction: 'asc'}]),
-                ),
-              S.listItem()
-                .title('Nicht angezeigt')
-                .child(
-                  S.documentList()
-                    .id('projects-and-posts-hidden')
-                    .title('Nicht angezeigt')
-                    .filter(`${mixedContentFilter} && showOnHomepage == false`)
-                    .defaultOrdering([{field: 'orderRank', direction: 'asc'}]),
-                ),
-            ]),
-        ),
+        .child(mixedContentList(S)),
 
       S.divider(),
       S.listItem().title('Kontakt').child(S.editor().schemaType('contact').documentId('contact')),

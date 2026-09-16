@@ -6,7 +6,7 @@ const ProjectHeader = ({ code, title }) => {
   if (!title && !code) return null;
 
   return (
-    <div className={styles.header} aria-hidden="true" typo="h3">
+    <div className={styles.header} aria-hidden="true" typo="h3 compensate">
       <motion.span
         className={styles.title}
         initial={{ y: "-120%" }}

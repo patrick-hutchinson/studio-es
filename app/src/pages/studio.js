@@ -13,7 +13,6 @@ import useScaleTextRemoval from "@/hooks/useScaleTextRemoval";
 import { useRouter } from "next/router";
 
 import Text from "@/components/Text/Text";
-const PROJECT_COUNT = 10;
 const CONTACT_SCROLL_DELAY = 650;
 
 const getPreviewBackgroundImage = (medium) => {
@@ -45,8 +44,7 @@ export default function Studio({ appearances = [], contact = null, projects = []
   );
   const { isVisible: showTitle, remove: removeTitle, titleRef } = useScaleTextRemoval(compensateTitleRemoval);
   const content = useMemo(
-    () =>
-      [...projects, ...posts].sort((a, b) => (a.orderRank || "~").localeCompare(b.orderRank || "~")).slice(0, PROJECT_COUNT),
+    () => [...projects, ...posts].sort((a, b) => (a.orderRank || "~").localeCompare(b.orderRank || "~")),
     [posts, projects],
   );
 

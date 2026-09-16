@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const spacingKeys = ["1", "2", "3", "4", "5", "6", "7", "8"];
 const overlayId = "spacing-debug-overlay";
@@ -375,8 +375,41 @@ function getInitialEnabledState() {
 }
 
 const SpacingDebugOverlay = () => {
+  const [isEnabled, setIsEnabled] = useState(false);
+
   useEffect(() => {
-    if (!getInitialEnabledState()) return undefined;
+    setIsEnabled(getInitialEnabledState());
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      const target = event.target;
+      const isTyping = target instanceof HTMLElement && target.closest("input, textarea, select, [contenteditable='true']");
+
+      if (event.key.toLowerCase() !== "r" || event.metaKey || event.ctrlKey || event.altKey || isTyping) return;
+
+      setIsEnabled((current) => {
+        const next = !current;
+
+        if (next) {
+          window.localStorage.setItem("spacingDebug", "1");
+          document.documentElement.dataset.spacingDebug = "true";
+        } else {
+          window.localStorage.removeItem("spacingDebug");
+          delete document.documentElement.dataset.spacingDebug;
+        }
+
+        return next;
+      });
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    if (!isEnabled) return undefined;
 
     let animationFrame = null;
 
@@ -416,7 +449,7 @@ const SpacingDebugOverlay = () => {
       document.getElementById(overlayId)?.remove();
       delete document.documentElement.dataset.spacingDebug;
     };
-  }, []);
+  }, [isEnabled]);
 
   return null;
 };
