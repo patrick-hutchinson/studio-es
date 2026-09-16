@@ -62,7 +62,7 @@ export default function Project({ appearances = [], nextProject, project }) {
             </SnapElement>
 
             <SnapElement>
-              <div className={styles.projectInfo}>
+              <div className={styles.projectInfo} hide-header="">
                 <div className={styles.projectInfoTitle} typo="h3">
                   {project.title}
                 </div>

@@ -113,7 +113,7 @@ export default function Studio({ appearances = [], contact = null, projects = []
                 />
               );
             })}
-            <div ref={endCapRef} className={`grid ${styles.contactContainer}`} id="contact">
+            <div ref={endCapRef} className={`grid ${styles.contactContainer}`} id="contact" hide-header="">
               <Text text={contact.text} className={styles.contactText} typo="h3 compensate" />
               <Text text={contact.callToAction} className={styles.callToAction} typo="h3 compensate" />
               <div className={styles.copyright} typo="h3 compensate">
