@@ -8,7 +8,7 @@ import Placeholder from "../Placeholder";
 
 import styles from "../../Media.module.css";
 
-const VideoFrame = ({ medium, className, eager = false, objectFit = "cover", paused, showPlaceholder = true }) => {
+const VideoFrame = ({ medium, className, eager = false, objectFit = "cover", paused, placeholderColor, showPlaceholder = true }) => {
   const videoRef = useRef(null);
 
   const [isLoaded, setIsLoaded] = useState(false);
@@ -32,7 +32,7 @@ const VideoFrame = ({ medium, className, eager = false, objectFit = "cover", pau
         className={styles.videoPlayer}
         style={{ aspectRatio: objectFit === "cover" ? aspectRatio : undefined }}
       >
-        {showPlaceholder ? <Placeholder medium={medium} aspectRatio={aspectRatio} isLoaded={isLoaded} /> : null}
+        {showPlaceholder ? <Placeholder medium={medium} aspectRatio={aspectRatio} isLoaded={isLoaded} placeholderColor={placeholderColor} /> : null}
         <Video
           medium={medium}
           objectFit={objectFit}

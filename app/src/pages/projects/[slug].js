@@ -1,4 +1,5 @@
 import MediaStrip from "@/components/MediaStrip/MediaStrip";
+import { MediaPlaceholderProvider } from "@/components/Media/MediaPlaceholderContext";
 import Gallery from "@/components/Gallery/Gallery";
 import ScaleText from "@/components/ScaleText/ScaleText";
 import usePageEntryMediaScroll from "@/hooks/usePageEntryMediaScroll";
@@ -33,7 +34,8 @@ export default function Project({ appearances = [], nextProject, project }) {
   usePageEntryMediaScroll(firstMediaRef, project.slug, { native: true, onComplete: removeTitle });
 
   return (
-    <div className="page">
+    <MediaPlaceholderProvider color={project.appearance?.background?.hex}>
+      <div className="page">
       {project.slug ? (
         <div className={styles.projectCode} typo="h3">
           {project.slug.toUpperCase()}
@@ -85,7 +87,8 @@ export default function Project({ appearances = [], nextProject, project }) {
           </SnapContainer>
         </div>
       </main>
-    </div>
+      </div>
+    </MediaPlaceholderProvider>
   );
 }
 

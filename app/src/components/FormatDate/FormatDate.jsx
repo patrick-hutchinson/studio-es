@@ -1,17 +1,18 @@
 const FormatDate = ({ date, className, typo }) => {
-  const d = new Date(date);
-  const options = { month: "short", year: "numeric" };
-  const monthYear = d.toLocaleDateString("en-US", options);
+  const [year, month, day] = String(date).slice(0, 10).split("-").map(Number);
 
-  function getOrdinal(n) {
-    const s = ["th", "st", "nd", "rd"];
-    const v = n % 100;
-    return n + (s[(v - 20) % 10] || s[v] || s[0]);
-  }
+  if (!year || !month || !day) return null;
 
-  const day = getOrdinal(d.getDate());
+  const yearStart = Date.UTC(year, 0, 1);
+  const dateInYear = Date.UTC(year, month - 1, day);
+  const dayOfYear = Math.floor((dateInYear - yearStart) / 86_400_000) + 1;
+  const code = `C-${String(dayOfYear).padStart(3, "0")}-${String(year).slice(-2)}`;
 
-  return <time className={className} typo={typo}>{`${monthYear.split(" ")[0]} ${day}`}</time>;
+  return (
+    <time className={className} dateTime={String(date).slice(0, 10)} typo={typo}>
+      {code}
+    </time>
+  );
 };
 
 export default FormatDate;
