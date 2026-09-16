@@ -8,7 +8,7 @@ const Post = ({ post }) => {
 
   return (
     <article className={styles.post} style={{ "--post-background": background, "--post-foreground": foreground }}>
-      {post.date ? <FormatDate className={styles.date} date={post.date} typo="h3" /> : null}
+      {/* {post.date ? <FormatDate className={styles.date} date={post.date} typo="h3" /> : null} */}
       <Text className={styles.title} text={post.title} typo="h2" />
     </article>
   );

@@ -45,7 +45,8 @@ export default function Studio({ appearances = [], contact = null, projects = []
   );
   const { isVisible: showTitle, remove: removeTitle, titleRef } = useScaleTextRemoval(compensateTitleRemoval);
   const content = useMemo(
-    () => [...projects, ...posts].sort((a, b) => (a.orderRank || "~").localeCompare(b.orderRank || "~")).slice(0, PROJECT_COUNT),
+    () =>
+      [...projects, ...posts].sort((a, b) => (a.orderRank || "~").localeCompare(b.orderRank || "~")).slice(0, PROJECT_COUNT),
     [posts, projects],
   );
 
