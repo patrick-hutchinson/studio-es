@@ -13,8 +13,10 @@ const PROGRAMMATIC_SCROLL_LOCK_EVENT = "neverathome:programmatic-scroll-lock";
 
 export const useLenisContext = () => useContext(LenisContext);
 
-function LenisContextProvider({ children }) {
-  const lenis = useLenis();
+function LenisContextProvider({ children, nativeScroll = false }) {
+  const lenisInstance = useLenis();
+  // Keep the provider tree stable while allowing slug pages to use native scroll snap.
+  const lenis = nativeScroll ? null : lenisInstance;
   const router = useRouter();
   const resetTimers = useRef([]);
   const isProgrammaticScrollLockedRef = useRef(false);
@@ -168,7 +170,7 @@ function LenisContextProvider({ children }) {
 export default function LenisProvider({ children }) {
   const router = useRouter();
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const skipLenis = router.pathname === "/projects/[slug]";
+  const nativeScroll = router.pathname === "/projects/[slug]";
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -182,17 +184,17 @@ export default function LenisProvider({ children }) {
     };
   }, []);
 
-  if (skipLenis) {
-    return <LenisContext.Provider value={null}>{children}</LenisContext.Provider>;
-  }
-
   return (
     <ReactLenis
       root
-      autoRaf={!prefersReducedMotion}
-      options={{ stopInertiaOnNavigate: true, syncTouch: !prefersReducedMotion }}
+      autoRaf={!prefersReducedMotion && !nativeScroll}
+      options={{
+        smoothWheel: !nativeScroll,
+        stopInertiaOnNavigate: true,
+        syncTouch: !nativeScroll && !prefersReducedMotion,
+      }}
     >
-      <LenisContextProvider>{children}</LenisContextProvider>
+      <LenisContextProvider nativeScroll={nativeScroll}>{children}</LenisContextProvider>
     </ReactLenis>
   );
 }
