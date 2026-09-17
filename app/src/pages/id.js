@@ -20,9 +20,9 @@ export default function Index() {
     <div className={`page ${styles.page}`}>
       <main className="main">
         <div className="content grid">
-          <ScaleText text="Id" className={`${styles.scaleText} ${styles.rowOne}`} />
-          <ScaleText text="P" className={`${styles.scaleText} ${styles.rowTwo}`} />
-          <ScaleText text="D" className={`${styles.scaleText} ${styles.rowThree}`} />
+          <ScaleText text="Id" className={`${styles.scaleText} ${styles.rowOne}`} letterSpacing={-60} />
+          <ScaleText text="P" className={`${styles.scaleText} ${styles.rowTwo}`} letterSpacing={-60} />
+          <ScaleText text="D" className={`${styles.scaleText} ${styles.rowThree}`} letterSpacing={-60} />
           <div className={styles.aboutText} typo="h3">
             <div className={styles.aboutTextInner}>
               The Studio Studio Es is an independent design practice based in Vienna, creating visual identities,

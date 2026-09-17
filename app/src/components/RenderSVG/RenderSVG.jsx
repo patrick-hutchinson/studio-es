@@ -96,12 +96,27 @@ const getPathWithLetterSpacing = (font, text, letterSpacing, fontSize) => {
   return path;
 };
 
-const RenderSVG = ({ text, className = "", fontSize = DEFAULT_SVG_FONT_SIZE, fontUrl, fontUrls = DEFAULT_FONT_URLS, letterSpacing = 0, padding = 0 }) => {
+const RenderSVG = ({
+  text,
+  className = "",
+  fontSize = DEFAULT_SVG_FONT_SIZE,
+  fontUrl,
+  fontUrls = DEFAULT_FONT_URLS,
+  letterSpacing = 0,
+  onReady,
+  padding = 0,
+}) => {
   const [outline, setOutline] = useState(null);
   const resolvedFontUrls = useMemo(() => (fontUrl ? [fontUrl] : fontUrls), [fontUrl, fontUrls]);
 
   useEffect(() => {
     let isMounted = true;
+    let readyFrame;
+    const notifyReady = () => {
+      readyFrame = requestAnimationFrame(() => {
+        if (isMounted) onReady?.();
+      });
+    };
 
     loadFont(resolvedFontUrls)
       .then((font) => {
@@ -116,6 +131,7 @@ const RenderSVG = ({ text, className = "", fontSize = DEFAULT_SVG_FONT_SIZE, fon
           pathData: path.toPathData(2),
           viewBox: `${nextBox.x} ${nextBox.y} ${nextBox.width} ${nextBox.height}`,
         });
+        notifyReady();
       })
       .catch((error) => {
         if (!isMounted) return;
@@ -125,12 +141,14 @@ const RenderSVG = ({ text, className = "", fontSize = DEFAULT_SVG_FONT_SIZE, fon
         }
 
         setOutline(null);
+        notifyReady();
       });
 
     return () => {
       isMounted = false;
+      cancelAnimationFrame(readyFrame);
     };
-  }, [fontSize, letterSpacing, padding, resolvedFontUrls, text]);
+  }, [fontSize, letterSpacing, onReady, padding, resolvedFontUrls, text]);
 
   const viewBox = outline?.viewBox || `${fallbackBox.x} ${fallbackBox.y} ${fallbackBox.width} ${fallbackBox.height}`;
   const pathData = outline?.pathData;

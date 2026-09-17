@@ -36,57 +36,57 @@ export default function Project({ appearances = [], nextProject, project }) {
   return (
     <MediaPlaceholderProvider color={project.appearance?.background?.hex}>
       <div className="page">
-      {project.slug ? (
-        <div className={styles.projectCode} typo="h3">
-          {project.slug.toUpperCase()}
-        </div>
-      ) : null}
-      <main className="main">
-        <div className="content grid">
-          {showTitle ? (
-            <ScaleText
-              ref={titleRef}
-              className={styles.projectTitle}
-              text={project.slug.toUpperCase()}
-              letterSpacing={-60}
-            />
-          ) : null}
+        {project.slug ? (
+          <div className={styles.projectCode} typo="h3">
+            {project.slug.toUpperCase()}
+          </div>
+        ) : null}
+        <main className="main">
+          <div className="content grid">
+            {showTitle ? (
+              <ScaleText
+                ref={titleRef}
+                className={styles.projectTitle}
+                text={project.slug.toUpperCase()}
+                letterSpacing={-60}
+              />
+            ) : null}
 
-          <SnapContainer>
-            <SnapElement>
-              {hasSingleSlideshowPreview ? (
-                <MediaStrip ref={firstMediaRef} className={styles.entryMedia} medium={singleSlideshowMedium} />
-              ) : slideshow.length ? (
-                <div ref={firstMediaRef} className={styles.entryMedia}>
-                  <Carousel array={slideshow} />
-                </div>
-              ) : null}
-            </SnapElement>
-
-            <SnapElement>
-              <div className={styles.projectInfo} hide-header="">
-                <div className={styles.projectInfoTitle} typo="h3">
-                  {project.title}
-                </div>
-                {supportingMedia ? (
-                  <div className={styles.carouselMiniature}>
-                    <CarouselMiniature array={supportingMedia} />
+            <SnapContainer>
+              <SnapElement>
+                {hasSingleSlideshowPreview ? (
+                  <MediaStrip ref={firstMediaRef} className={styles.entryMedia} medium={singleSlideshowMedium} />
+                ) : slideshow.length ? (
+                  <div ref={firstMediaRef} className={styles.entryMedia}>
+                    <Carousel array={slideshow} />
                   </div>
                 ) : null}
-                <Text className={styles.description} text={project.description} typo="h3" />
-              </div>
-            </SnapElement>
+              </SnapElement>
 
-            {galleryImages.length > 1 ? (
               <SnapElement>
-                <div ref={slideshow.length ? undefined : firstMediaRef} className={styles.entryMedia}>
-                  <Gallery className={styles.Gallery} gallery={galleryImages} layout={project.galleryLayout} />
+                <div className={styles.projectInfo} hide-header="">
+                  <div className={styles.projectInfoTitle} typo="h3">
+                    {project.title}
+                  </div>
+                  {supportingMedia ? (
+                    <div className={styles.carouselMiniature}>
+                      <CarouselMiniature array={supportingMedia} />
+                    </div>
+                  ) : null}
+                  <Text className={styles.description} text={project.description} typo="h3" />
                 </div>
               </SnapElement>
-            ) : null}
-          </SnapContainer>
-        </div>
-      </main>
+
+              {galleryImages.length > 1 ? (
+                <SnapElement>
+                  <div ref={slideshow.length ? undefined : firstMediaRef} className={styles.entryMedia}>
+                    <Gallery className={styles.Gallery} gallery={galleryImages} layout={project.galleryLayout} />
+                  </div>
+                </SnapElement>
+              ) : null}
+            </SnapContainer>
+          </div>
+        </main>
       </div>
     </MediaPlaceholderProvider>
   );
