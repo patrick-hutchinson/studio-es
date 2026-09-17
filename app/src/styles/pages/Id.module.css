@@ -1,12 +1,13 @@
 .page {
   padding: 0 var(--margin);
+  padding-left: 16px;
 }
 
 .scaleText {
   grid-column: 1 / 9;
   height: 100vh;
   overflow: visible;
-  padding: var(--margin);
+  padding: 16px;
   padding-right: 0;
   padding-left: 0;
 }
