@@ -67,7 +67,7 @@ const ScaleText = forwardRef(function ScaleText(
 
       const rootStyles = window.getComputedStyle(document.documentElement);
       const regionStyles = window.getComputedStyle(region);
-      const margin = 16;
+      const margin = 18;
       const paddingTop = getPixelValue(regionStyles.paddingTop);
       const verticalPadding = paddingTop + getPixelValue(regionStyles.paddingBottom);
       const pinTop = paddingTop || margin;
