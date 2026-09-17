@@ -59,7 +59,16 @@ html.lenis body {
   padding: 18px;
 }
 
-.transitionContainer svg {
+.transitionTextStage {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  padding: 18px;
+  transform-origin: top left;
+}
+
+.transitionTextStage svg {
   width: auto;
   min-width: 0;
   max-width: none;

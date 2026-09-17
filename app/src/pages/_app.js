@@ -210,7 +210,14 @@ export default function App({ Component, pageProps }) {
               onAnimationComplete={completePaneSwipe}
               transition={destination ? paneTransition : { duration: 0 }}
             >
-              <RenderSVG text={transitionText} letterSpacing={-60} onReady={beginPaneSwipe} />
+              <motion.div
+                animate={destination ? { height: "100%", top: "0%" } : { height: "0%", top: "100%" }}
+                className="transitionTextStage"
+                initial={false}
+                transition={destination ? paneTransition : { duration: 0 }}
+              >
+                <RenderSVG text={transitionText} letterSpacing={-60} onReady={beginPaneSwipe} />
+              </motion.div>
             </motion.div>
             <motion.div
               animate={{ y: destination ? "100vh" : "0vh" }}
