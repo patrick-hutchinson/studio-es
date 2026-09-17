@@ -39,6 +39,11 @@
   z-index: 1;
 }
 
+.preview:not([data-pinned]) [data-project-title],
+.gallery:not([data-pinned]) [data-project-title] {
+  display: none;
+}
+
 .gallery {
   position: relative;
   height: 100vh;

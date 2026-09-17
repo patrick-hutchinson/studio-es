@@ -3,7 +3,7 @@
   inset: 0 0 auto;
   z-index: 5;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: var(--margin);
   padding: var(--margin);
   overflow: hidden;
@@ -26,5 +26,4 @@
 
 .code {
   flex: 0 0 auto;
-  text-align: right;
 }
