@@ -7,19 +7,20 @@
   background-position: top left;
   background-repeat: repeat-x;
   background-size: auto 100%;
+  background-color: var(--preview-title-background);
 
   &::after {
     position: absolute;
     inset: 0;
     z-index: 1;
     content: "";
-    background: var(--preview-hover-background);
-    opacity: 0;
+    background: var(--preview-title-background);
+    opacity: 1;
     transition: opacity 150ms ease;
   }
 
   &:hover::after {
-    opacity: 1;
+    opacity: 0;
   }
 }
 
@@ -28,15 +29,15 @@
   z-index: 2;
   margin: 0;
   overflow: hidden;
-  color: var(--preview-hover-foreground);
+  color: var(--preview-title-foreground);
 
   text-overflow: ellipsis;
   white-space: nowrap;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 150ms ease;
   padding: var(--margin);
 
   .preview:hover & {
-    opacity: 1;
+    opacity: 0;
   }
 }

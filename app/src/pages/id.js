@@ -1,10 +1,12 @@
 import styles from "@/styles/pages/Id.module.css";
 
+import Text from "@/components/Text/Text";
+
 export default function Id() {
   return (
     <div className={`page ${styles.page}`}>
       <main className="main">
-        <div className="content grid">
+        <div className={`${styles.idPage} content grid`}>
           <div className={styles.aboutText} typo="h3">
             <div className={styles.aboutTextInner}>
               The Studio Studio Es is an independent design practice based in Vienna, creating visual identities,
@@ -32,6 +34,10 @@ export default function Id() {
               Identity, 2027 The Kurious Magazine No. 2, 2026 P.IN.E.A 002, Fall/Winter, 2026 Talk at Schloss Hollenegg, June
               25–26, 2026 Commissions and General Enquiries info@studio-es.at.
             </div>
+          </div>
+          <Text text="Hier auch ein Custom text." className={styles.callToAction} typo="h3 compensate" />
+          <div className={styles.copyright} typo="h3 compensate">
+            Hier der selbe copyright text?
           </div>
         </div>
       </main>

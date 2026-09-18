@@ -2,30 +2,8 @@
   padding: 0 var(--margin);
 }
 
-.scaleText {
-  grid-column: 1 / 9;
-  height: 100vh;
-  overflow: visible;
-  padding: 18px;
-  padding-right: 0;
-  padding-left: 0;
-}
-
-.scaleText svg {
-  width: auto;
-  max-width: none;
-}
-
-.rowOne {
-  grid-row: 1;
-}
-
-.rowTwo {
-  grid-row: 2;
-}
-
-.rowThree {
-  grid-row: 3;
+.idPage {
+  grid-template-rows: auto auto;
 }
 
 .aboutText {
@@ -39,28 +17,15 @@
   top: calc(var(--margin) + 20px);
 }
 
-.placeholder {
-  grid-column: 1 / 13;
-  height: 100vw;
-
-  width: 100%;
+.callToAction {
+  grid-column: 9 / 12;
+  grid-row: 2;
+  display: flex;
+  align-items: end;
 }
-
-.indexList {
-  --index-list-gap: 100px;
-  grid-column: 12 / 13;
-  align-self: stretch;
-  text-align: right;
-}
-
-.indexListItem {
-  min-height: calc(1em + var(--index-list-gap));
-}
-
-.indexListItemInner {
-  position: sticky;
-  top: var(--margin);
-  background: var(--background);
-  display: block;
-  width: 100%;
+.copyright {
+  grid-column: 1 / 4;
+  grid-row: 2;
+  display: flex;
+  align-items: end;
 }

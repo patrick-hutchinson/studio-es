@@ -23,8 +23,8 @@ const MiniatureMediaStrip = forwardRef(function MediaStrip({ appearance, classNa
       className={[styles.preview, className].filter(Boolean).join(" ")}
       style={{
         "--preview-background-image": !isVideo && medium?.url ? `url("${getMiniatureImageUrl(medium.url)}")` : "none",
-        "--preview-hover-background": background,
-        "--preview-hover-foreground": foreground,
+        "--preview-title-background": background,
+        "--preview-title-foreground": foreground,
       }}
     >
       {isVideo ? <VideoFrameStrip frameWidth={160} medium={medium} /> : null}
