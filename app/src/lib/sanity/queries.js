@@ -100,7 +100,8 @@ export const appearancesQuery = `*[_type=="appearanceCombination"] | order(title
 export const contactQuery = `*[_type=="contact"][0]{
   _id,
   text,
-  callToAction
+  callToAction,
+  copyright
 }`;
 
 export const postsQuery = `*[_type=="post"] | order(orderRank asc){

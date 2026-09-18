@@ -15,6 +15,10 @@ export const contact = defineType({
       title: 'Call to Action',
       type: 'portableText',
     }),
+    defineField({
+      name: 'copyright',
+      type: 'string',
+    }),
   ],
   preview: {
     prepare: () => ({title: 'Kontakt'}),

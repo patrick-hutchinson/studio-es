@@ -39,6 +39,11 @@
   z-index: 1;
 }
 
+/* While the app translates its content layer, fixed media becomes document-relative. */
+:global(.content[data-page-transition-covering]) .preview[data-pinned] {
+  top: var(--page-transition-scroll-y, 0px);
+}
+
 .preview:not([data-pinned]) [data-project-title],
 .gallery:not([data-pinned]) [data-project-title] {
   display: none;
@@ -55,6 +60,10 @@
   position: fixed;
   top: 0;
   z-index: 1;
+}
+
+:global(.content[data-page-transition-covering]) .gallery[data-pinned] {
+  top: var(--page-transition-scroll-y, 0px);
 }
 
 .galleryTrack {

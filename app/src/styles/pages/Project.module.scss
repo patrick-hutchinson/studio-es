@@ -13,16 +13,6 @@
   max-width: none;
 }
 
-.projectCode {
-  position: fixed;
-  top: var(--margin);
-  left: var(--margin);
-  z-index: 1001;
-  pointer-events: none;
-  color: #fff;
-  mix-blend-mode: difference;
-}
-
 .block {
   grid-column: 1 / -1;
   width: 100%;
@@ -80,7 +70,7 @@
 }
 
 .carouselMiniature {
-  grid-column: 3 / 7;
+  grid-column: 4 / 6;
   grid-row: 1;
   align-self: center;
   position: relative;

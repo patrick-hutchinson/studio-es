@@ -1,35 +1,37 @@
 import { forwardRef } from "react";
 
-import Media from "@/components/Media/Media";
 import VideoFrameStrip from "@/components/VideoFrameStrip/VideoFrameStrip";
 import styles from "./MiniatureMediaStrip.module.scss";
 
-const getAspectRatio = (value) => {
-  if (typeof value !== "string") return "16 / 9";
+const getMiniatureImageUrl = (url) => {
+  if (!url) return "";
 
-  const [width, height] = value.split(":").map(Number);
+  const separator = url.includes("?") ? "&" : "?";
 
-  return Number.isFinite(width) && Number.isFinite(height) && height > 0 ? `${width} / ${height}` : "16 / 9";
+  // Archive strips render at 20 CSS pixels tall; a 3x source remains crisp while staying lightweight.
+  return `${url}${separator}h=40&fit=max&auto=format`;
 };
 
-const MiniatureMediaStrip = forwardRef(function MediaStrip({ className = "", medium }, forwardedRef) {
+const MiniatureMediaStrip = forwardRef(function MediaStrip({ appearance, className = "", medium, title }, forwardedRef) {
   const isVideo = medium?.type === "video";
-  const hasMedium = medium?.type === "image" || isVideo;
+  const background = appearance?.background?.hex || "#ffffff";
+  const foreground = appearance?.font?.hex || "#000000";
 
   return (
     <section
       ref={forwardedRef}
       className={[styles.preview, className].filter(Boolean).join(" ")}
       style={{
-        "--preview-background-image": !isVideo && medium?.url ? `url("${medium.url}")` : "none",
-        "--preview-media-aspect-ratio": getAspectRatio(medium?.aspect_ratio),
+        "--preview-background-image": !isVideo && medium?.url ? `url("${getMiniatureImageUrl(medium.url)}")` : "none",
+        "--preview-hover-background": background,
+        "--preview-hover-foreground": foreground,
       }}
     >
-      {isVideo && hasMedium ? <VideoFrameStrip medium={medium} /> : null}
-      {isVideo && hasMedium ? (
-        <div className={styles.projectMedia}>
-          <Media className={styles.projectMediaContent} eager medium={medium} objectFit="cover" showPlaceholder={false} />
-        </div>
+      {isVideo ? <VideoFrameStrip frameWidth={160} medium={medium} /> : null}
+      {title ? (
+        <p className={styles.title} typo="h3 compensate">
+          {title}
+        </p>
       ) : null}
     </section>
   );

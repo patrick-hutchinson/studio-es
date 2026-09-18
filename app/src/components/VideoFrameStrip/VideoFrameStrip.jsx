@@ -14,9 +14,9 @@ const getAspectRatio = (value) => {
   return Number.isFinite(width) && Number.isFinite(height) && height > 0 ? { width, height } : { width: 16, height: 9 };
 };
 
-const VideoFrameStrip = ({ medium }) => {
+const VideoFrameStrip = ({ frameWidth, medium }) => {
   const stripRef = useRef(null);
-  const frames = getVideoFrameUrls(medium);
+  const frames = getVideoFrameUrls(medium, undefined, frameWidth);
   const [repeatCount, setRepeatCount] = useState(1);
   const { width: aspectWidth, height: aspectHeight } = getAspectRatio(medium?.aspect_ratio);
 

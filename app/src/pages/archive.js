@@ -9,6 +9,7 @@ export default function Archive({ entries = [] }) {
     <div className="page">
       <main className="main">
         <div className="grid">
+          <div className={styles.first}></div>
           {entries.map((entry) => {
             const isPost = entry._type === "archivedPost";
 
@@ -16,7 +17,15 @@ export default function Archive({ entries = [] }) {
               return <MiniaturePost key={entry._id} post={entry} className={styles.miniaturePost} />;
             }
 
-            return <MiniatureMediaStrip key={entry._id} className={styles.miniatureMediaStrip} medium={entry.medium} />;
+            return (
+              <MiniatureMediaStrip
+                key={entry._id}
+                appearance={entry.appearance}
+                className={styles.miniatureMediaStrip}
+                medium={entry.medium}
+                title={entry.title}
+              />
+            );
           })}
         </div>
       </main>

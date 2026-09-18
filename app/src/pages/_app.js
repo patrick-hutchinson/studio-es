@@ -75,6 +75,7 @@ export default function App({ Component, pageProps }) {
   const [pendingDestination, setPendingDestination] = useState(null);
   const [preparedDestination, setPreparedDestination] = useState(null);
   const [transitionPhase, setTransitionPhase] = useState("idle");
+  const [transitionScrollY, setTransitionScrollY] = useState(0);
   const nativeExitLockRef = useRef(null);
   const transitionText = getTransitionText(preparedDestination ?? destination);
   const isPaneCovering = transitionPhase === "entering" || transitionPhase === "covering";
@@ -119,6 +120,8 @@ export default function App({ Component, pageProps }) {
   const beginPaneSwipe = useCallback(() => {
     if (!preparedDestination || transitionPhase !== "idle") return;
 
+    // A transformed ancestor changes pinned media from viewport-fixed to document-relative.
+    setTransitionScrollY(window.scrollY);
     setDestination(preparedDestination);
     setTransitionPhase("entering");
   }, [preparedDestination, transitionPhase]);
@@ -159,8 +162,10 @@ export default function App({ Component, pageProps }) {
       const currentUrl = new URL(window.location.href);
       const isSamePageHash =
         nextUrl.pathname === currentUrl.pathname && nextUrl.search === currentUrl.search && nextUrl.hash.length > 0;
+      const isStudioContactScroll =
+        router.pathname === "/studio" && nextUrl.pathname === "/studio" && nextUrl.searchParams.get("contact") === "1";
 
-      if (nextUrl.origin !== currentUrl.origin || isSamePageHash || nextUrl.href === currentUrl.href) return;
+      if (nextUrl.origin !== currentUrl.origin || isSamePageHash || isStudioContactScroll || nextUrl.href === currentUrl.href) return;
 
       event.preventDefault();
       event.stopPropagation();
@@ -239,10 +244,12 @@ export default function App({ Component, pageProps }) {
             <motion.div
               animate={{ y: isPaneCovering ? "100vh" : "0vh" }}
               className="content"
+              data-page-transition-covering={isPaneCovering ? "" : undefined}
               initial={false}
+              style={isPaneCovering ? { "--page-transition-scroll-y": `${transitionScrollY}px` } : undefined}
               transition={transitionAnimation}
             >
-              <Header site={site} />
+              <Header projectId={router.pathname === "/projects/[slug]" ? pageProps?.project?.slug?.toUpperCase() : undefined} site={site} />
               <SpacingDebugOverlay />
               <div className="pageTransitionStack">
                 <div className="pageTransition" key={router.asPath}>

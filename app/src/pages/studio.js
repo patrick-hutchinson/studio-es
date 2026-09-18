@@ -98,7 +98,7 @@ export default function Studio({ appearances = [], contact = null, projects = []
               <Text text={contact.text} className={styles.contactText} typo="h3 compensate" />
               <Text text={contact.callToAction} className={styles.callToAction} typo="h3 compensate" />
               <div className={styles.copyright} typo="h3 compensate">
-                Studio Es, 2026
+                {contact.copyright}
               </div>
             </div>
           </div>

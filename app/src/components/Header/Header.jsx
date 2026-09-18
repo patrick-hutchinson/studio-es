@@ -10,11 +10,31 @@ import { useCallback, useContext, useEffect, useState } from "react";
 
 const HEADER_HIDE_THRESHOLD = 30;
 
-const Header = ({ site = {} }) => {
+const Header = ({ projectId, site = {} }) => {
   const { isMobile } = useContext(DeviceContext);
   const lenis = useLenisContext();
   const router = useRouter();
   const [isHidden, setIsHidden] = useState(false);
+
+  const handleContactClick = useCallback(
+    (event) => {
+      if (router.pathname !== "/studio") return;
+
+      const contact = document.getElementById("contact");
+      if (!contact) return;
+
+      event.preventDefault();
+
+      if (lenis) {
+        lenis.start();
+        lenis.scrollTo(contact, { duration: 2, offset: 0 });
+        return;
+      }
+
+      contact.scrollIntoView({ behavior: "smooth", block: "start" });
+    },
+    [lenis, router.pathname],
+  );
 
   const updateVisibility = useCallback(() => {
     const shouldHide = [...document.querySelectorAll("[hide-header]")].some((element) => {
@@ -65,10 +85,19 @@ const Header = ({ site = {} }) => {
   const DesktopNav = () => {
     return (
       <nav className={`${styles.nav} grid`}>
-        <Link href="/studio">The Studio</Link>
-        <Link href="/id">The Id</Link>
-        <Link href="/archive">Index</Link>
-        <Link href="/studio?contact=1">Contact</Link>
+        {projectId ? <span className={styles.projectId}>{projectId}</span> : null}
+        <Link className={styles.studioLink} href="/studio">
+          The Studio
+        </Link>
+        <Link className={styles.idLink} href="/id">
+          The Id
+        </Link>
+        <Link className={styles.indexLink} href="/archive">
+          Index
+        </Link>
+        <Link className={styles.contactLink} href="/studio?contact=1" onClick={handleContactClick}>
+          Contact
+        </Link>
       </nav>
     );
   };
