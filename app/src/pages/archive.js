@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import MiniatureMediaStrip from "@/components/MiniatureMediaStrip/MiniatureMediaStrip";
 import MiniaturePost from "@/components/MiniaturePost/MiniaturePost";
 import { getArchivedEntries } from "@/lib/sanity";
@@ -5,6 +7,8 @@ import { getArchivedEntries } from "@/lib/sanity";
 import styles from "@/styles/pages/archive.module.scss";
 
 export default function Archive({ entries = [] }) {
+  const [expandedEntryId, setExpandedEntryId] = useState(null);
+
   return (
     <div className="page">
       <main className="main">
@@ -22,7 +26,10 @@ export default function Archive({ entries = [] }) {
                 key={entry._id}
                 appearance={entry.appearance}
                 className={styles.miniatureMediaStrip}
-                medium={entry.medium}
+                isExpanded={expandedEntryId === entry._id}
+                media={entry.headerMedia}
+                medium={entry.headerMedia?.[0]?.medium}
+                onExpand={() => setExpandedEntryId(entry._id)}
                 title={entry.title}
               />
             );

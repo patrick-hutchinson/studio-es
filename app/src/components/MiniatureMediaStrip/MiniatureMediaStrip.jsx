@@ -1,7 +1,13 @@
-import { forwardRef } from "react";
+import { forwardRef, useMemo } from "react";
 
+import Carousel from "@/components/Carousel/Carousel";
+import { MediaPlaceholderProvider } from "@/components/Media/MediaPlaceholderContext";
 import VideoFrameStrip from "@/components/VideoFrameStrip/VideoFrameStrip";
+import { motion } from "framer-motion";
 import styles from "./MiniatureMediaStrip.module.scss";
+
+const COLLAPSED_HEIGHT = 32;
+const EXPANDED_HEIGHT = COLLAPSED_HEIGHT * 5;
 
 const getMiniatureImageUrl = (url) => {
   if (!url) return "";
@@ -12,28 +18,52 @@ const getMiniatureImageUrl = (url) => {
   return `${url}${separator}h=40&fit=max&auto=format`;
 };
 
-const MiniatureMediaStrip = forwardRef(function MediaStrip({ appearance, className = "", medium, title }, forwardedRef) {
+const MiniatureMediaStrip = forwardRef(function MediaStrip(
+  { appearance, className = "", isExpanded = false, media = [], medium, onExpand, title },
+  forwardedRef,
+) {
   const isVideo = medium?.type === "video";
   const background = appearance?.background?.hex || "#ffffff";
   const foreground = appearance?.font?.hex || "#000000";
+  const carouselMedia = useMemo(
+    () => (media ?? []).filter((item) => item?.medium?.type === "image" || item?.medium?.type === "video"),
+    [media],
+  );
+  const canExpand = carouselMedia.length > 0;
+
+  const expand = () => {
+    if (canExpand && !isExpanded) onExpand?.();
+  };
 
   return (
-    <section
-      ref={forwardedRef}
+    <motion.section
+      animate={{ height: isExpanded ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT }}
+      aria-expanded={isExpanded}
+      aria-label={canExpand ? `Show header media for ${title || "project"}` : undefined}
       className={[styles.preview, className].filter(Boolean).join(" ")}
+      data-expanded={isExpanded ? "" : undefined}
+      onClick={expand}
+      ref={forwardedRef}
+      role={canExpand ? "button" : undefined}
       style={{
         "--preview-background-image": !isVideo && medium?.url ? `url("${getMiniatureImageUrl(medium.url)}")` : "none",
-        "--preview-title-background": background,
-        "--preview-title-foreground": foreground,
+        "--preview-hover-background": background,
+        "--preview-hover-foreground": foreground,
       }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
     >
-      {isVideo ? <VideoFrameStrip frameWidth={160} medium={medium} /> : null}
-      {title ? (
+      {!isExpanded && isVideo ? <VideoFrameStrip frameWidth={160} medium={medium} /> : null}
+      {!isExpanded && title ? (
         <p className={styles.title} typo="h3 compensate">
           {title}
         </p>
       ) : null}
-    </section>
+      {isExpanded ? (
+        <MediaPlaceholderProvider color={background}>
+          <Carousel array={carouselMedia} autoScrollDelay={6000} contained infinite showCounter={false} />
+        </MediaPlaceholderProvider>
+      ) : null}
+    </motion.section>
   );
 });
 

@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import useEmblaCarousel from "embla-carousel-react";
 import Media from "@/components/Media/Media";
@@ -11,18 +11,75 @@ import { DeviceContext } from "@/context/DeviceContext";
 
 const AUTO_SCROLL_DELAY = 3000;
 const MINIMUM_PAUSE_DURATION = 10000;
+const INFINITE_REPEAT_BUFFER = 2;
+const MINIMUM_INFINITE_REPEAT_COUNT = 3;
 
-const Carousel = ({ array, onIndexChange }) => {
+const Carousel = ({ array, autoScrollDelay = AUTO_SCROLL_DELAY, contained = false, infinite = false, onIndexChange, showCounter = true }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const { isDesktop, isTouch } = useContext(DeviceContext);
+  const carouselOuterRef = useRef(null);
   const pauseUntilRef = useRef(0);
   const dragStartedRef = useRef(false);
-  const media = array ?? [];
+  const baseMedia = useMemo(() => array ?? [], [array]);
+  const [repeatCount, setRepeatCount] = useState(1);
+  const media = useMemo(() => {
+    const items = baseMedia;
+
+    return infinite && items.length ? Array.from({ length: repeatCount }, () => items).flat() : items;
+  }, [baseMedia, infinite, repeatCount]);
   const [emblaRef, emblaApi] = useEmblaCarousel(
-    { align: "start", watchDrag: !isDesktop, dragResistance: 1, dragFree: isTouch ? true : false, loop: media.length > 1 },
+    {
+      align: "start",
+      watchDrag: !isDesktop,
+      dragResistance: 1,
+      dragFree: isTouch ? true : false,
+      loop: media.length > 1,
+    },
     [],
   );
+
+  const setCarouselRefs = useCallback(
+    (node) => {
+      carouselOuterRef.current = node;
+      emblaRef(node);
+    },
+    [emblaRef],
+  );
+
+  useLayoutEffect(() => {
+    if (!infinite || !baseMedia.length) return undefined;
+
+    const carousel = carouselOuterRef.current;
+    if (!carousel) return undefined;
+
+    const updateRepeatCount = () => {
+      const slides = Array.from(carousel.querySelectorAll("[data-carousel-slide]"));
+      const firstCycle = slides.slice(0, baseMedia.length);
+      const cycleWidth = firstCycle.reduce((total, slide) => {
+        const marginRight = Number.parseFloat(window.getComputedStyle(slide).marginRight) || 0;
+
+        return total + slide.getBoundingClientRect().width + marginRight;
+      }, 0);
+
+      if (cycleWidth <= 0 || carousel.clientWidth <= 0) return;
+
+      // Give Embla one full viewport of media plus two spare cycles for a stable loop.
+      const nextRepeatCount = Math.max(
+        MINIMUM_INFINITE_REPEAT_COUNT,
+        Math.ceil(carousel.clientWidth / cycleWidth) + INFINITE_REPEAT_BUFFER,
+      );
+
+      setRepeatCount((current) => (current === nextRepeatCount ? current : nextRepeatCount));
+    };
+
+    const resizeObserver = new ResizeObserver(updateRepeatCount);
+    resizeObserver.observe(carousel);
+    carousel.querySelectorAll("[data-carousel-slide]").forEach((slide) => resizeObserver.observe(slide));
+    updateRepeatCount();
+
+    return () => resizeObserver.disconnect();
+  }, [baseMedia, infinite, repeatCount]);
 
   const pauseAutoScroll = useCallback((duration = MINIMUM_PAUSE_DURATION) => {
     pauseUntilRef.current = Math.max(pauseUntilRef.current, Date.now() + duration);
@@ -135,31 +192,33 @@ const Carousel = ({ array, onIndexChange }) => {
       if (!isDragging && Date.now() >= pauseUntilRef.current) {
         emblaApi.scrollNext();
       }
-    }, AUTO_SCROLL_DELAY);
+    }, autoScrollDelay);
 
     return () => clearInterval(interval);
-  }, [emblaApi, isDragging, media.length]);
+  }, [autoScrollDelay, emblaApi, isDragging, media.length]);
 
   if (!media.length) return null;
 
   return (
     <motion.div
-      className={`${styles.carouselOuter} ${styles.carouselFullscreen} ${isDesktop ? styles.desktopClickNavigation : ""}`}
+      className={`${styles.carouselOuter} ${styles.carouselFullscreen} ${contained ? styles.carouselContained : ""} ${isDesktop ? styles.desktopClickNavigation : ""}`}
       onClick={handleDesktopClick}
-      ref={emblaRef}
+      ref={setCarouselRefs}
     >
       <div className={`${styles.carouselInner}`}>
         {media.map((item, index) => {
           return (
-            <li key={item._key ?? item.medium?._id ?? index} className={`${styles.slide}`}>
+            <li data-carousel-slide key={`${item._key ?? item.medium?._id ?? "media"}-${index}`} className={`${styles.slide}`}>
               <Media medium={item.medium} />
             </li>
           );
         })}
       </div>
-      <div aria-live="polite" className={styles.mediaCounter} typo="h3">
-        {activeIndex + 1}/{media.length}
-      </div>
+      {showCounter ? (
+        <div aria-live="polite" className={styles.mediaCounter} typo="h3">
+          {activeIndex + 1}/{media.length}
+        </div>
+      ) : null}
     </motion.div>
   );
 };

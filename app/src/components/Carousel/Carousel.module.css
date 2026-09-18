@@ -56,6 +56,13 @@
 .carouselFullscreen .slide {
   height: 100vh;
 }
+
+.carouselContained,
+.carouselContained .carouselInner,
+.carouselContained .slide {
+  height: 100%;
+}
+
 .carouselMiniature .slide {
   height: calc(((100vw / 12) * 3) * (100vh / 100vw));
 
