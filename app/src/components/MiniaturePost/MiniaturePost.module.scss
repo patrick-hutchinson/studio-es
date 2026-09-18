@@ -1,0 +1,18 @@
+.post {
+  position: relative;
+
+  width: 100vw;
+  height: fit-content;
+  padding: var(--margin);
+  overflow: hidden;
+  color: var(--post-foreground);
+  background: var(--post-background);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.title {
+  max-width: 100%;
+  margin: 0;
+}

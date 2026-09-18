@@ -1,15 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import styles from "@/styles/pages/Studio.module.scss";
 
-import ScaleText from "@/components/ScaleText/ScaleText";
 import ScaleMediaStrip from "@/components/ScaleMediaStrip/ScaleMediaStrip";
 import Post from "@/components/Post/Post";
 import { useLenisContext } from "@/context/LenisContext";
 import { DEFAULT_COLOR_PAIR, getRandomColorPair } from "@/lib/getRandomColorPair";
 import { getAppearances, getContact, getPosts, getProjects } from "@/lib/sanity";
-import usePageEntryMediaScroll from "@/hooks/usePageEntryMediaScroll";
-import useScaleTextRemoval from "@/hooks/useScaleTextRemoval";
 import { useRouter } from "next/router";
 
 import Text from "@/components/Text/Text";
@@ -26,29 +23,14 @@ const getPreviewBackgroundImage = (medium) => {
 
 export default function Studio({ appearances = [], contact = null, projects = [], posts = [] }) {
   const [colors, setColors] = useState(DEFAULT_COLOR_PAIR);
-  const projectsRef = useRef(null);
   const endCapRef = useRef(null);
   const lenis = useLenisContext();
   const router = useRouter();
   const isContactRoute = router.asPath.includes("contact=1");
-  const compensateTitleRemoval = useCallback(
-    (top) => {
-      if (lenis) {
-        lenis.scrollTo(top, { force: true, immediate: true });
-        return;
-      }
-
-      window.scrollTo({ top, behavior: "auto" });
-    },
-    [lenis],
-  );
-  const { isVisible: showTitle, remove: removeTitle, titleRef } = useScaleTextRemoval(compensateTitleRemoval);
   const content = useMemo(
     () => [...projects, ...posts].sort((a, b) => (a.orderRank || "~").localeCompare(b.orderRank || "~")),
     [posts, projects],
   );
-
-  usePageEntryMediaScroll(projectsRef, "studio", { enabled: !isContactRoute, onComplete: removeTitle });
 
   useEffect(() => {
     setColors(getRandomColorPair(appearances));
@@ -64,7 +46,7 @@ export default function Studio({ appearances = [], contact = null, projects = []
     const timer = window.setTimeout(() => {
       if (lenis) {
         lenis.start();
-        lenis.scrollTo(endCapRef.current, { duration: 2, offset: 0, onComplete: removeTitle });
+        lenis.scrollTo(endCapRef.current, { duration: 2, offset: 0 });
         return;
       }
 
@@ -84,8 +66,7 @@ export default function Studio({ appearances = [], contact = null, projects = []
     >
       <main className="main">
         <div className="content grid">
-          {showTitle ? <ScaleText ref={titleRef} text="Es" className={styles.scaleText} letterSpacing={-60} /> : null}
-          <div ref={projectsRef} className={styles.projects} data-project-count={content.length}>
+          <div className={styles.projects} data-project-count={content.length}>
             {content.map((project, index) => {
               const isPost = project._type === "post";
 

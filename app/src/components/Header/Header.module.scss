@@ -17,6 +17,9 @@ header.header {
       grid-column: 10 / 11;
     }
     a:nth-child(3) {
+      grid-column: 11 / 12;
+    }
+    a:nth-child(4) {
       grid-column: 12 / 13;
       text-align: right;
     }

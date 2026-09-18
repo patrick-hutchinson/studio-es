@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { motion } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useRouter } from "next/router";
 
@@ -20,7 +20,6 @@ import "@/styles/fonts.scss";
 
 const paneTransition = { duration: 0.8, ease: [0.76, 0, 0.24, 1] };
 const defaultSite = { title: "Studio Es" };
-const ROUTE_SETTLE_TIMEOUT = 1200;
 
 let cachedSite;
 let siteRequest;
@@ -38,44 +37,10 @@ const getTransitionText = (destination) => {
 
 const nextPaint = () => new Promise((resolve) => window.requestAnimationFrame(resolve));
 
-const waitForScaleText = () =>
-  new Promise((resolve) => {
-    const page = document.querySelector(".pageTransition");
-
-    if (!page || page.querySelector("[data-ready]")) {
-      resolve();
-      return;
-    }
-
-    let settled = false;
-    const finish = () => {
-      if (settled) return;
-
-      settled = true;
-      observer.disconnect();
-      window.clearTimeout(timeout);
-      resolve();
-    };
-    const observer = new MutationObserver(() => {
-      if (page.querySelector("[data-ready]")) {
-        finish();
-      }
-    });
-    const timeout = window.setTimeout(finish, ROUTE_SETTLE_TIMEOUT);
-
-    observer.observe(page, {
-      attributes: true,
-      attributeFilter: ["data-ready"],
-      childList: true,
-      subtree: true,
-    });
-  });
-
 const waitForIncomingRoutePaint = async () => {
-  await waitForScaleText();
   await document.fonts?.ready;
 
-  // Paint once for the measured route and once for the browser to composite it.
+  // Commit once for the route and once for the browser to composite it.
   await nextPaint();
   await nextPaint();
 };
@@ -109,26 +74,75 @@ export default function App({ Component, pageProps }) {
   const [destination, setDestination] = useState(null);
   const [pendingDestination, setPendingDestination] = useState(null);
   const [preparedDestination, setPreparedDestination] = useState(null);
+  const [transitionPhase, setTransitionPhase] = useState("idle");
+  const nativeExitLockRef = useRef(null);
   const transitionText = getTransitionText(preparedDestination ?? destination);
+  const isPaneCovering = transitionPhase === "entering" || transitionPhase === "covering";
+  const transitionAnimation = transitionPhase === "idle" ? { duration: 0 } : paneTransition;
+
+  const lockNativeExitScroll = useCallback(() => {
+    if (router.pathname !== "/projects/[slug]" || nativeExitLockRef.current) return;
+
+    const root = document.documentElement;
+    const body = document.body;
+    const scrollY = window.scrollY;
+
+    nativeExitLockRef.current = {
+      bodyOverflow: body.style.overflow,
+      rootOverflow: root.style.overflow,
+      rootScrollBehavior: root.style.scrollBehavior,
+      rootScrollSnapType: root.style.scrollSnapType,
+    };
+    // Cancel the slug page's native entry scroll before moving its visual layer.
+    root.style.scrollBehavior = "auto";
+    root.style.scrollSnapType = "none";
+    root.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    window.scrollTo({ top: scrollY, behavior: "auto" });
+  }, [router.pathname]);
+
+  const releaseNativeExitScroll = useCallback(() => {
+    const lock = nativeExitLockRef.current;
+
+    if (!lock) return;
+
+    const root = document.documentElement;
+    const body = document.body;
+
+    root.style.overflow = lock.rootOverflow;
+    root.style.scrollBehavior = lock.rootScrollBehavior;
+    root.style.scrollSnapType = lock.rootScrollSnapType;
+    body.style.overflow = lock.bodyOverflow;
+    nativeExitLockRef.current = null;
+  }, []);
 
   const beginPaneSwipe = useCallback(() => {
-    if (!preparedDestination || destination) return;
+    if (!preparedDestination || transitionPhase !== "idle") return;
 
     setDestination(preparedDestination);
-  }, [destination, preparedDestination]);
+    setTransitionPhase("entering");
+  }, [preparedDestination, transitionPhase]);
 
-  const completePaneSwipe = useCallback(async () => {
-    if (!destination) return;
+  const handlePaneAnimationComplete = useCallback(async () => {
+    if (transitionPhase === "leaving") {
+      releaseNativeExitScroll();
+      setDestination(null);
+      setPreparedDestination(null);
+      setTransitionPhase("idle");
+      return;
+    }
 
+    if (transitionPhase !== "entering" || !destination) return;
+
+    setTransitionPhase("covering");
     try {
       await router.push(destination);
       await waitForIncomingRoutePaint();
     } finally {
-      // Keep the pane in place until the destination has measured and painted.
-      setDestination(null);
-      setPreparedDestination(null);
+      // Reveal the mounted route by reversing the same shared pane motion.
+      setTransitionPhase("leaving");
     }
-  }, [destination, router]);
+  }, [destination, releaseNativeExitScroll, router, transitionPhase]);
 
   useEffect(() => {
     const handleDocumentClick = (event) => {
@@ -151,9 +165,10 @@ export default function App({ Component, pageProps }) {
       event.preventDefault();
       event.stopPropagation();
 
-      if (!destination && !pendingDestination && !preparedDestination) {
+      if (transitionPhase === "idle" && !pendingDestination && !preparedDestination) {
         const href = `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
 
+        lockNativeExitScroll();
         setPendingDestination(href);
         router
           .prefetch(href)
@@ -170,7 +185,9 @@ export default function App({ Component, pageProps }) {
     document.addEventListener("click", handleDocumentClick, true);
 
     return () => document.removeEventListener("click", handleDocumentClick, true);
-  }, [destination, pendingDestination, preparedDestination, router]);
+  }, [lockNativeExitScroll, pendingDestination, preparedDestination, router, transitionPhase]);
+
+  useEffect(() => releaseNativeExitScroll, [releaseNativeExitScroll]);
 
   useEffect(() => {
     let isMounted = true;
@@ -204,26 +221,26 @@ export default function App({ Component, pageProps }) {
         <DeviceProvider>
           <LenisProvider>
             <motion.div
-              animate={{ y: destination ? "0%" : "-100%" }}
+              animate={{ y: isPaneCovering ? "0%" : "-100%" }}
               className="transitionContainer"
               initial={false}
-              onAnimationComplete={completePaneSwipe}
-              transition={destination ? paneTransition : { duration: 0 }}
+              onAnimationComplete={handlePaneAnimationComplete}
+              transition={transitionAnimation}
             >
               <motion.div
-                animate={destination ? { height: "100%", top: "0%" } : { height: "0%", top: "100%" }}
+                animate={isPaneCovering ? { height: "100%", top: "0%" } : { height: "0%", top: "100%" }}
                 className="transitionTextStage"
                 initial={false}
-                transition={destination ? paneTransition : { duration: 0 }}
+                transition={transitionAnimation}
               >
                 <RenderSVG text={transitionText} letterSpacing={-60} onReady={beginPaneSwipe} />
               </motion.div>
             </motion.div>
             <motion.div
-              animate={{ y: destination ? "100vh" : "0vh" }}
+              animate={{ y: isPaneCovering ? "100vh" : "0vh" }}
               className="content"
               initial={false}
-              transition={destination ? paneTransition : { duration: 0 }}
+              transition={transitionAnimation}
             >
               <Header site={site} />
               <SpacingDebugOverlay />

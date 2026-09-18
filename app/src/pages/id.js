@@ -1,28 +1,10 @@
-import ScaleText from "@/components/ScaleText/ScaleText";
 import styles from "@/styles/pages/Id.module.css";
 
-const idItems = Array.from({ length: 33 }, () => "Id–001–2026");
-const pItems = Array.from({ length: 33 }, () => "P–001–2026");
-const dItems = Array.from({ length: 31 }, () => "D–001–2026");
-
-const IndexList = ({ className = "", items }) => (
-  <div className={[styles.indexList, className].filter(Boolean).join(" ")} typo="h3">
-    {items.map((item, index) => (
-      <div className={styles.indexListItem} key={`${item}-${index}`}>
-        <div className={styles.indexListItemInner}>{item}</div>
-      </div>
-    ))}
-  </div>
-);
-
-export default function Index() {
+export default function Id() {
   return (
     <div className={`page ${styles.page}`}>
       <main className="main">
         <div className="content grid">
-          <ScaleText text="Id" className={`${styles.scaleText} ${styles.rowOne}`} letterSpacing={-60} />
-          <ScaleText text="P" className={`${styles.scaleText} ${styles.rowTwo}`} letterSpacing={-60} />
-          <ScaleText text="D" className={`${styles.scaleText} ${styles.rowThree}`} letterSpacing={-60} />
           <div className={styles.aboutText} typo="h3">
             <div className={styles.aboutTextInner}>
               The Studio Studio Es is an independent design practice based in Vienna, creating visual identities,
@@ -51,10 +33,6 @@ export default function Index() {
               25–26, 2026 Commissions and General Enquiries info@studio-es.at.
             </div>
           </div>
-          <IndexList className={styles.rowOne} items={idItems} />
-          <IndexList className={styles.rowTwo} items={pItems} />
-          <IndexList className={styles.rowThree} items={dItems} />
-          <div className={styles.placeholder}></div>
         </div>
       </main>
     </div>

@@ -1,12 +1,8 @@
 import MediaStrip from "@/components/MediaStrip/MediaStrip";
 import { MediaPlaceholderProvider } from "@/components/Media/MediaPlaceholderContext";
 import Gallery from "@/components/Gallery/Gallery";
-import ScaleText from "@/components/ScaleText/ScaleText";
-import usePageEntryMediaScroll from "@/hooks/usePageEntryMediaScroll";
-import useScaleTextRemoval from "@/hooks/useScaleTextRemoval";
 import { getAppearances, getProject, getProjects } from "@/lib/sanity";
 import styles from "@/styles/pages/Project.module.scss";
-import { useCallback, useRef } from "react";
 
 import SnapContainer from "@/components/Snap/SnapContainer";
 import SnapElement from "@/components/Snap/SnapElement";
@@ -27,12 +23,6 @@ export default function Project({ appearances = [], nextProject, project }) {
   const supportingMedia = project.supportingMedia ?? [];
   const singleSlideshowMedium = slideshow.length === 1 ? slideshow[0]?.medium : null;
   const hasSingleSlideshowPreview = singleSlideshowMedium?.type === "image" || singleSlideshowMedium?.type === "video";
-  const firstMediaRef = useRef(null);
-  const compensateTitleRemoval = useCallback((top) => window.scrollTo({ top, behavior: "auto" }), []);
-  const { isVisible: showTitle, remove: removeTitle, titleRef } = useScaleTextRemoval(compensateTitleRemoval);
-
-  usePageEntryMediaScroll(firstMediaRef, project.slug, { native: true, onComplete: removeTitle });
-
   return (
     <MediaPlaceholderProvider color={project.appearance?.background?.hex}>
       <div className="page">
@@ -43,21 +33,12 @@ export default function Project({ appearances = [], nextProject, project }) {
         ) : null}
         <main className="main">
           <div className="content grid">
-            {showTitle ? (
-              <ScaleText
-                ref={titleRef}
-                className={styles.projectTitle}
-                text={project.slug.toUpperCase()}
-                letterSpacing={-60}
-              />
-            ) : null}
-
             <SnapContainer>
               <SnapElement>
                 {hasSingleSlideshowPreview ? (
-                  <MediaStrip ref={firstMediaRef} className={styles.entryMedia} medium={singleSlideshowMedium} />
+                  <MediaStrip className={styles.entryMedia} medium={singleSlideshowMedium} />
                 ) : slideshow.length ? (
-                  <div ref={firstMediaRef} className={styles.entryMedia}>
+                  <div className={styles.entryMedia}>
                     <Carousel array={slideshow} />
                   </div>
                 ) : null}
@@ -79,7 +60,7 @@ export default function Project({ appearances = [], nextProject, project }) {
 
               {galleryImages.length > 1 ? (
                 <SnapElement>
-                  <div ref={slideshow.length ? undefined : firstMediaRef} className={styles.entryMedia}>
+                  <div className={styles.entryMedia}>
                     <Gallery className={styles.Gallery} gallery={galleryImages} layout={project.galleryLayout} />
                   </div>
                 </SnapElement>

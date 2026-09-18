@@ -118,3 +118,29 @@ export const postsQuery = `*[_type=="post"] | order(orderRank asc){
     description
   },
 }`;
+
+export const archivedEntriesQuery = `*[_type in ["archivedProject", "archivedPost"]] | order(coalesce(meta.year, date) desc){
+  _id,
+  _type,
+  title,
+  appearance,
+  "date": coalesce(meta.year, date),
+  "medium": select(
+    _type == "archivedProject" && header.images[0]._type == "image" => {
+      "type": "image",
+      "_id": header.images[0].asset->_id,
+      "url": header.images[0].asset->url,
+      "width": header.images[0].asset->metadata.dimensions.width,
+      "height": header.images[0].asset->metadata.dimensions.height,
+      "altText": header.images[0].alt
+    },
+    _type == "archivedProject" && header.images[0]._type == "video" => {
+      "type": "video",
+      "_id": header.images[0].video.asset->_id,
+      "assetId": header.images[0].video.asset->assetId,
+      "playbackId": header.images[0].video.asset->playbackId,
+      "duration": header.images[0].video.asset->data.duration,
+      "aspect_ratio": header.images[0].video.asset->data.aspect_ratio
+    }
+  )
+}`;
