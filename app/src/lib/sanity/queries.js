@@ -120,14 +120,14 @@ export const postsQuery = `*[_type=="post"] | order(orderRank asc){
   },
 }`;
 
-export const archivedEntriesQuery = `*[_type in ["archivedProject", "archivedPost"]] | order(coalesce(meta.year, date) desc){
+export const archiveEntriesQuery = `*[_type in ["archiveProject", "archivePost"]] | order(coalesce(meta.year, date) desc){
   _id,
   _type,
   title,
   appearance,
   "date": coalesce(meta.year, date),
   "headerMedia": select(
-    _type == "archivedProject" => header.images[]{
+    _type == "archiveProject" => header.images[]{
       _key,
       "medium": select(
         _type == "image" => {

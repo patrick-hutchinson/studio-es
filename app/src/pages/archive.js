@@ -1,13 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import MiniatureMediaStrip from "@/components/MiniatureMediaStrip/MiniatureMediaStrip";
 import MiniaturePost from "@/components/MiniaturePost/MiniaturePost";
-import { getArchivedEntries } from "@/lib/sanity";
+import { getArchiveEntries } from "@/lib/sanity";
 
 import styles from "@/styles/pages/archive.module.scss";
 
 export default function Archive({ entries = [] }) {
   const [expandedEntryId, setExpandedEntryId] = useState(null);
+
+  useEffect(() => {
+    const closeExpandedEntry = (event) => {
+      if (event.key === "Escape") setExpandedEntryId(null);
+    };
+
+    window.addEventListener("keydown", closeExpandedEntry);
+
+    return () => window.removeEventListener("keydown", closeExpandedEntry);
+  }, []);
 
   return (
     <div className="page">
@@ -15,7 +25,7 @@ export default function Archive({ entries = [] }) {
         <div className="grid">
           <div className={styles.first}></div>
           {entries.map((entry) => {
-            const isPost = entry._type === "archivedPost";
+            const isPost = entry._type === "archivePost";
 
             if (isPost) {
               return <MiniaturePost key={entry._id} post={entry} className={styles.miniaturePost} />;
@@ -29,7 +39,7 @@ export default function Archive({ entries = [] }) {
                 isExpanded={expandedEntryId === entry._id}
                 media={entry.headerMedia}
                 medium={entry.headerMedia?.[0]?.medium}
-                onExpand={() => setExpandedEntryId(entry._id)}
+                onExpand={() => setExpandedEntryId((currentId) => (currentId === entry._id ? null : entry._id))}
                 title={entry.title}
               />
             );
@@ -41,7 +51,7 @@ export default function Archive({ entries = [] }) {
 }
 
 export async function getStaticProps() {
-  const entries = await getArchivedEntries();
+  const entries = await getArchiveEntries();
 
   return {
     props: {

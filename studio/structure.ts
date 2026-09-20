@@ -21,6 +21,26 @@ const mixedContentList = (S: StructureBuilder) =>
     },
   )
 
+const editableArchiveList = (S: StructureBuilder) =>
+  S.list()
+    .title('Archive')
+    .items([
+      S.listItem()
+        .title('Projects')
+        .child(
+          S.documentTypeList('archiveProject')
+            .title('Archive Projects')
+            .defaultOrdering([{field: 'meta.year', direction: 'desc'}]),
+        ),
+      S.listItem()
+        .title('Posts')
+        .child(
+          S.documentTypeList('archivePost')
+            .title('Archive Posts')
+            .defaultOrdering([{field: 'meta.year', direction: 'desc'}]),
+        ),
+    ])
+
 export const structure = (S: StructureBuilder, context: ConfigContext) =>
   S.list()
     .title('Content')
@@ -72,7 +92,14 @@ export const structure = (S: StructureBuilder, context: ConfigContext) =>
         .child(S.editor().schemaType('home').documentId('b7605842-c2ca-4d2e-aac8-96bd835dd082')),
       S.listItem()
         .title('Projects & Posts')
-        .child(mixedContentList(S)),
+        .child(
+          S.list()
+            .title('Projects & Posts')
+            .items([
+              S.listItem().title('Selected').child(mixedContentList(S)),
+              S.listItem().title('Archive').child(editableArchiveList(S)),
+            ]),
+        ),
 
       S.divider(),
       S.listItem().title('Kontakt').child(S.editor().schemaType('contact').documentId('contact')),

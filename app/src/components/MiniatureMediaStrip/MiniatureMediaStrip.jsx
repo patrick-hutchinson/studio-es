@@ -32,29 +32,37 @@ const MiniatureMediaStrip = forwardRef(function MediaStrip(
   const canExpand = carouselMedia.length > 0;
 
   const expand = () => {
-    if (canExpand && !isExpanded) onExpand?.();
+    if (canExpand) onExpand?.();
   };
 
   return (
     <motion.section
       animate={{ height: isExpanded ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT }}
       aria-expanded={isExpanded}
-      aria-label={canExpand ? `Show header media for ${title || "project"}` : undefined}
+      aria-label={canExpand ? `${isExpanded ? "Hide" : "Show"} header media for ${title || "project"}` : undefined}
       className={[styles.preview, className].filter(Boolean).join(" ")}
       data-expanded={isExpanded ? "" : undefined}
       onClick={expand}
       ref={forwardedRef}
       role={canExpand ? "button" : undefined}
       style={{
-        "--preview-background-image": !isVideo && medium?.url ? `url("${getMiniatureImageUrl(medium.url)}")` : "none",
         "--preview-hover-background": background,
         "--preview-hover-foreground": foreground,
       }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
     >
-      {!isExpanded && isVideo ? <VideoFrameStrip frameWidth={160} medium={medium} /> : null}
+      {!isExpanded ? (
+        <div
+          className={styles.mediaPreview}
+          style={{
+            "--preview-background-image": !isVideo && medium?.url ? `url("${getMiniatureImageUrl(medium.url)}")` : "none",
+          }}
+        >
+          {isVideo ? <VideoFrameStrip frameWidth={160} medium={medium} /> : null}
+        </div>
+      ) : null}
       {!isExpanded && title ? (
-        <p className={styles.title} typo="h3 compensate">
+        <p className={styles.title} typo="h3">
           {title}
         </p>
       ) : null}

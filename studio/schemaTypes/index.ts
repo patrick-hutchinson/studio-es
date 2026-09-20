@@ -1,4 +1,6 @@
 import {about} from './about'
+import {archiveProject} from './archiveProject'
+import {archivePost} from './archivePost'
 import {archivedProject} from './archivedProject'
 import {archivedNews} from './archivedNews'
 import {archivedPost} from './archivedPost'
@@ -39,6 +41,8 @@ import {contact} from './contact'
 export const schemaTypes = [
   site,
   about,
+  archivePost,
+  archiveProject,
   archivedNews,
   archivedPost,
   archivedProject,
