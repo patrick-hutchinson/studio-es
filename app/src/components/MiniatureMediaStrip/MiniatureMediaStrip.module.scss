@@ -45,6 +45,11 @@
   }
 }
 
+.code {
+  flex: 0 0 auto;
+  margin-right: var(--margin);
+}
+
 .preview:not([data-expanded]):hover .mediaPreview {
   transform: translateY(100%);
 }

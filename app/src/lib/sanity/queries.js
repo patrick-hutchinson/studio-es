@@ -104,6 +104,13 @@ export const contactQuery = `*[_type=="contact"][0]{
   copyright
 }`;
 
+export const infoQuery = `*[_type=="info"][0]{
+  _id,
+  about,
+  callToAction,
+  copyright
+}`;
+
 export const postsQuery = `*[_type=="post"] | order(orderRank asc){
   _id,
   _type,
@@ -124,6 +131,7 @@ export const archiveEntriesQuery = `*[_type in ["archiveProject", "archivePost"]
   _id,
   _type,
   title,
+  "code": meta.slug.current,
   appearance,
   "date": coalesce(meta.year, date),
   "headerMedia": select(

@@ -37,6 +37,7 @@ import {mediaAsset} from './types/media/mediaAsset'
 import {videoAsset} from './types/media/videoAsset'
 import {mediaGallery, rasterGallery, rasterGalleryItem} from './types/media/gallery'
 import {contact} from './contact'
+import {info} from './info'
 
 export const schemaTypes = [
   site,
@@ -66,6 +67,7 @@ export const schemaTypes = [
   post,
   project,
   services,
+  info,
   slider,
   studio,
   video,

@@ -1,5 +1,5 @@
 import { PortableText } from "@portabletext/react";
-import { cloneElement, isValidElement } from "react";
+import { cloneElement, forwardRef, isValidElement } from "react";
 
 const isPortableTextBlockEmpty = (value) => {
   if (!value?.children?.length) return true;
@@ -52,17 +52,17 @@ const getLinkAttributes = (value) => {
   return value.url ? { href: value.url } : null;
 };
 
-const Text = ({ text, typo, className, components, style }) => {
+const Text = forwardRef(function Text({ text, typo, className, components, style }, ref) {
   if (!Array.isArray(text)) {
     return text ? (
-      <p typo={typo} className={className} style={{ ...style }}>
+      <p ref={ref} typo={typo} className={className} style={{ ...style }}>
         {text}
       </p>
     ) : null;
   }
 
   return (
-    <div className={className} typo={typo} style={{ ...style }}>
+    <div ref={ref} className={className} typo={typo} style={{ ...style }}>
       <PortableText
         value={text}
         components={{
@@ -84,6 +84,6 @@ const Text = ({ text, typo, className, components, style }) => {
       />
     </div>
   );
-};
+});
 
 export default Text;

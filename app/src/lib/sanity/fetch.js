@@ -1,5 +1,14 @@
 import { getPreviewClient, getProductionClient } from "./client";
-import { archiveEntriesQuery, appearancesQuery, contactQuery, postsQuery, projectBySlugQuery, projectsQuery, siteQuery } from "./queries";
+import {
+  archiveEntriesQuery,
+  appearancesQuery,
+  contactQuery,
+  postsQuery,
+  projectBySlugQuery,
+  projectsQuery,
+  siteQuery,
+  infoQuery,
+} from "./queries";
 
 export function getSanityClient() {
   const isProduction = process.env.VERCEL_ENV === "production";
@@ -70,6 +79,10 @@ export async function getAppearances() {
 
 export async function getContact() {
   return getSanityClient().fetch(contactQuery);
+}
+
+export async function getInfo() {
+  return getSanityClient().fetch(infoQuery);
 }
 
 export async function getProject(slug) {

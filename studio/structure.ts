@@ -11,7 +11,11 @@ const mixedContentList = (S: StructureBuilder) =>
       .title('Projects & Posts')
       .filter(mixedContentFilter)
       .defaultOrdering([{field: 'orderRank', direction: 'asc'}])
-      .child((documentId, {params}) => S.document().documentId(documentId).schemaType(params.type || 'project'))
+      .child((documentId, {params}) =>
+        S.document()
+          .documentId(documentId)
+          .schemaType(params.type || 'project'),
+      )
       .serialize(),
     {
       __preserveInstance: true,
@@ -103,6 +107,7 @@ export const structure = (S: StructureBuilder, context: ConfigContext) =>
 
       S.divider(),
       S.listItem().title('Kontakt').child(S.editor().schemaType('contact').documentId('contact')),
+      S.listItem().title('Id').child(S.editor().schemaType('info').documentId('info')),
 
       S.divider(),
       S.listItem()

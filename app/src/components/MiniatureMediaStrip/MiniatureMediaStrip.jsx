@@ -19,7 +19,7 @@ const getMiniatureImageUrl = (url) => {
 };
 
 const MiniatureMediaStrip = forwardRef(function MediaStrip(
-  { appearance, className = "", isExpanded = false, media = [], medium, onExpand, title },
+  { appearance, className = "", code, isExpanded = false, media = [], medium, onExpand, title },
   forwardedRef,
 ) {
   const isVideo = medium?.type === "video";
@@ -63,6 +63,7 @@ const MiniatureMediaStrip = forwardRef(function MediaStrip(
       ) : null}
       {!isExpanded && title ? (
         <p className={styles.title} typo="h3">
+          {code ? <span className={styles.code}>{code}</span> : null}
           {title}
         </p>
       ) : null}

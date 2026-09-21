@@ -36,6 +36,7 @@ export default function Archive({ entries = [] }) {
                 key={entry._id}
                 appearance={entry.appearance}
                 className={styles.miniatureMediaStrip}
+                code={entry.code?.toUpperCase()}
                 isExpanded={expandedEntryId === entry._id}
                 media={entry.headerMedia}
                 medium={entry.headerMedia?.[0]?.medium}
