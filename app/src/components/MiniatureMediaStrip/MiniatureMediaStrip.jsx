@@ -4,6 +4,7 @@ import Carousel from "@/components/Carousel/Carousel";
 import { MediaPlaceholderProvider } from "@/components/Media/MediaPlaceholderContext";
 import VideoFrameStrip from "@/components/VideoFrameStrip/VideoFrameStrip";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import styles from "./MiniatureMediaStrip.module.scss";
 
 const COLLAPSED_HEIGHT = 32;
@@ -19,7 +20,7 @@ const getMiniatureImageUrl = (url) => {
 };
 
 const MiniatureMediaStrip = forwardRef(function MediaStrip(
-  { appearance, className = "", code, isExpanded = false, media = [], medium, onExpand, title },
+  { appearance, className = "", code, href, isExpanded = false, media = [], medium, onExpand, title },
   forwardedRef,
 ) {
   const isVideo = medium?.type === "video";
@@ -29,18 +30,18 @@ const MiniatureMediaStrip = forwardRef(function MediaStrip(
     () => (media ?? []).filter((item) => item?.medium?.type === "image" || item?.medium?.type === "video"),
     [media],
   );
-  const canExpand = carouselMedia.length > 0;
+  const canExpand = !href && carouselMedia.length > 0;
 
   const expand = () => {
     if (canExpand) onExpand?.();
   };
 
-  return (
+  const preview = (
     <motion.section
       animate={{ height: isExpanded ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT }}
-      aria-expanded={isExpanded}
+      aria-expanded={canExpand ? isExpanded : undefined}
       aria-label={canExpand ? `${isExpanded ? "Hide" : "Show"} header media for ${title || "project"}` : undefined}
-      className={[styles.preview, className].filter(Boolean).join(" ")}
+      className={[styles.preview, href ? "" : className].filter(Boolean).join(" ")}
       data-expanded={isExpanded ? "" : undefined}
       onClick={expand}
       ref={forwardedRef}
@@ -73,6 +74,14 @@ const MiniatureMediaStrip = forwardRef(function MediaStrip(
         </MediaPlaceholderProvider>
       ) : null}
     </motion.section>
+  );
+
+  return href ? (
+    <Link aria-label={`Open ${title || "project"}`} className={[styles.link, className].filter(Boolean).join(" ")} href={href}>
+      {preview}
+    </Link>
+  ) : (
+    preview
   );
 });
 

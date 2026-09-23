@@ -47,6 +47,7 @@ const ScaleMediaStrip = ({
   const galleryRef = useRef(null);
   const lenis = useLenisContext();
   const [galleryLayout, setGalleryLayout] = useState({ itemSize: 0, sideCount: MIN_SIDE_COUNT });
+  const [isPinned, setIsPinned] = useState(false);
   const galleryImages = useMemo(
     () => gallery.map((item) => item?.medium ?? item).filter((medium) => medium?.type === "image" && medium.url),
     [gallery],
@@ -129,9 +130,7 @@ const ScaleMediaStrip = ({
       preview.style.removeProperty("--preview-background-tile-width");
     }
 
-    if (preview.hasAttribute("data-pinned") !== isPinned) {
-      preview.toggleAttribute("data-pinned", isPinned);
-    }
+    setIsPinned((current) => (current === isPinned ? current : isPinned));
 
     if (isPinned) {
       preview.style.left = `${regionBox.left}px`;
@@ -199,11 +198,12 @@ const ScaleMediaStrip = ({
         <article
           ref={galleryRef}
           className={styles.gallery}
+          data-pinned={isPinned ? "" : undefined}
           style={{
             "--gallery-active-left": `${activeLeft}px`,
           }}
         >
-          <ProjectHeader code={code} title={title} />
+          <ProjectHeader code={code} isPinned={isPinned} title={title} />
           <div className={styles.galleryTrack}>
             {galleryItems.map(({ image, offset, width }) => (
               <div className={styles.galleryItem} key={`${offset}-${image._id}`} style={{ "--gallery-item-width": `${width}px` }}>
@@ -223,12 +223,13 @@ const ScaleMediaStrip = ({
         <article
           ref={previewRef}
           className={[styles.preview, usePortraitPreviewSizing && isPortrait ? styles.portrait : ""].filter(Boolean).join(" ")}
+          data-pinned={isPinned ? "" : undefined}
           style={{
             "--preview-background-image": backgroundImage ? `url("${backgroundImage}")` : "none",
             "--preview-media-aspect-ratio": getAspectRatio(foregroundMedium?.aspect_ratio),
           }}
         >
-          <ProjectHeader code={code} title={title} />
+          <ProjectHeader code={code} isPinned={isPinned} title={title} />
           {foregroundMedium?.type === "video" ? <VideoFrameStrip medium={foregroundMedium} /> : null}
           {foregroundMedium ? (
             <div className={styles.projectMedia}>

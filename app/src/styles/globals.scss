@@ -35,6 +35,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+::selection {
+  color: var(--selection-foreground, #000);
+  background: var(--selection-background, #fff);
+}
+
 html.lenis body {
   overflow: visible !important;
 }
@@ -42,7 +47,7 @@ html.lenis body {
 .page,
 .main,
 .content {
-  min-height: 100vh;
+  // min-height: 100vh;
 }
 
 .transitionContainer {

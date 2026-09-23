@@ -13,6 +13,7 @@ import Footer from "@/components/Footer/Footer";
 import SpacingDebugOverlay from "@/components/SpacingDebugOverlay/SpacingDebugOverlay";
 
 import RenderSVG from "@/components/RenderSVG/RenderSVG";
+import { DEFAULT_COLOR_PAIR, getRandomColorPair } from "@/lib/getRandomColorPair";
 
 import "@/styles/globals.scss";
 import "@/styles/spacing.scss";
@@ -22,6 +23,7 @@ const paneTransition = { duration: 0.8, ease: [0.76, 0, 0.24, 1] };
 const defaultSite = { title: "Studio Es" };
 
 let cachedSite;
+let cachedAppearances = [];
 let siteRequest;
 
 const getTransitionText = (destination) => {
@@ -46,7 +48,7 @@ const waitForIncomingRoutePaint = async () => {
 };
 
 const loadSite = async () => {
-  if (cachedSite) return cachedSite;
+  if (cachedSite) return { appearances: cachedAppearances, site: cachedSite };
 
   if (!siteRequest) {
     siteRequest = fetch("/api/site")
@@ -57,10 +59,11 @@ const loadSite = async () => {
 
         return response.json();
       })
-      .then(({ site }) => {
-        cachedSite = site;
+      .then((data) => {
+        cachedSite = data.site;
+        cachedAppearances = data.appearances ?? [];
 
-        return site;
+        return { appearances: cachedAppearances, site: cachedSite };
       });
   }
 
@@ -71,6 +74,7 @@ export default function App({ Component, pageProps }) {
   const router = useRouter();
   const page = pageProps?.page ?? {};
   const [site, setSite] = useState(cachedSite ?? defaultSite);
+  const [selectionColors, setSelectionColors] = useState(DEFAULT_COLOR_PAIR);
   const [destination, setDestination] = useState(null);
   const [pendingDestination, setPendingDestination] = useState(null);
   const [preparedDestination, setPreparedDestination] = useState(null);
@@ -198,9 +202,10 @@ export default function App({ Component, pageProps }) {
     let isMounted = true;
 
     loadSite()
-      .then((nextSite) => {
+      .then(({ appearances, site: nextSite }) => {
         if (isMounted) {
           setSite(nextSite ?? defaultSite);
+          setSelectionColors(getRandomColorPair(appearances));
         }
       })
       .catch((error) => {
@@ -212,6 +217,13 @@ export default function App({ Component, pageProps }) {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+
+    root.style.setProperty("--selection-background", selectionColors.background);
+    root.style.setProperty("--selection-foreground", selectionColors.foreground);
+  }, [selectionColors]);
 
   return (
     <>

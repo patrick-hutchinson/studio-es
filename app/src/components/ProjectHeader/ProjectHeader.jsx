@@ -1,8 +1,8 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 import styles from "./ProjectHeader.module.css";
 
-const ProjectHeader = ({ code, title }) => {
+const ProjectHeader = ({ code, isPinned = false, title }) => {
   if (!title && !code) return null;
 
   return (
@@ -16,11 +16,22 @@ const ProjectHeader = ({ code, title }) => {
       >
         {code}
       </motion.span>
-      {title ? (
-        <span className={styles.title} data-project-title="">
-          {title}
-        </span>
-      ) : null}
+
+      <AnimatePresence mode="wait">
+        {isPinned && title ? (
+          <motion.span
+            key={title}
+            className={styles.title}
+            data-project-title=""
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+          >
+            {title}
+          </motion.span>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 };

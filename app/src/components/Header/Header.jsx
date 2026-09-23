@@ -85,7 +85,11 @@ const Header = ({ projectId, site = {} }) => {
   const DesktopNav = () => {
     return (
       <nav className={`${styles.nav} grid`}>
-        {projectId ? <span className={styles.projectId}>{projectId}</span> : null}
+        {projectId ? (
+          <Link href="/" className={styles.projectId}>
+            {projectId}
+          </Link>
+        ) : null}
         <Link className={styles.studioLink} href="/studio">
           The Studio
         </Link>
@@ -106,6 +110,7 @@ const Header = ({ projectId, site = {} }) => {
     return <nav className={styles.nav}></nav>;
   };
 
+  if (router.pathname === "/id") return;
   return (
     <motion.header
       animate={{ y: isHidden ? "-100%" : "0%" }}

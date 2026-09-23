@@ -4,6 +4,7 @@ import styles from "@/styles/pages/Id.module.css";
 
 import Text from "@/components/Text/Text";
 import { getInfo } from "@/lib/sanity/fetch";
+import Link from "next/link";
 
 export default function Id({ info = {} }) {
   const currentYear = String(new Date().getFullYear()).slice(-2);
@@ -41,10 +42,10 @@ export default function Id({ info = {} }) {
   }, [info.about]);
 
   return (
-    <div className={`page ${styles.page}`} hide-header="">
+    <div className={`page ${styles.page}`}>
       <main className="main">
         <div className={`${styles.idPage} content grid`} data-about-overflow={aboutOverflows ? "" : undefined}>
-          <div className={styles.idTag} typo="h3 compensate">{`Id-000-${currentYear}`}</div>
+          <Link href="/" className={styles.idTag} typo="h3 compensate">{`Id-000-${currentYear}`}</Link>
           <div className={styles.aboutText} typo="h3">
             <Text ref={aboutTextRef} className={styles.aboutTextInner} text={info.about} />
           </div>

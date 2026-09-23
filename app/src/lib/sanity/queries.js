@@ -21,6 +21,7 @@ const projectListFields = `{
   _id,
   _type,
   orderRank,
+  "archivedSourceId": archivedSource._ref,
   title,
   openable,
   showOnHomepage,

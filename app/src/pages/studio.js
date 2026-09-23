@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import styles from "@/styles/pages/Studio.module.scss";
 
@@ -10,7 +10,6 @@ import { getAppearances, getContact, getPosts, getProjects } from "@/lib/sanity"
 import { useRouter } from "next/router";
 
 import Text from "@/components/Text/Text";
-const CONTACT_SCROLL_DELAY = 650;
 
 const getPreviewBackgroundImage = (medium) => {
   if (medium?.type === "image") return medium.url;
@@ -36,24 +35,24 @@ export default function Studio({ appearances = [], contact = null, projects = []
     setColors(getRandomColorPair(appearances));
   }, [appearances]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isContactRoute || !endCapRef.current) return undefined;
 
-    // Start at the page top, then wait for its transition before the contact scroll.
-    lenis?.scrollTo(0, { force: true, immediate: true });
-    window.scrollTo({ top: 0, behavior: "auto" });
+    const scrollToContact = () => {
+      lenis?.resize?.();
 
-    const timer = window.setTimeout(() => {
       if (lenis) {
-        lenis.start();
-        lenis.scrollTo(endCapRef.current, { duration: 2, offset: 0 });
+        lenis.scrollTo(endCapRef.current, { force: true, immediate: true, offset: 0 });
         return;
       }
 
-      endCapRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, CONTACT_SCROLL_DELAY);
+      endCapRef.current.scrollIntoView({ behavior: "auto", block: "start" });
+    };
 
-    return () => window.clearTimeout(timer);
+    scrollToContact();
+    const frameId = window.requestAnimationFrame(scrollToContact);
+
+    return () => window.cancelAnimationFrame(frameId);
   }, [isContactRoute, lenis]);
 
   return (

@@ -18,6 +18,7 @@ function LenisContextProvider({ children, nativeScroll = false }) {
   // Keep the provider tree stable while allowing slug pages to use native scroll snap.
   const lenis = nativeScroll ? null : lenisInstance;
   const router = useRouter();
+  const isContactEntry = router.pathname === "/studio" && router.query.contact === "1";
   const resetTimers = useRef([]);
   const isProgrammaticScrollLockedRef = useRef(false);
 
@@ -102,6 +103,8 @@ function LenisContextProvider({ children, nativeScroll = false }) {
     };
 
     const handleRouteChangeComplete = () => {
+      if (isContactEntry) return;
+
       queueScrollToTop();
     };
 
@@ -113,11 +116,13 @@ function LenisContextProvider({ children, nativeScroll = false }) {
       router.events.off("routeChangeStart", handleRouteChangeStart);
       router.events.off("routeChangeComplete", handleRouteChangeComplete);
     };
-  }, [clearResetTimers, lenis, queueScrollToTop, router.events]);
+  }, [clearResetTimers, isContactEntry, lenis, queueScrollToTop, router.events]);
 
   useEffect(() => {
+    if (isContactEntry) return;
+
     queueScrollToTop();
-  }, [queueScrollToTop, router.asPath]);
+  }, [isContactEntry, queueScrollToTop, router.asPath]);
 
   useEffect(() => {
     if (!lenis) return undefined;
