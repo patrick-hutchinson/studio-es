@@ -20,6 +20,7 @@ import "@/styles/spacing.scss";
 import "@/styles/fonts.scss";
 
 const paneTransition = { duration: 0.8, ease: [0.76, 0, 0.24, 1] };
+const transitionFontUrl = "/fonts/Union-Regular-Adjusted.otf";
 const defaultSite = { title: "Studio Es" };
 
 let cachedSite;
@@ -250,7 +251,7 @@ export default function App({ Component, pageProps }) {
                 initial={false}
                 transition={transitionAnimation}
               >
-                <RenderSVG text={transitionText} letterSpacing={-60} onReady={beginPaneSwipe} />
+                <RenderSVG fontUrl={transitionFontUrl} text={transitionText} letterSpacing={-60} onReady={beginPaneSwipe} />
               </motion.div>
             </motion.div>
             <motion.div
